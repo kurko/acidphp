@@ -1,6 +1,6 @@
 <?php
 /**
- * Controller principal deste m�dulo
+ * Controller principal deste módulo
  *
  * @package ModController
  * @name nome
