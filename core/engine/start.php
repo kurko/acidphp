@@ -21,9 +21,6 @@
 
 $engine = new Engine();
 
-//var_dump($_GET);
-//$url =  ("/", );
-//pr($url);
 
 if( is_file(APP_CONTROLLER_DIR.$engine->callController."_controller.php") ){
     include(APP_CONTROLLER_DIR.$engine->callController."_controller.php");

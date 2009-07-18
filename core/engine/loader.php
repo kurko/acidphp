@@ -27,12 +27,18 @@ include(CORE_FUNCTIONS_FILE);
  */
 include(CORE_CLASS_DIR."Engine.php");
 include(CORE_CLASS_DIR."Controller.php");
+/**
+ * Classe de configuração do sistema
+ */
+include(CORE_CLASS_DIR."Config.php");
 
 if( is_file(APP_CONTROLLER_DEFAULT) ){
     include(APP_CONTROLLER_DEFAULT);
 } else {
     include(CORE_APP_CONTROLLER_DEFAULT);
 }
+
+include(APP_CONFIG_ROUTES);
 
 
 

@@ -1,7 +1,8 @@
-<IfModule mod_rewrite.c>
-   RewriteEngine on
+<IfModule mod_rewrite.so>
+    RewriteEngine on
+    Options +FollowSymlinks
 #   RewriteRule ^(.*)/(.*)$ index.php?qstr=$1/$2 [NC]
 
-   RewriteRule    ^$ index.php?url= [L]
-   RewriteRule    ^(.*)$ index.php?url=$1 [QSA,L]
+    RewriteRule ^$ index.php?url= [L]
+    RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
 </IfModule>

@@ -70,12 +70,30 @@ define("APP_CONTROLLER_DIR", "app/controller/");
 define("APP_MODEL_DIR", "app/model/");
 define("APP_VIEW_DIR", APP_DIR.VIEW_DIR);
 
+/**
+ * Principais caminhos dentro de app/
+ */
+/**
+ * APP CONFIG
+ */
+define("APP_CONFIG_DIR", APP_DIR."config/");
+define("APP_CONFIG_ROUTES", APP_CONFIG_DIR."routes.php");
+
+/**
+ * View paths
+ */
 define("APP_LAYOUT_DIR", APP_VIEW_DIR.LAYOUT_DIR);
 
 /**
  * APP SUPPORT FILES
  */
+/**
+ * AppController do Core
+ */
 define("CORE_APP_CONTROLLER_DEFAULT", CORE_CLASS_DIR."AppController.php");
+/**
+ * AppController criado pelo usuário na aplicação
+ */
 define("APP_CONTROLLER_DEFAULT", APP_DIR."app_controller.php");
 
 
