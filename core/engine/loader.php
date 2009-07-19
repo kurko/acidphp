@@ -39,6 +39,7 @@ if( is_file(APP_CONTROLLER_DEFAULT) ){
 }
 
 include(APP_CONFIG_ROUTES);
+include(APP_CONFIG_CORE);
 
 
 

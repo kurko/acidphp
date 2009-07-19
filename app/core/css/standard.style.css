@@ -1,0 +1,41 @@
+/* 
+    Document   : standard.style
+    Created on : 19/07/2009, 05:08:09
+    Author     : Alexandre de Oliveira
+    Description:
+        Padrão do framework
+*/
+body {
+    background: orange;
+    text-align: center; /* For IE */
+    font-size: 76%;
+    font-family: Arial, "Lucida Sans";
+}
+
+/**
+ * FORMATAÇÃO DE TIPOGRAFIA E PADRONIZAÇÃO
+ */
+p { line-height: 18px; }
+/**
+ * LAYOUT
+ */
+#global {
+    width: 760px;
+    background: white;
+    margin: 0 auto;
+    text-align: left;
+    display: table;
+}
+
+#global div#cabecalho {
+    margin: 10px;
+}
+
+#global div#view {
+    margin: 10px;
+}
+
+#global div#rodape {
+    margin: 10px;
+    font-size: 0.8em;
+}

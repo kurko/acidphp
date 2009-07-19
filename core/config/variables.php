@@ -78,11 +78,20 @@ define("APP_VIEW_DIR", APP_DIR.VIEW_DIR);
  */
 define("APP_CONFIG_DIR", APP_DIR."config/");
 define("APP_CONFIG_ROUTES", APP_CONFIG_DIR."routes.php");
+define("APP_CONFIG_CORE", APP_CONFIG_DIR."core.php");
 
 /**
  * View paths
  */
 define("APP_LAYOUT_DIR", APP_VIEW_DIR.LAYOUT_DIR);
+
+/**
+ * APP CORE
+ */
+define("APP_CORE_DIR", APP_DIR."core/");
+define("APP_CSS_DIR", APP_CORE_DIR."css/");
+define("APP_JS_DIR", APP_CORE_DIR."js/");
+define("APP_FLASH_DIR", APP_CORE_DIR."flash/");
 
 /**
  * APP SUPPORT FILES

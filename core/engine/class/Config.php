@@ -19,7 +19,7 @@ class Config {
      * @param string $varValor Valor a ser gravado na nova vari�vel.
      * @return bool Se a vari�vel foi gravada com sucesso. 
      */
-    static public function write($varName, $varValor){
+    public function write($varName, $varValor){
         return self::$config[$varName] = $varValor;
     }
 
@@ -30,7 +30,7 @@ class Config {
      * @param string $default Valor retornado caso a configura��o n�o exista.
      * @return string
      */
-    static public function read($varName, $default = ''){
+    public function read($varName, $default = ''){
         if( !empty(self::$config[$varName]) ){
             return self::$config[$varName];
         } else {

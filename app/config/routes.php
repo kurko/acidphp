@@ -10,10 +10,9 @@
 
 $routes = array(
     "/" => array(
-        "controller" => "main", "action" => "index"
+        "controller" => "site", "action" => "index"
     )
 );
-
 Config::write("routes", $routes)
 
 ?>

@@ -13,12 +13,31 @@
  */
 class Engine
 {
-
+    /**
+     * CONTROLLERS
+     */
+    /**
+     *
+     * @var string Qual Controller deve ser chamado
+     */
     public $callController;
+    /**
+     *
+     * @var string Qual o nome da classe de controller que deve ser chamada
+     */
     public $callControllerClass;
+    /**
+     *
+     * @var string Qual Action deverá ser chamada
+     */
     public $callAction;
-
+    /**
+     *
+     * @var array Contém os routes atuais
+     */
     protected $routes;
+    public $arguments;
+    public $webroot;
 
     function __construct(){
 
@@ -54,10 +73,13 @@ class Engine
              * Analisa arquivo routes.php e verifica qual
              * é a url padrão a ser aberta.
              */
+            if( array_key_exists("/", $this->routes) ){
 
-            if( in_array("/", $this->routes) ){
-                $url[0] = (empty($this->routes["/"]["controller"])) ? "main" : $this->routes["/"]["controller"];
-                $url[1] = (empty($this->routes["/"]["action"])) ? "main" : $this->routes["/"]["action"];
+                /**
+                 * Ajusta Controllers e Actions a serem carregados
+                 */
+                $url[0] = (empty($this->routes["/"]["controller"])) ? "site" : $this->routes["/"]["controller"];
+                $url[1] = (empty($this->routes["/"]["action"])) ? "index" : $this->routes["/"]["action"];
 
                 if( !empty($url[0]) AND !empty($url[1]) ){
                     $this->defineRoutes($url);
@@ -65,11 +87,13 @@ class Engine
                 
             }
         }
-        //pr($url);
-
-
     }
 
+    /**
+     * Define o controller e action a ser carregado a partir de uma URL
+     *
+     * @param array $url URL atual para definir qual controller carregar
+     */
     private function defineRoutes($url){
         /**
          * Controller
@@ -77,12 +101,32 @@ class Engine
         if( !empty($url[0]) ){
             $this->callController = $url[0];
             $this->callControllerClass = ucwords($this->callController);
+        } else {
+            $this->callController = "site";
         }
         /**
          * Action
          */
-        if( !empty($url[1]) )
+        if( !empty($url[1]) ){
             $this->callAction = $url[1];
+        }
+        /**
+         * Se não há actions chamado, pede por "index"
+         */
+        else {
+            $this->callAction = "index";
+        }
+
+        /**
+         * Verifica o resto da URL por argumentos $_GET
+         */
+        //echo '0'.implode("/", $url).'0';
+        $this->webroot = str_replace( implode("/", $url), "", $_SERVER["REQUEST_URI"]);
+        define("WEBROOT", $this->webroot);
+        array_shift($url);
+        array_shift($url);
+        $this->arguments = $url;
+
     }
 }
 

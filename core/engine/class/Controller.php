@@ -10,10 +10,29 @@
  */
 class Controller
 {
-
+    /**
+     *
+     * @var TEngine Objeto responsável pela inicialização de todo o sistema
+     */
     private $engine;
-
-    protected $helpers = array('Form');
+    /**
+     * VARIÁVEIS DE SISTEMA
+     */
+    /**
+     *
+     * @var array Contém todos os parâmetros de ambiente do sistema, como
+     * variáveis $_POST e $_GET tratadas, bem como URL atual, controllers e
+     * actions
+     */
+    protected $params;
+    protected $webroot;
+    /**
+     * HELPERS
+     *
+     * @var array Helpers são objetos que auxiliam em tarefas de View, como
+     * Formulários, Javascript, entre outros.
+     */
+    protected $helpers = array("Html", "Form");
 
     /**
      * CONFIGURAÇÃO DE AMBIENTE
@@ -21,15 +40,36 @@ class Controller
     protected $layout = "default";
     protected $autoRender = true;
 
+    /**
+     *
+     * @param <type> $param
+     */
+    protected $actionCallback;
+
     function __construct($param = ''){
 
         /**
-         * Inicialização
+         * VARIÁVEIS DE SISTEMA
+         *
+         * Inicialização de variáveis
+         */
+        /**
+         * Toma todas as configurações do objeto Engine, responsável pela
+         * de inicialização do sistema, como análise de URLs, entre outros.
          */
         $this->engine = $param["engine"];
+        /**
+         * Parâmetros de sistema
+         */
+        $this->params["controller"] = $this->engine->callController;
+        $this->params["action"] = $this->engine->callAction;
+        $this->params["args"] = $this->engine->arguments;
+
+        $this->webroot = $this->engine->webroot;
+        //$this->set("web", $varValue)
 
         /**
-         * HELPERS | COMPONENTS | BEHAVIORS
+         * HELPERS, COMPONENTS, BEHAVIORS
          */
         /**
          * HELPERS
@@ -37,6 +77,11 @@ class Controller
          * Cria helpers solicitados
          */
         if( count($this->helpers) ){
+            /**
+             * Loop por cada helper requisitado.
+             *
+             * Carrega classe do Helper, instancia e envia para o View
+             */
             foreach($this->helpers as $valor){
                 include_once( CORE_HELPERS_DIR.$valor.".php" );
                 $helperName = $valor.HELPER_CLASSNAME_SUFFIX;
@@ -70,24 +115,13 @@ class Controller
     }
 
     /**
-     * ACTIONS DE APOIO
-     *
-     * Métodos que desempenham funções que podem substituir actions
-     * inexistentes.
-     */
-    protected function actions(){
-        $this->set('aust', $this->aust);
-        $this->render('actions', 'content_trigger');
-    }
-
-    /**
      * MÉTODOS DE SUPORTE
      *
      * Todos os métodos que dão suporte ao funcionamento do sistema.
      *      ex.: render, set, beforeFilter, afterFilter, trigger, ect
      */
     /**
-     * TRIGGER
+     * TRIGGER()
      *
      * É o responsável por chamar as funções:
      *      1. beforeFilter
@@ -95,6 +129,7 @@ class Controller
      *      3. render
      *      4. afterFilter
      *
+     * @method TRIGGER()
      * @param array $param
      *      'ation': qual método deve ser chamado
      */
@@ -107,23 +142,40 @@ class Controller
         }
 
         /**
-         * $this->beforeFilter() é chamado sempre antes de qualquer açãoo
+         * MÉTODO EXISTE?
+         *
+         * Se método não existe, pára tudo. Se existe, continua.
          */
-        $this->beforeFilter();
-        /**
-         * Chama a action requerida.
-         */
-        $this->{$param['action']}();
+        if( method_exists($this, $param['action']) ){
+            $actionExists = true;
+        } else {
+            $actionExists = false;
+        }
+        //$actionExists = true;
 
         /**
-         * Se não foi renderizado ainda, renderiza automaticamente
+         * Se o action existe
          */
-        if( !$this->isRendered AND $this->autoRender )
-            $this->render( $this->action );
-        /**
-         * $this->afterFilter() é chamado sempre depois de qualquer ação
-         */
-        $this->afterFilter();
+        if( $actionExists ){
+            /**
+             * $this->beforeFilter() é chamado sempre antes de qualquer açãoo
+             */
+            $this->beforeFilter();
+            /**
+             * Chama a action requerida com seus respectivos argumentos.
+             */
+            call_user_func_array( array($this, $param['action'] ), $this->params["args"] );
+
+            /**
+             * Se não foi renderizado ainda, renderiza automaticamente
+             */
+            if( !$this->isRendered AND $this->autoRender )
+                $this->render( $this->action );
+            /**
+             * $this->afterFilter() é chamado sempre depois de qualquer ação
+             */
+            $this->afterFilter();
+        }
     }
 
     /**
@@ -197,7 +249,7 @@ class Controller
      */
     private function __call($function, $args){
 
-
+        //pr($args);
 
     }
 }
