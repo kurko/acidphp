@@ -66,8 +66,8 @@ define("CORE_LAYOUT_DIR", CORE_DIR.VIEW_DIR.LAYOUT_DIR);
 if (!defined('APP_DIR')) {
     define("APP_DIR", "app/");
 }
-define("APP_CONTROLLER_DIR", "app/controller/");
-define("APP_MODEL_DIR", "app/model/");
+define("APP_CONTROLLER_DIR", APP_DIR."controller/");
+define("APP_MODEL_DIR", APP_DIR."model/");
 define("APP_VIEW_DIR", APP_DIR.VIEW_DIR);
 
 /**
@@ -79,6 +79,7 @@ define("APP_VIEW_DIR", APP_DIR.VIEW_DIR);
 define("APP_CONFIG_DIR", APP_DIR."config/");
 define("APP_CONFIG_ROUTES", APP_CONFIG_DIR."routes.php");
 define("APP_CONFIG_CORE", APP_CONFIG_DIR."core.php");
+define("APP_CONFIG_DATABASE", APP_CONFIG_DIR."database.php");
 
 /**
  * View paths
@@ -104,6 +105,14 @@ define("CORE_APP_CONTROLLER_DEFAULT", CORE_CLASS_DIR."AppController.php");
  * AppController criado pelo usuário na aplicação
  */
 define("APP_CONTROLLER_DEFAULT", APP_DIR."app_controller.php");
+/**
+ * AppModel do Core
+ */
+define("CORE_APP_MODEL_DEFAULT", CORE_CLASS_DIR."AppModel.php");
+/**
+ * AppModel criado pelo usuário na aplicação
+ */
+define("APP_MODEL_DEFAULT", APP_DIR."app_model.php");
 
 
 

@@ -44,7 +44,7 @@ class FormHelper
          * Verifica se o usuário especificou um controller que deverá
          * ser usado para salvar as informações do formulário
          */
-        $controller = (empty($options["controller"])) ? 'conteudo' : $options["controller"];
+        $controller = (empty($options["controller"])) ? $this->modelName : $options["controller"];
         /**
          * Action
          *
@@ -55,7 +55,7 @@ class FormHelper
         /**
          * ABRE FORMULÁRIO
          */
-        $conteudo.= '<form method="post" action="adm_main.php?section='.$controller.'&action='.$action.'" class="formHelper">';
+        $conteudo.= '<form method="post" action="'.WEBROOT.''.$controller.'/'.$action.'" class="formHelper">';
 
         /**
          * INPUTS HIDDEN
@@ -90,6 +90,10 @@ class FormHelper
      *
      * @param string $fieldName Nome do campo no banco de dados.
      * @param array $options Opções de configurações e amostragem.
+     *      "label" string :
+     *      "value" string : Valor padrão do campo
+     *      "select" array :
+     *      ""
      * @return string Código HTML para o form input pedido.
      */
     public function input($fieldName, $options = ''){
@@ -98,7 +102,10 @@ class FormHelper
         $conteudo.= '<div class="input">';
 
         /**
-         * LABEL
+         * ANÁLISE DE OPTIONS
+         */
+        /**
+         * ["label"]
          *
          * Se Label não foi especificado
          */
@@ -108,12 +115,57 @@ class FormHelper
             $conteudo.= '<label for="input-'.$fieldName.'">'.$options["label"].'</label>';
         }
 
+        /**
+         * ["select"]
+         * 
+         * Tipos de campos
+         */
+        if( !empty($options["select"]) ){
+            $inputType = "select";
+        } else {
+            $inputType = "text";
+        }
+        /**
+         * ["value"]
+         *
+         * Padrão padrão do input
+         */
+        $fieldValue = ( empty($options["value"]) ) ? "" : 'value="'.$options["value"].'" ';
+
 
         /**
+         * PROPRIEDADES-PADRÃO
+         */
+        $standardAtrib = 'id="input-'.$fieldName.'" '. $fieldValue;
+
+        /**
+         * NOMES DO INPUTS
+         *
          * Gera nomes para os inputs
          */
-        if( !empty($this->modelName) ){
-            $inputName = "data[".$this->modelName."][".$fieldName."]";
+        /**
+         * Verifica se o Model é padrão ou foi especificado algum outro
+         */
+        $dotPos = strpos($fieldName, "." );
+        if( $dotPos === false ){
+            /**
+             * É o model padrão
+             */
+            $modelName = $this->modelName;
+        }
+        /**
+         * Outro Model foi especificado
+         */
+        else {
+            $modelName = substr( $fieldName, 0, $dotPos );
+            $fieldName = substr( $fieldName, $dotPos+1, 100 );
+        }
+
+        /**
+         * Define o nome do input
+         */
+        if( !empty($modelName) ){
+            $inputName = "data[".$modelName."][".$fieldName."]";
         } else {
             $inputName = "data[".$fieldName."]";
         }
@@ -121,14 +173,7 @@ class FormHelper
         /**
          * ANÁLISE DE TIPOS DE CAMPOS
          */
-        $inputType = "text";
 
-        /**
-         * Analisa qual é o tipo de campo
-         */
-        if( !empty($options["select"]) ){
-            $inputType = "select";
-        }
         /**
          * Mostra inputs de acordo com o especificado
          */
@@ -137,7 +182,7 @@ class FormHelper
          */
         if( $inputType == "text" ){
             $conteudo.= '<div class="input_field input_text">';
-            $conteudo.= '<input type="text" name="'.$inputName.'" id="input-'.$fieldName.'">';
+            $conteudo.= '<input type="text" name="'.$inputName.'" '.$standardAtrib.' />';
         }
         /**
          * INPUT <SELECT>
@@ -156,7 +201,7 @@ class FormHelper
              */
             $selectOptions = $select["options"];
             $conteudo.= '<div class="input_field input_select">';
-            $conteudo.= '<select name="'.$inputName.'" id="input-'.$fieldName.'">';
+            $conteudo.= '<select name="'.$inputName.'" '.$standardAtrib.'>';
             /**
              * Loop pelo select criando <options>
              */
@@ -183,7 +228,7 @@ class FormHelper
          */
         else {
             $conteudo.= '<div class="input_field input_text">';
-            $conteudo.= '<input type="text" name="'.$inputName.'" value="ERRO NO TIPO DE CAMPO" id="input-'.$fieldName.'">';
+            $conteudo.= '<input type="text" name="'.$inputName.'" value="ERRO NO TIPO DE CAMPO" '.$standardAtrib.'>';
         }
         $conteudo.= '</div>'; // fecha div do .input_field
 

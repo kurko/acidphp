@@ -13,6 +13,7 @@ $routes = array(
         "controller" => "site", "action" => "index"
     )
 );
+
 Config::write("routes", $routes)
 
 ?>

@@ -39,7 +39,11 @@ class Engine
     public $arguments;
     public $webroot;
 
-    function __construct(){
+
+    public $conn;
+    public $dbTables;
+
+    function __construct($params = ""){
 
         /**
          * Carrega os routes do sistema
@@ -52,8 +56,22 @@ class Engine
          * e action deve ser aberto.
          */
         $this->translateUrl();
+
+
+        /**
+         * AJUSTA CONEXÃO SE EXISTIR
+         */
+        $this->conn = ( empty($params["conn"]) ) ? NULL : $params["conn"];
+        /**
+         * Verifica tabelas
+         */
+        $this->checkTables($conn);
     }
 
+    /**
+     * Traduz a URL para que seja possível carregar os controllers e actions
+     * certos.
+     */
     private function translateUrl(){
         
         if( !empty($_GET["url"]) ){
@@ -86,6 +104,35 @@ class Engine
                 }
                 
             }
+        }
+    }
+
+    /**
+     * Verifica quais as tabelas existentes na base de dados.
+     *
+     * É usado SHOW_TABLES
+     *
+     * @param array $params Configurações adicionais
+     *      - 'conn' [opcional] : objeto conexão
+     */
+    protected function checkTables($params = ""){
+        /**
+         * Admite uma conexão (configurada ou padrão)
+         */
+        $conn = ( empty($params["conn"]) ) ? $this->conn : $params["conn"];
+
+        /**
+         * Carrega todas as tabelas do DB
+         */
+        $mysql = $conn->query('SHOW TABLES');
+        /**
+         * Salva as tabelas encontradas
+         * 
+         * Loop por todas as tabelas do DB, salvando as informações sobre as
+         * tabelas de forma organizada
+         */
+        foreach($mysql as $chave=>$dados){
+            $this->dbTables[] = $dados[0];
         }
     }
 

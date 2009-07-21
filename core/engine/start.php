@@ -18,9 +18,11 @@
  * @since [Arquivo existe desde: Data ou Versao]
  */
 
-
-$engine = new Engine();
-
+$conn = new Conexao($dbConn);
+$engine = new Engine(array(
+        'conn' => $conn,
+    )
+);
 
 if( is_file(APP_CONTROLLER_DIR.$engine->callController."_controller.php") ){
     include(APP_CONTROLLER_DIR.$engine->callController."_controller.php");

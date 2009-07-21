@@ -25,4 +25,17 @@ function pr($str){
     echo "</pre>";
 }
 
+/**
+ * function showWarning()
+ *
+ * Mostra um aviso para o usuário. Somente se debug > 0
+ *
+ * @param string $str Aviso a ser mostrado
+ */
+function showWarning($str){
+    if( Config::read("debug") > 0 ){
+        trigger_error( $str , E_USER_WARNING);
+    }
+}
+
 ?>

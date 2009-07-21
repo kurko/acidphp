@@ -23,24 +23,52 @@
 include(CORE_FUNCTIONS_FILE);
 
 /**
- * Classes
+ * CARREGA CLASSES
  */
+include(CORE_CLASS_DIR."Connection.php");
 include(CORE_CLASS_DIR."Engine.php");
 include(CORE_CLASS_DIR."Controller.php");
+include(CORE_CLASS_DIR."Model.php");
+
 /**
  * Classe de configuração do sistema
  */
 include(CORE_CLASS_DIR."Config.php");
 
+/**
+ * CONTROLLERS
+ */
+/**
+ * Verifica se existe um AppController especificado, senão carrega o do core
+ */
 if( is_file(APP_CONTROLLER_DEFAULT) ){
     include(APP_CONTROLLER_DEFAULT);
 } else {
     include(CORE_APP_CONTROLLER_DEFAULT);
 }
 
+/**
+ * MODELS
+ */
+/**
+ * Verifica se existe um AppModel especificado, senão carrega o do core
+ */
+if( is_file(APP_MODEL_DEFAULT) ){
+    include(APP_MODEL_DEFAULT);
+} else {
+    include(CORE_APP_MODEL_DEFAULT);
+}
+
 include(APP_CONFIG_ROUTES);
 include(APP_CONFIG_CORE);
+include(APP_CONFIG_DATABASE);
 
+/**
+ * Carrega todos os models
+ */
+foreach (glob(APP_MODEL_DIR."*.php") as $filename) {
+   include($filename);
+}
 
 
 ?>

@@ -8,6 +8,7 @@
  * @since v0.1 19/07/2009
  */
 
+Config::write("debug", 1);
 Config::write("charset", "UTF-8");
 
 ?>

@@ -35,6 +35,14 @@ class Controller
     protected $helpers = array("Html", "Form");
 
     /**
+     * USES (MODELS)
+     *
+     * Indica quais models devem ser carregados
+     *
+     * @var array Contém o nome dos models a serem usados
+     */
+    protected $uses = array();
+    /**
      * CONFIGURAÇÃO DE AMBIENTE
      */
     protected $layout = "default";
@@ -59,14 +67,60 @@ class Controller
          */
         $this->engine = $param["engine"];
         /**
-         * Parâmetros de sistema
+         * $THIS->PARAMS
+         *
+         * Configura os parâmetros de sistema
          */
         $this->params["controller"] = $this->engine->callController;
         $this->params["action"] = $this->engine->callAction;
         $this->params["args"] = $this->engine->arguments;
+        /**
+         * Ajust $_POST
+         */
+        if( !empty($_POST) ){
+            $this->params["post"] = $_POST;
+            if( !empty($_POST["data"]) ){
+                $this->data = $_POST["data"];
+                //foreach( $data as $model ){
+
+                    //pr( $model );
+                //}
+            }
+        }
 
         $this->webroot = $this->engine->webroot;
         //$this->set("web", $varValue)
+
+        /**
+         * MODELS
+         *
+         * Carrega models que estão descritos em $this->uses
+         */
+        if( !empty($this->uses) ){
+            /**
+             * Loop por cada model requisitado e carrega cada um.
+             *
+             * Ele estão acessívels através de $this->modelName
+             */
+            foreach($this->uses as $valor){
+                $className = $valor;
+                
+                /**
+                 * Monta parâmetros para criar os models
+                 */
+                 //pr($this->engine->dbTables);
+                $modelParams = array(
+                    'conn' => $this->engine->conn,
+                    'dbTables' => $this->engine->dbTables,
+                    'modelName' => $className,
+                );
+
+                if( !class_exists($className) ){
+                    include(APP_MODEL_DIR.$className.".php");
+                }
+                $this->{$className} = new $className($modelParams);
+            }
+        }
 
         /**
          * HELPERS, COMPONENTS, BEHAVIORS
@@ -151,7 +205,8 @@ class Controller
         } else {
             $actionExists = false;
         }
-        //$actionExists = true;
+        if( Config::read("debug") > 0 )
+            $actionExists = true;
 
         /**
          * Se o action existe

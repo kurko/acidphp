@@ -1,13 +1,13 @@
 <?php
 /**
- * Arquivo responsável pela Conexão com Bases de Dados
+ * Arquivo responsï¿½vel pela Conexï¿½o com Bases de Dados
  *
- * Integra PDO (se presente) ou conexão normal.
+ * Integra PDO (se presente) ou conexï¿½o normal.
  *
- * ATENÇÃO:
- *      - Se você encontrar erro de 'mysql unbuffered', erro 2014, isto significa
- *        que você precisa liberar a memória após as querys que você fez.
- *        Faça isto através do método PDOStatement::closeCursor();
+ * ATENï¿½ï¿½O:
+ *      - Se vocï¿½ encontrar erro de 'mysql unbuffered', erro 2014, isto significa
+ *        que vocï¿½ precisa liberar a memï¿½ria apï¿½s as querys que vocï¿½ fez.
+ *        Faï¿½a isto atravï¿½s do mï¿½todo PDOStatement::closeCursor();
  *
  * @package DB
  * @name Conexao
@@ -15,15 +15,15 @@
  * @version 0.1
  * @since v0.1.5, 30/05/2009
  */
-class Conexao extends SQLObject {
+class Conexao {
     /**
      *
-     * @var bool Se a base de dados existe. Serve para verificação simples.
+     * @var bool Se a base de dados existe. Serve para verificaï¿½ï¿½o simples.
      */
 	public $DBExiste;
     /**
      *
-     * @var Resource Possui a conexão com o DB
+     * @var Resource Possui a conexï¿½o com o DB
      */
 	public $conn;
     /**
@@ -34,7 +34,7 @@ class Conexao extends SQLObject {
 
     /**
      *
-     * @var <type> Contém toda a configuração de acesso à base de dados
+     * @var <type> Contï¿½m toda a configuraï¿½ï¿½o de acesso ï¿½ base de dados
      */
     protected $dbConfig;
 
@@ -42,16 +42,16 @@ class Conexao extends SQLObject {
 
 
     /**
-     * Cria conexão com o DB. Faz integração de conexões se PDO existe ou não.
+     * Cria conexï¿½o com o DB. Faz integraï¿½ï¿½o de conexï¿½es se PDO existe ou nï¿½o.
      *
-     * @param array $conexao Contém parâmetros de conexão ao DB
+     * @param array $conexao Contï¿½m parï¿½metros de conexï¿½o ao DB
      */
 	function __construct($dbConfig){
             
         $this->dbConfig = $dbConfig;
 
         /**
-         * Se a extensão PDO, usada para conexão com vários tipos de bases de dados
+         * Se a extensï¿½o PDO, usada para conexï¿½o com vï¿½rios tipos de bases de dados
          */
         if($this->PdoExtension()){
             $this->PdoInit($dbConfig);
@@ -60,7 +60,7 @@ class Conexao extends SQLObject {
             }
         }
         /**
-         * Conexão comum
+         * Conexï¿½o comum
          */
         else {
             $this->DbConnect($dbConfig);
@@ -68,29 +68,38 @@ class Conexao extends SQLObject {
 	}
 
     /**
-     * Efetua conexão via PDO.
+     * Efetua conexï¿½o via PDO.
      * 
-     * Esta função é executada somente se a extensão 'PDO' estiver ativada.
+     * Esta funï¿½ï¿½o ï¿½ executada somente se a extensï¿½o 'PDO' estiver ativada.
      *
-     * @param array $dbConfig Possui dados para conexão no DB
+     * @param array $dbConfig Possui dados para conexï¿½o no DB
      *      driver: tipo de driver/db (mysql, postgresql, mssql, oracle, etc)
      *      database: nome da base de dados
-     *      server: endereço da base de dados
-     *      username: nome de usuário para acesso ao db
+     *      server: endereï¿½o da base de dados
+     *      username: nome de usuï¿½rio para acesso ao db
      *      password: senha para acesso ao db
      */
     protected function PdoInit($dbConfig){
 
         $dbConfig['driver'] = (empty($dbConfig['driver'])) ? 'mysql' : $dbonfig['driver'];
+        $charset = ( empty($dbConfig["encoding"])) ? "" : ";charset=".$dbConfig["encoding"];
 
-        if( $this->conn = new PDO(
-                                $dbConfig['driver'].':host='.$dbConfig['server'].';'
-                                .   'dbname='.$dbConfig['database'],
-                                $dbConfig['username'], $dbConfig['password'],
-                                array(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true)
-                            )
-
-        ){
+        $this->conn = new PDO(
+                        $dbConfig['driver'].':host='.$dbConfig['server'].';'
+                        .   'dbname='.$dbConfig['database']
+                        .   $charset,
+                        
+                        $dbConfig['username'], $dbConfig['password'],
+                        array(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true)
+                            );
+        //var_dump($this->conn);
+        if( !empty($dbConfig["encoding"]) ){
+            $this->conn->exec("SET NAMES '".$dbConfig["encoding"]."'");
+            $this->conn->exec("SET character_set_connection=".$dbConfig["encoding"]);
+            $this->conn->exec("SET character_set_client=".$dbConfig["encoding"]);
+            $this->conn->exec("SET character_set_results=".$dbConfig["encoding"]);
+        }
+        if( $this->conn){
             $this->DBExiste = true;
         }
         $this->pdo = $this->conn;
@@ -98,13 +107,13 @@ class Conexao extends SQLObject {
         //$this->con = $dbConfig[]':host=localhost;dbname=test';
     }
     /**
-     * Conexão comum ao DB. Padrão MySQL.
+     * Conexï¿½o comum ao DB. Padrï¿½o MySQL.
      *
-     * @param array $dbConfig Possui dados para conexão no DB
+     * @param array $dbConfig Possui dados para conexï¿½o no DB
      *      driver: tipo de driver/db (mysql, postgresql, mssql, oracle, etc)
      *      database: nome da base de dados
-     *      server: endereço da base de dados
-     *      username: nome de usuário para acesso ao db
+     *      server: endereï¿½o da base de dados
+     *      username: nome de usuï¿½rio para acesso ao db
      *      password: senha para acesso ao db
      */
     protected function DbConnect($dbConfig){
@@ -123,18 +132,18 @@ class Conexao extends SQLObject {
      * CRUD
      */
     /**
-     * Função integradora para Query's
+     * Funï¿½ï¿½o integradora para Query's
      *
      * @param string $sql
      * @return array Resultado em formato array
      */
     public function query($sql, $type = ""){
         /**
-         * Se a extensão PDO está ativada
+         * Se a extensï¿½o PDO estï¿½ ativada
          */
         if($this->PdoExtension()){
             /**
-             * Roda o SQL e trás os resultados para um array
+             * Roda o SQL e trï¿½s os resultados para um array
              */
 
             /**
@@ -142,13 +151,13 @@ class Conexao extends SQLObject {
              */
             if ( !empty( $type ) ){
                 /**
-                 * Se "ASSOC", usa por padrão PDO::FETCH_ASSOC.
+                 * Se "ASSOC", usa por padrï¿½o PDO::FETCH_ASSOC.
                  */
                 if( $type == "ASSOC" ){
                     $query = $this->conn->query( $sql, PDO::FETCH_ASSOC );
                 }
                 /**
-                 * Se for um tipo específico de resultado desejado aceito pelo
+                 * Se for um tipo especï¿½fico de resultado desejado aceito pelo
                  * PDO, carrega automaticamente o tipo selecionado em
                  * PDO::query().
                  */
@@ -190,7 +199,7 @@ class Conexao extends SQLObject {
         }
         
         /**
-         * Se não houverem resultados, instancia variável para evitar erros
+         * Se nï¿½o houverem resultados, instancia variï¿½vel para evitar erros
          */
         if(empty($result)){
             $result = array();
@@ -199,15 +208,15 @@ class Conexao extends SQLObject {
     }
 
     /**
-     * Comando específico para uso com PDO. Se PDO não está presente,
+     * Comando especï¿½fico para uso com PDO. Se PDO nï¿½o estï¿½ presente,
      * chama $this->query.
      *
      * @param string $sql
-     * @return <type> Retorna resultado da operação
+     * @return <type> Retorna resultado da operaï¿½ï¿½o
      */
     public function exec($sql, $mode = ''){
         /**
-         * Se a extensão PDO está ativada
+         * Se a extensï¿½o PDO estï¿½ ativada
          */
         if($this->PdoExtension()){
             /**
@@ -217,9 +226,9 @@ class Conexao extends SQLObject {
             $result = $this->conn->exec($sql);
             
             /**
-             * Quando executado CREATE TABLE, retorno com sucesso é 0 e
-             * insucesso é false, não sendo possível diferenciar entre um e
-             * outro. Este hack dá um jeitinho nisto.
+             * Quando executado CREATE TABLE, retorno com sucesso ï¿½ 0 e
+             * insucesso ï¿½ false, nï¿½o sendo possï¿½vel diferenciar entre um e
+             * outro. Este hack dï¿½ um jeitinho nisto.
              */
             if( in_array( $mode, array('CREATE_TABLE', 'CREATE TABLE') ) ){
                 if($result == 0 AND !is_bool($result)){
@@ -242,7 +251,7 @@ class Conexao extends SQLObject {
      */
     public function count($sql){
         /**
-         * Se a extensão PDO está ativada
+         * Se a extensï¿½o PDO estï¿½ ativada
          */
         if($this->PdoExtension()){
             /**
@@ -281,7 +290,7 @@ class Conexao extends SQLObject {
     public function listaTabelasDoDBParaArray($db = '' ){
 
         /**
-         * Ajusta o DB (se nenhum especificado, usa o padrão do sistema)
+         * Ajusta o DB (se nenhum especificado, usa o padrï¿½o do sistema)
          */
         $db = ( empty($db) ) ? $this->dbConfig['db'] : $db;
 
@@ -310,7 +319,7 @@ class Conexao extends SQLObject {
      *
      * @param string $tabela
      * @return array Array contendo todos os campos da tabela escolhida,
-     * juntamente com informações como tipo e chaves.
+     * juntamente com informaï¿½ï¿½es como tipo e chaves.
      */
     public function listaCampos( $tabela ){
         $sql = "DESCRIBE ". $tabela;
@@ -318,7 +327,7 @@ class Conexao extends SQLObject {
         $query = $this->query($sql);
 
         /**
-         * Loop pelos campos ajustando para o português os índices da array
+         * Loop pelos campos ajustando para o portuguï¿½s os ï¿½ndices da array
          * de retorno.
          */
         foreach($query as $chave=>$valor){
@@ -346,7 +355,7 @@ class Conexao extends SQLObject {
             return $this->count($sql);
     }
 
-// retorna quantos registros existém na tabela CONFIG (tabela de configurações)
+// retorna quantos registros existï¿½m na tabela CONFIG (tabela de configuraï¿½ï¿½es)
     public function VerificaConf(){
             $sql = "SELECT id
                             FROM
@@ -357,15 +366,15 @@ class Conexao extends SQLObject {
     }
 
     /**
-     * VERIFICAÇÕES INTERNAS
+     * VERIFICAï¿½ï¿½ES INTERNAS
      */
     /**
      *
-     * @return bool A extensão PDO está ativa ou não
+     * @return bool A extensï¿½o PDO estï¿½ ativa ou nï¿½o
      */
     protected function PdoExtension(){
         /**
-         * Se a extensão PDO está ativada ou não
+         * Se a extensï¿½o PDO estï¿½ ativada ou nï¿½o
          */
         //return false;
         return extension_loaded('PDO');

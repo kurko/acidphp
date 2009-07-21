@@ -11,13 +11,24 @@
 class SiteController extends AppController
 {
 
+    var $uses = array("Usuario", "Tarefa");
+
     function index(){
+        
     }
 
     function listar($id="nao", $id2="naotb"){
+        
+    }
 
+    function save(){
+        pr( $this->Usuario->saveAll( $this->data ) );
+    }
 
-        $this->autoRender = false;
+    function savetarefa(){
+        pr( $this->Tarefa->saveAll( $this->data ) );
+
+        $this->render("save");
     }
 
 
