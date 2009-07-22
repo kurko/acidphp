@@ -1,12 +1,11 @@
 <?php
 /**
- * Arquivo que representa a estrutura controller de um MV
+ * Arquivo que representa a estrutura MODEL de um MCV
  *
  * @package MVC
- * @name Controller
+ * @name Model
  * @author Alexandre de Oliveira <chavedomundo@gmail.com>
- * @version 0.1
- * @since v0.1.5, 22/06/2009
+ * @since v0.1, 19/07/2009
  */
 class Model
 {
@@ -23,8 +22,10 @@ class Model
      *
      * @var array Indica que este Model tem outros sub-Models
      */
-    protected $hasOne = array();
-    protected $hasMany = array();
+    public $hasOne = array();
+    public $hasMany = array();
+    public $modelsLoaded = array();
+    public $tableAlias = array();
 
     /**
      * CONEXÃO
@@ -32,6 +33,7 @@ class Model
      * @var object Contém a conexão com a base de dados
      */
     private $conn;
+    
     /**
      *
      * @var array Tabela descrita
@@ -48,6 +50,8 @@ class Model
      * @var array
      */
     private $dbTables;
+
+    public $sqlObject;
 
 
     /**
@@ -66,7 +70,7 @@ class Model
         $this->dbTables = ( empty($params["dbTables"]) ) ? array() : $params["dbTables"];
         
         /**
-         * TABELA A SER USADA
+         * DEFINE A TABELA A SER USADA
          */
         $this->useTable = ( empty($this->useTable) ) ? $params["modelName"] : $this->useTable;
 
@@ -90,10 +94,32 @@ class Model
          * hasOne
          */
         if( !empty($this->hasOne) ){
-            foreach( $this->hasOne as $model=>$propriedades){
+            foreach( $this->hasOne as $model=>$propriedades ){
                 $this->{$model} = new $model($params);
+                $this->modelsLoaded[] = $model;
             }
         }
+        /**
+         * hasMany
+         */
+        if( !empty($this->hasMany) ){
+            foreach( $this->hasMany as $model=>$propriedades ){
+                $this->{$model} = new $model($params);
+                $this->modelsLoaded[] = $model;
+            }
+        }
+        /**
+         * Carrega as tabelas de cada model
+         */
+        $this->tableAlias[ get_class($this) ] = $this->useTable;
+        foreach( $this->modelsLoaded as $chave=>$valor ){
+            $this->tableAlias[$valor] = $this->{$valor}->useTable;
+        }
+
+        /**
+         * SQLObject
+         */
+        $this->sqlObject = new SQLObject();
     }
 
     /**
@@ -107,7 +133,6 @@ class Model
      * @return bool Se salvou ou não
      */
     public function saveAll($data, $options = array()){
-        pr($data);
         if( is_array($data) ){
             /**
              * Loop por cada tabela com valores enviados
@@ -132,7 +157,6 @@ class Model
                         }
                     }
 
-
                 } else {
                     $tabela = $this->{$model}->useTable;
                     $modelPai = false;
@@ -141,7 +165,6 @@ class Model
                     } else if( array_key_exists($model, $this->hasMany) ){
                         $modelsFilhos[$model] = $campos;
                     }
-                    
                 }
 
                 if( $modelPai ){
@@ -238,8 +261,26 @@ class Model
         }
 
         return false;
-    }
+    } // FIM SAVEALL()
 
+    public function find($options, $mode = "all"){
+
+        /**
+         * CONFIGURAÇÕES RELAÇÕES
+         */
+        $options["tableAlias"] = $this->tableAlias;
+        foreach( $options["tableAlias"] as $model=>$valor ){
+            $options["models"][$model] = $this->{$model};
+        }
+        /**
+         * Model chamado
+         */
+        $options["mainModel"] = $this;
+
+        $mysql = $this->conn->query( $this->sqlObject->find($options), ASSOC );
+        return $mysql;
+
+    }// fim find()
 
     /**
      * MÉTODOS INTERNOS (PRIVATE)

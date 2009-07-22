@@ -30,6 +30,9 @@ include(CORE_CLASS_DIR."Engine.php");
 include(CORE_CLASS_DIR."Controller.php");
 include(CORE_CLASS_DIR."Model.php");
 
+
+include(CORE_CLASS_DIR."SQLObject.php");
+
 /**
  * Classe de configuração do sistema
  */

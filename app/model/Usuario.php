@@ -6,6 +6,9 @@ class Usuario extends AppModel {
         'Tarefa' => array(
             'foreignKey' => 'usuario_id',
         ),
+        'Idade' => array(
+            'foreignKey' => 'usuario_id',
+        ),
     );
 }
 

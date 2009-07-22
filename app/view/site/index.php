@@ -4,6 +4,10 @@
  * and open the template in the editor.
  */
 
+if( !empty($temp) ){
+    pr($temp);
+}
+
 echo $form->create("Usuario", array(
         "controller" => "site",
     )

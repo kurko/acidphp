@@ -27,3 +27,12 @@ CREATE TABLE tarefas (
     PRIMARY KEY  (id),
     UNIQUE KEY (id)
 );
+
+
+CREATE TABLE idades (
+    id int auto_increment,
+    titulo varchar(80),
+    usuario_id int,
+    PRIMARY KEY  (id),
+    UNIQUE KEY (id)
+);

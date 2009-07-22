@@ -1,5 +1,6 @@
 <?php
 /**
+ * Tranforma pedidos CRUD do DB em cÃ³digos SQL
  *
  * @package Classes
  * @name SQLObject
@@ -11,7 +12,7 @@ class SQLObject {
 
     /**
      *
-     * @var class Classe responsável pela conexão com o banco de dados
+     * @var class Classe responsÃ¡vel pela conexÃ£o com o banco de dados
      */
     protected $conexao;
 
@@ -19,31 +20,80 @@ class SQLObject {
         //$this->conexao = $conexaoClass;
     }
 
-    function find($options, $modo = 'all'){
+    /**
+     * method FIND()
+     *
+     * Transforma um pedido em cÃ³digo SQL para ser executado
+     *
+     * @param array $options
+     * @return string CÃ³digo SQL
+     */
+    public function find($options){
+        //pr($options);
         /**
-         * Configurações gerais
+         * AJUSTA MODEL PRINCIPAL
+         */
+        $mainModel = $options["mainModel"];
+        /**
+         * ConfiguraÃ§Ãµes gerais
          *
-         * Ajusta os parâmetros passados em variáveis específicas
+         * Ajusta os parÃ¢metros passados em variÃ¡veis especÃ­ficas
          */
-        /**
-         * $fields -> Campos que devem ser carregados
-         */
-        $fields = (empty($options['fields'])) ? '*' : ( (is_array($options['fields'])) ? implode(',', $options['fields']) : $options['fields'] );
+
         /**
          * $table -> Tabela a ser usada
          */
-        $table = (empty($options['table'])) ? '' : $options['table'];
+        $tableAlias = ( empty($options['tableAlias']) ) ? '' : $options['tableAlias'];
+        
+        $table = array(
+            $mainModel->useTable." AS ".get_class($mainModel)
+        );
+        $usedModels[] = $mainModel;
+
+        /**
+         * RELACIONAMENTO
+         */
+        $hasOne = $mainModel->hasOne;
+        $hasMany = $mainModel->hasMany;
+        foreach( $hasOne as $model=>$info ){
+            $usedModels[] = $options["models"][$model];
+            $leftJoinTemp[] = "LEFT JOIN ".$options["tableAlias"][$model] . " AS " . $model
+                        . " ON ". get_class( $mainModel ).".id=".$model.".".$info["foreignKey"];
+        }
+
+        pr($relationalModel);
+
+        /**
+         * FIELDS
+         *
+         * $fields -> Campos que devem ser carregados
+         */
+         //pr($options["models"]);
+        if( empty($options['fields']) ){
+            foreach($usedModels as $model){
+                /**
+                 * Loop por cada campo da tabela para montar Fields
+                 */
+                foreach( $model->tableDescribed as $campo=>$info ){
+                    $fields[] = get_class( $model ).".".$campo." AS ".get_class( $model )."\.".$campo;
+                }
+            }
+        }
+        pr($fields);
+        //$fields = (empty($options['fields'])) ? '*' : ( (is_array($options['fields'])) ? implode(',', $options['fields']) : $options['fields'] );
+
         /**
          * $join -> LEFT JOIN, RIGHT JOIN, INNER JOIN, etc
          */
-        $join = (empty($options['join'])) ? '' : ( (is_array($options['join'])) ? implode(' ', $options['join']) : $options['join'] );
+        $leftJoin = (empty($leftJoinTemp)) ? '' : implode(' ', $leftJoinTemp) ;
+        
         /**
          * $order
          */
         $order = (empty($options['order'])) ? '' : ( (is_array($options['order'])) ? 'ORDER BY '. implode(', ', $options['order']) : $options['order'] );
 
         /**
-         * Verifica condições passadas, formatando o comando SQL de acordo
+         * Verifica condiÃ§Ãµes passadas, formatando o comando SQL de acordo
          */
         if(!empty($options['conditions'])){
             $conditions = $options['conditions'];
@@ -66,10 +116,10 @@ class SQLObject {
             $rules = 'WHERE ' . implode(' AND ', $rules);
         }
         $sql = "SELECT
-                    $fields
+                    ". implode(", ", $fields) ."
                 FROM
-                    $table
-                    $join
+                    ". implode(", ", $table) ."
+                    $leftJoin
                     $rules
                     $order
                 ";
@@ -82,6 +132,7 @@ class SQLObject {
         if ( $modo == 'sql' ){
             return $sql;
         }
+        return $sql;
 
         /**
          * Debuggar
@@ -96,9 +147,9 @@ class SQLObject {
         $return = array();
         foreach($query as $chave=>$dados){
             /**
-             * Monta estruturas de saída de acordo como o modo pedido
+             * Monta estruturas de saÃ­da de acordo como o modo pedido
              *
-             * O modo padrão é ALL conforme configurado nos parâmetros da função
+             * O modo padrÃ£o Ã© ALL conforme configurado nos parÃ¢metros da funÃ§Ã£o
              */
             /**
              * ALL
@@ -139,7 +190,7 @@ class SQLObject {
         if($modo == 'NOT'){
             foreach($conditions as $campo=>$valor){
                 /**
-                 * Se for uma array com vários valores
+                 * Se for uma array com vÃ¡rios valores
                  */
                 if(is_array($valor)){
                     $rules[] = $campo .' NOT IN(\''. implode('\', \'', $valor) . '\')';
@@ -153,7 +204,7 @@ class SQLObject {
         } elseif($modo == 'OR'){
             foreach($conditions as $campo=>$valor){
                 /**
-                 * Se for uma array com vários valores
+                 * Se for uma array com vÃ¡rios valores
                  */
                 //pr($conditions);
                 if(is_array($valor)){
@@ -179,14 +230,14 @@ class SQLObject {
             if(is_array($conditions)){
                 foreach($conditions as $valor){
                     /**
-                     * Vários valores para este campo
+                     * VÃ¡rios valores para este campo
                      */
                     if(is_array($valor)){
                         foreach($valor as $cadaValor){
                             $tempRules[] = $campo.'=\''. $cadaValor . '\'';
                         }
                     /**
-                     * Um único valor para este campo
+                     * Um Ãºnico valor para este campo
                      */
                     } else {
                         $tempRules[] = $campo.'=\''. $valor . '\'';
@@ -203,9 +254,8 @@ class SQLObject {
         //pr($rules);
         $return = $rules;
         return $return;
-        
+
     }
 
 }
-
 ?>

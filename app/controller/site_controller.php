@@ -14,7 +14,17 @@ class SiteController extends AppController
     var $uses = array("Usuario", "Tarefa");
 
     function index(){
-        
+        $temp = $this->Usuario->find(array(
+                                        'conditions' => array(
+                                            'Usuario.id' => '20',
+                                        ),
+                                        //'order' => 'id ASC',
+                                        'limit' => '20',
+                                    ),
+                                    "all"
+            );
+
+        $this->set('temp', $temp);
     }
 
     function listar($id="nao", $id2="naotb"){
