@@ -18,12 +18,34 @@
  * @since [Arquivo existe desde: Data ou Versao]
  */
 
+/**
+ * TIMER INIT
+ */
+$startTime = microtime(true);
+
+/**
+ * CONEXÃO
+ */
 $conn = new Conexao($dbConn);
+/**
+ * NEW ENGINE
+ */
 $engine = new Engine(array(
         'conn' => $conn,
     )
 );
 
+/**
+ * CONFIGURAÇÕES
+ */
+/**
+ * Tabelas que já foram descritas
+ */
+$describedTables = array();
+
+/**
+ * CARREGA O CONTROLLER NECESSÁRIO
+ */
 if( is_file(APP_CONTROLLER_DIR.$engine->callController."_controller.php") ){
     include(APP_CONTROLLER_DIR.$engine->callController."_controller.php");
 }
@@ -38,7 +60,19 @@ $param = array(
     "engine" => $engine,
 );
 
+/**
+ * Carrega o sistema de controller
+ */
 $appRunningController = new $callControllerClass( $param );
 
+
+
+/**
+ * TIMER END
+ */
+$endTime = microtime(true);
+showLoadingTime($endTime - $startTime);
+
+debugSQLs( Config::read("SQLs") );
 
 ?>

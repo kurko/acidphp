@@ -75,16 +75,12 @@ class Controller
         $this->params["action"] = $this->engine->callAction;
         $this->params["args"] = $this->engine->arguments;
         /**
-         * Ajust $_POST
+         * Ajusta $_POST
          */
         if( !empty($_POST) ){
             $this->params["post"] = $_POST;
             if( !empty($_POST["data"]) ){
                 $this->data = $_POST["data"];
-                //foreach( $data as $model ){
-
-                    //pr( $model );
-                //}
             }
         }
 

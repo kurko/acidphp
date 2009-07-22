@@ -68,9 +68,9 @@ class Conexao {
 	}
 
     /**
-     * Efetua conex�o via PDO.
+     * Efetua conexão via PDO.
      * 
-     * Esta fun��o � executada somente se a extens�o 'PDO' estiver ativada.
+     * Esta função é executada somente se a extens�o 'PDO' estiver ativada.
      *
      * @param array $dbConfig Possui dados para conex�o no DB
      *      driver: tipo de driver/db (mysql, postgresql, mssql, oracle, etc)
@@ -118,14 +118,14 @@ class Conexao {
      */
     protected function DbConnect($dbConfig){
         $conexao = $dbConfig;
-		$conn = mysql_connect($conexao['server'], $conexao['username'], $conexao['password']) or die('Erro ao encontrar servidor');
-		if(mysql_select_db($conexao['database'], $conn)){
-			$this->DBExiste = TRUE;
+        $conn = mysql_connect($conexao['server'], $conexao['username'], $conexao['password']) or die('Erro ao encontrar servidor');
+        if(mysql_select_db($conexao['database'], $conn)){
+            $this->DBExiste = TRUE;
             $this->db = $db;
             $this->conn = $conn;
-		} else {
-			$this->DBExiste = FALSE;
-		}
+        } else {
+            $this->DBExiste = FALSE;
+        }
     }
 
     /**
@@ -139,23 +139,28 @@ class Conexao {
      */
     public function query($sql, $type = ""){
         /**
+         * Timer init
+         */
+        $sT = microtime(true);
+
+        /**
          * Se a extens�o PDO est� ativada
          */
         if($this->PdoExtension()){
             /**
-             * Roda o SQL e tr�s os resultados para um array
+             * Roda o SQL e três os resultados para um array
              */
-
             /**
              * Se o resultado deve ser num formato diferente
              */
             if ( !empty( $type ) ){
                 /**
-                 * Se "ASSOC", usa por padr�o PDO::FETCH_ASSOC.
+                 * Se "ASSOC", usa por padrão PDO::FETCH_ASSOC.
                  */
                 if( $type == "ASSOC" ){
                     $query = $this->conn->query( $sql, PDO::FETCH_ASSOC );
                 }
+
                 /**
                  * Se for um tipo espec�fico de resultado desejado aceito pelo
                  * PDO, carrega automaticamente o tipo selecionado em
@@ -197,7 +202,14 @@ class Conexao {
                 $result[] = $dados;
             }
         }
-        
+
+        /**
+         * Timer Init
+         */
+        $eT = microtime(true);
+
+        Config::add("SQLs", array("sql" => $sql, "time" => $eT - $sT) );
+
         /**
          * Se n�o houverem resultados, instancia vari�vel para evitar erros
          */
@@ -215,8 +227,13 @@ class Conexao {
      * @return <type> Retorna resultado da opera��o
      */
     public function exec($sql, $mode = ''){
+
         /**
-         * Se a extens�o PDO est� ativada
+         * Timer init
+         */
+        $sT = microtime(true);
+        /**
+         * Se a extensão PDO está ativada
          */
         if($this->PdoExtension()){
             /**
@@ -232,15 +249,25 @@ class Conexao {
              */
             if( in_array( $mode, array('CREATE_TABLE', 'CREATE TABLE') ) ){
                 if($result == 0 AND !is_bool($result)){
-                    return 1;
+                    $result = 1;
                 } else {
-                    return false;
+                    $result = false;
                 }
             }
-            return $result;
+            //return $result;
         } else {
-            return mysql_query($sql);
+            $return = mysql_query($sql);
         }
+
+        /**
+         * Timer Init
+         */
+        $eT = microtime(true);
+
+        Config::add("SQLs", array("sql" => $sql, "time" => $eT - $sT) );
+
+        return $result;
+
     }
 
     /**

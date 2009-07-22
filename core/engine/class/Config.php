@@ -13,21 +13,38 @@ class Config {
     protected static $config;
 
     /**
-     * Escreve uma nova variável com configura��es.
+     * Escreve uma nova variável com configurações.
      *
-     * @param string $varName Nome da vari�vel a ser gravada.
-     * @param string $varValor Valor a ser gravado na nova vari�vel.
-     * @return bool Se a vari�vel foi gravada com sucesso. 
+     * @param string $varName Nome da variável a ser gravada.
+     * @param string $varValor Valor a ser gravado na nova variável.
+     * @return bool Se a variável foi gravada com sucesso.
      */
     public function write($varName, $varValor){
         return self::$config[$varName] = $varValor;
     }
 
     /**
-     * Retorna um valor de uma configura��o.
+     * Some uma variável a uma array
      *
-     * @param string $varName Nome da configura��o que se deseja saber o valor.
-     * @param string $default Valor retornado caso a configura��o n�o exista.
+     * @param string $varName Nome da variável a ser gravada (será uma array).
+     * @param string|array $varValor Valor a ser gravado na nova variável.
+     * @return bool Se a variável foi gravada com sucesso.
+     */
+    public function add($varName, $varValor){
+        $tempVar = self::$config[$varName];
+        if( !is_array($tempVar) )
+            $tempVar = array();
+
+        array_push( $tempVar , $varValor);
+        self::$config[$varName] = $tempVar;
+        return true;
+    }
+
+    /**
+     * Retorna um valor de uma configuração.
+     *
+     * @param string $varName Nome da configuração que se deseja saber o valor.
+     * @param string $default Valor retornado caso a configuração não exista.
      * @return string
      */
     public function read($varName, $default = ''){

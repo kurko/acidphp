@@ -20,9 +20,11 @@
 
 
 function pr($str){
-    echo "<pre>";
-    print_r($str);
-    echo "</pre>";
+    if( Config::read("debug") > 0 ){
+        echo "<pre>";
+        print_r($str);
+        echo "</pre>";
+    }
 }
 
 /**
@@ -35,6 +37,47 @@ function pr($str){
 function showWarning($str){
     if( Config::read("debug") > 0 ){
         trigger_error( $str , E_USER_WARNING);
+    }
+}
+
+/**
+ * Escreve na tela o tempo total em segundos, deixando três casa depois
+ * da vírgula para milisegundos.
+ *
+ * @param string $totalTime Tempo total
+ */
+function showLoadingTime($totalTime){
+    if( Config::read("debug") > 0 ){
+        echo number_format($totalTime, 3, '.', '');
+    }
+}
+
+function debugSQLs($sql){
+    if( Config::read("debug") > 0 ){
+        echo '<table width="100%" style="background: white; padding: 10px;">';
+        echo '<tr>';
+        echo '<td style="font-size: 12px;">';
+        echo "<strong>Instruções SQL</strong>";
+        echo '</td>';
+        echo '<td style="font-size: 12px;">';
+        echo "<strong>Tempo</strong>";
+        echo '</td>';
+        echo '</tr>';
+
+        foreach($sql as $chave=>$valor){
+            echo '<tr>';
+                echo '<td style="font-size: 12px;">';
+                echo $valor["sql"];
+                echo '</td>';
+                echo '<td style="font-size: 12px;">';
+                echo showLoadingTime( $valor["time"] );
+                echo '</td>';
+            echo '</tr>';
+
+            echo '<tr><td colspan="2" style="font-size: 0; background: silver;"></td></tr>';
+
+        }
+        echo '</table>';
     }
 }
 

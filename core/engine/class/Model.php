@@ -32,6 +32,10 @@ class Model
      * @var object Contém a conexão com a base de dados
      */
     private $conn;
+    /**
+     *
+     * @var array Tabela descrita
+     */
     public $tableDescribed;
 
 
@@ -68,9 +72,16 @@ class Model
 
         /**
          * DESCRIBE NA TABELA
+         *
+         * Com global $describedTables, sabemos quais já foram descritas e não
+         * repetimos o processo.
          */
-        $this->describeTable();
-        //pr( $this->tableDescribed);
+        global $describedTables;
+        if( !array_key_exists($this->useTable, $describedTables) ){
+            $this->describeTable();
+        } else {
+            $this->tableDescribed = $describedTables[$this->useTable];
+        }
 
         /**
          * CRIA RELAÇÕES
@@ -237,6 +248,7 @@ class Model
     private function describeTable($params = ""){
         $conn = ( empty($params["conn"]) ) ? $this->conn : $params["conn"];
 
+        global $describedTables;
         /**
          * Retorna todos os campos das tabelas
          */
@@ -244,6 +256,7 @@ class Model
 
         foreach($conn->query($describeSql, "ASSOC") as $tabela=>$info){
             $this->tableDescribed[$info['Field']] = $info;
+            $describedTables[$this->useTable][$info['Field']] = $info;
         }
     }
 
