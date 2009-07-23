@@ -41,6 +41,8 @@ class SQLObject {
          */
 
         /**
+         * TABLE
+         * 
          * $table -> Tabela a ser usada
          */
         $tableAlias = ( empty($options['tableAlias']) ) ? '' : $options['tableAlias'];
@@ -51,48 +53,92 @@ class SQLObject {
         $usedModels[] = $mainModel;
 
         /**
-         * RELACIONAMENTO
+         * JOIN
+         */
+        /**
+         * Left Join
+         *
+         * Ajusta Left Joins de acordo com relacionamentos dos models
          */
         $hasOne = $mainModel->hasOne;
         $hasMany = $mainModel->hasMany;
-        foreach( $hasOne as $model=>$info ){
+        $has = array();
+        $has = array_merge( $hasOne , $hasMany );
+        foreach( $has as $model=>$info ){
             $usedModels[] = $options["models"][$model];
             $leftJoinTemp[] = "LEFT JOIN ".$options["tableAlias"][$model] . " AS " . $model
                         . " ON ". get_class( $mainModel ).".id=".$model.".".$info["foreignKey"];
         }
-
-        pr($relationalModel);
+        /**
+         * $join -> Left Join, Right Join, Inner Join, etc
+         */
+        $leftJoin = (empty($leftJoinTemp)) ? '' : implode(' ', $leftJoinTemp) ;
 
         /**
          * FIELDS
          *
          * $fields -> Campos que devem ser carregados
          */
-         //pr($options["models"]);
+        /**
+         * Se nenhum campo foi indicado
+         */
         if( empty($options['fields']) ){
             foreach($usedModels as $model){
                 /**
                  * Loop por cada campo da tabela para montar Fields
                  */
                 foreach( $model->tableDescribed as $campo=>$info ){
-                    $fields[] = get_class( $model ).".".$campo." AS ".get_class( $model )."\.".$campo;
+                    $fields[] = get_class( $model ).".".$campo." AS ".get_class( $model )."__".$campo;
                 }
             }
         }
-        pr($fields);
-        //$fields = (empty($options['fields'])) ? '*' : ( (is_array($options['fields'])) ? implode(',', $options['fields']) : $options['fields'] );
+        /**
+         * Se algum campo foi indicado
+         */
+        else {
+            /**
+             * Se fields == array
+             */
+            if( is_array($options["fields"]) ){
+                foreach( $options["fields"] as $campo ){
+                    $underlinePos = strpos($campo, "." );
+                    if( $underlinePos !== false ){
+                        /**
+                         * Model do campo usado
+                         */
+                        $modelReturned = substr( $campo, 0, $underlinePos );
+                    }
+                    $fieldModelUsed[$modelReturned] = $modelReturned;
+                    $fields[] = $campo. " AS ".str_replace(".", "__", $campo);
+                }
+                foreach($fieldModelUsed as $model){
+                    $fields[] = $model.".id AS ".$model."__id";
+                }
+
+                
+            }
+            /**
+             * Se fields == string
+             */
+            else if(is_string($options["fields"])) {
+                $fields[] = $options["fields"];
+            }
+        } // fim fields
+
 
         /**
-         * $join -> LEFT JOIN, RIGHT JOIN, INNER JOIN, etc
+         * ORDER
          */
-        $leftJoin = (empty($leftJoinTemp)) ? '' : implode(' ', $leftJoinTemp) ;
-        
-        /**
-         * $order
-         */
-        $order = (empty($options['order'])) ? '' : ( (is_array($options['order'])) ? 'ORDER BY '. implode(', ', $options['order']) : $options['order'] );
+        $order = (empty($options['order'])) ? '' : ( (is_array($options['order'])) ? 'ORDER BY '. implode(', ', $options['order']) : "ORDER BY ". $options['order'] );
 
         /**
+         * LIMIT
+         */
+        $limit = (empty($options['limit'])) ? '' : 'LIMIT '. $options['limit'];
+
+        /**
+         * CONDITIONS
+         * 
          * Verifica condições passadas, formatando o comando SQL de acordo
          */
         if(!empty($options['conditions'])){
@@ -110,6 +156,13 @@ class SQLObject {
         }
 
         /**
+         *
+         * GERA SQL
+         *
+         *
+         *
+         */
+        /*
          * Quebra as regras dentro do WHERE para SQL
          */
         if(is_array($rules)){
@@ -122,6 +175,7 @@ class SQLObject {
                     $leftJoin
                     $rules
                     $order
+                    $limit
                 ";
 
         /**
@@ -139,40 +193,6 @@ class SQLObject {
          *
          * Descomente a linha abaixo para debugar
          */
-            //echo $sql . '<--<br />';
-
-            //echo $this->conexao->testConexao();
-
-        $query = $this->query($sql);
-        $return = array();
-        foreach($query as $chave=>$dados){
-            /**
-             * Monta estruturas de saída de acordo como o modo pedido
-             *
-             * O modo padrão é ALL conforme configurado nos parâmetros da função
-             */
-            /**
-             * ALL
-             */
-            if($modo == 'all'){
-                array_push($return, $dados);
-            /**
-             * FIRST
-             */
-            } elseif($modo == 'first' and (count($fields) == 1 or is_string($fields))){
-                if(is_array($fields)){
-                    $return[] = $dados[$fields[0]];
-                } else {
-                    $return[] = $dados[$fields];
-                }
-            }
-        }
-
-        /**
-         * Descomente a linha abaixo para debugar
-         */
-            //pr( $return);
-        return $return;
     }
 
     /*

@@ -263,22 +263,140 @@ class Model
         return false;
     } // FIM SAVEALL()
 
+    /**
+     *
+     * @param array $options Contém opçoes de carregamento
+     * @param string $mode Modo de retorno
+     *      - 'all' (padrão) : Listagem completa
+     * @return array
+     */
     public function find($options, $mode = "all"){
 
         /**
-         * CONFIGURAÇÕES RELAÇÕES
+         * CONFIGURAÇÕES DE RELACIONAMENTO
          */
         $options["tableAlias"] = $this->tableAlias;
         foreach( $options["tableAlias"] as $model=>$valor ){
             $options["models"][$model] = $this->{$model};
         }
         /**
-         * Model chamado
+         * Dfine model principal
          */
         $options["mainModel"] = $this;
 
-        $mysql = $this->conn->query( $this->sqlObject->find($options), ASSOC );
-        return $mysql;
+        /**
+         * GERA SQL
+         *
+         * Gera SQL com SQLObject
+         */
+        $sqlGerado = $this->sqlObject->find($options);
+        $query = $this->conn->query( $sqlGerado, ASSOC );
+        
+        /**
+         * Trata os dados para retornarem no formato adequado
+         */
+        $return = array();
+        $registro = array();
+        $i = 0;
+        foreach($query as $chave=>$dados){
+            /**
+             * ANALISA RESULTADO DO DB
+             */
+            /*
+             * Transforma o resultado em uma array legível. O resultado do
+             * DB vem desformatado do SQL Object.
+             */
+            foreach( $dados as $campo=>$valor){
+                $underlinePos = strpos($campo, "__" );
+                if( $underlinePos !== false ){
+                    /**
+                     * Model e Campo
+                     */
+                    $modelReturned = substr( $campo, 0, $underlinePos );
+                    $campoReturned = substr( $campo, $underlinePos+2, 100 );
+
+                    /**
+                     * Codigo
+                     */
+                    $tempResult[$i][$modelReturned][$campoReturned] = $valor;
+                }
+            }
+            $i++;
+
+        }
+
+        /**
+         * Monta estruturas de saída de acordo como o modo pedido
+         *
+         * O modo padrão é ALL conforme configurado nos parâmetros da função
+         */
+        foreach( $tempResult as $index ){
+            // ID principal do model principal
+            $mainId = $index[ get_class($this) ]["id"];
+
+            $hasManyResult = array();
+
+            
+            foreach($index as $model=>$dados){
+
+                /**
+                 * Ajusta retorno da array de dados
+                 */
+                /**
+                 * Se o model hasMany
+                 */
+                if( array_key_exists( $model , $this->hasMany) ){
+                    $hasManyResult = $dados;
+                    $registro[ $index[ get_class($this) ]["id"] ][$model][] = $hasManyResult;
+                }
+                /**
+                 * Senão, simplesmente salva na array o resultado do model
+                 */
+                else {
+                    $registro[ $index[ get_class($this) ]["id"] ][$model] = $dados;
+                }
+            }
+            unset($hasManyResult);
+            
+        }
+
+        $return = $registro;
+        return $return;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            //if(  )
+            /**
+             * ALL
+             */
+            if($mode == 'all'){
+                //pr($dados);
+                //array_push($return, $registro);
+                //array_push($return, $dados);
+            }
+            /**
+             * FIRST
+             */
+            elseif($mode == 'first' and (count($fields) == 1 or is_string($fields))){
+                if(is_array($fields)){
+                    $return[] = $dados[$fields[0]];
+                } else {
+                    $return[] = $dados[$fields];
+                }
+            }
 
     }// fim find()
 

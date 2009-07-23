@@ -14,11 +14,15 @@ class SiteController extends AppController
     var $uses = array("Usuario", "Tarefa");
 
     function index(){
+
         $temp = $this->Usuario->find(array(
                                         'conditions' => array(
-                                            'Usuario.id' => '20',
+                                            'OR' => array(
+                                                'Usuario.id' => array('20', '21'),
+                                            )
                                         ),
-                                        //'order' => 'id ASC',
+                                        'fields' => array('Usuario.nome','Tarefa.nome'),
+                                        'order' => 'Usuario.id ASC',
                                         'limit' => '20',
                                     ),
                                     "all"
