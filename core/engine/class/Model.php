@@ -266,6 +266,7 @@ class Model
     /**
      *
      * @param array $options Contém opçoes de carregamento
+     *      - '' : 
      * @param string $mode Modo de retorno
      *      - 'all' (padrão) : Listagem completa
      * @return array
