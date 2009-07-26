@@ -33,6 +33,8 @@ class DatabaseAbstractor extends DataAbstractor
     /**
      * __CONSTRUCT()
      *
+     * @author Alexandre de Oliveira <chavedomundo@gmail.com>
+     * @since v0.1
      * @param array $params
      *      "conn" object : conexão com o db;
      */
@@ -55,7 +57,29 @@ class DatabaseAbstractor extends DataAbstractor
     /**
      * MÉTODOS DE SUPORTE
      */
-
+    /**
+     * FIND()
+     *
+     * Busca na base de dados por dados requisitados pelos Models.
+     *
+     * @author Alexandre de Oliveira <chavedomundo@gmail.com>
+     * @since v0.1
+     * @param array $options Parâmetros de configuração da busca
+     *      Opções de configuração
+     *      --
+     *      - 'mainModel' : O model que está fazendo a requisição
+     *      - 'tableAlias': Quais tabelas são de quais models
+     *      - 'models'    : Models que fazem parte da requisição (relacionados)
+     *      Parâmetros de busca
+     *      --
+     *      - 'conditions': Condições para formação de operações lógicas SQL
+     *      - 'fields'    : Campos a serem carregados do DB
+     *      - 'limit'     : Quantos registros devem ser carregados
+     *      - 'order'     : Ordenação dos registros (ORDER BY)
+     *
+     *
+     * @return array Resultado da base de dados no formato requisitado
+     */
     public function find($options){
 
         /**
@@ -97,6 +121,11 @@ class DatabaseAbstractor extends DataAbstractor
             }
 
             /**
+             * Desmancha $sql do model principal para não haver recarregamento
+             */
+            $sql = array();
+
+            /**
              * Pega os ids dos resultados atuais
              */
             foreach($query as $campos){
@@ -127,7 +156,6 @@ class DatabaseAbstractor extends DataAbstractor
             $sql = $this->sqlObject->select($options);
         }
 
-        //return $sql;
         /**
          * RETURN
          * 
@@ -239,6 +267,6 @@ class DatabaseAbstractor extends DataAbstractor
         echo $oo;
         return $registro;
 
-    }
+    } // fim find()
 }
 ?>

@@ -57,6 +57,8 @@ class Model
     /**
      * __CONSTRUCT()
      *
+     * @author Alexandre de Oliveira <chavedomundo@gmail.com>
+     * @since v0.1
      * @param array $params
      *      "conn" object : conexão com o db;
      */
@@ -133,6 +135,8 @@ class Model
     /**
      * SAVEALL()
      *
+     * @author Alexandre de Oliveira <chavedomundo@gmail.com>
+     * @since v0.1
      * @param array $data Dados enviados para salvar no DB
      * @param array $options
      * @return bool Se salvou ou não
@@ -274,6 +278,8 @@ class Model
      * Função responsável por retornar dados de uma base de dados através de
      * classes DatabaseAbstractor
      *
+     * @author Alexandre de Oliveira <chavedomundo@gmail.com>
+     * @since v0.1
      * @param array $options Contém opçoes de carregamento
      *      - '' : 
      * @param string $mode Modo de retorno

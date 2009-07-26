@@ -23,7 +23,7 @@ class SiteController extends AppController
                                                     'Tarefa.id' => array('22', '23'),
                                                 ),
                                             ),
-                                            'Tarefa9.id' => '29',
+                                            'Tarefa.id' => '29',
                                         ),
                                         
                                         'fields' => array(
@@ -32,7 +32,7 @@ class SiteController extends AppController
                                             'Idade.titulo',
                                         ),
                                         'order' => 'Usuario.id ASC',
-                                        //'limit' => '300',
+                                        'limit' => '2',
                                     ),
                                     "all"
             );

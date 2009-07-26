@@ -1,12 +1,11 @@
 <?php
 /**
- * Tranforma pedidos CRUD do DB em códigos SQL
+ * Tranforma pedidos CRUD relacionado a bases de dados em códigos SQL
  *
  * @package Classes
  * @name SQLObject
  * @author Alexandre de Oliveira <chavedomundo@gmail.com>
- * @version 0.2
- * @since v0.1.5, 30/05/2009
+ * @since v0.1, 18/07/2009
  */
 class SQLObject {
 
@@ -17,7 +16,7 @@ class SQLObject {
     protected $conexao;
 
     function __construct(){
-        //$this->conexao = $conexaoClass;
+        
     }
 
     /**
@@ -29,7 +28,6 @@ class SQLObject {
      * @return string Código SQL
      */
     public function select($options){
-        //pr($options);
 
         /**
          * AJUSTA MODEL PRINCIPAL
@@ -168,7 +166,30 @@ class SQLObject {
         /**
          * CONDITIONS
          *
-         * Verifica condições passadas, formatando o comando SQL de acordo
+         * Contém as condições para formação das regras SQL WHERE
+         *
+         * Sintaxe:
+         *
+         *  'conditions' => array(
+         *      // diz que NÃO deve ser nenhum dos itens abaixo.
+         *      'NOT' => array(
+         *          'Usuario.id' => array('24', '25'),
+         *          'OR' => array(
+         *              'Usuario.id' => array('20', '21'),
+         *              'Tarefa.id' => array('22', '23'),
+         *          ),
+         *      ),
+         *      // valores serão 24 OU 25
+         *      'OR' => array(
+         *          'Usuario.id' => '24'
+         *          'Usuario.id' => '25'
+         *      ),
+         *      // verificação simples, o campo deve ser igual a 29
+         *      'Tarefa.id' => '29',
+         *
+         */
+        /**
+         * Analisa condições passadas, formatando o comando SQL de acordo
          */
         if(!empty($options['conditions'])){
             $conditions = $options['conditions'];
@@ -358,6 +379,18 @@ class SQLObject {
                         if( $underlinePos !== false ){
                             /**
                              * Model e Campo
+                             */
+                            /**
+                             * @todo - Se mandar carregar um model que não
+                             * existe, não mostra erro. Isto não deve acontecer,
+                             * somente quando for fazer um carregamento
+                             * para o problema do SQL LIMIT com models
+                             * relacionados. Meta:
+                             *
+                             * 1) Fazer aviso de model faltando
+                             * 2) Enviar parâmetro através de $options indicando
+                             * que este carregamento é com o argumento SQL LIMIT
+                             *
                              */
                             $modelReturned = substr( $campo, 0, $underlinePos );
                             if( !in_array($modelReturned, $options["models"]) ){
