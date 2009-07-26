@@ -11,19 +11,28 @@
 class SiteController extends AppController
 {
 
-    var $uses = array("Usuario", "Tarefa");
+    var $uses = array("Usuario");
 
     function index(){
 
         $temp = $this->Usuario->find(array(
                                         'conditions' => array(
-                                            'OR' => array(
-                                                'Usuario.id' => array('20', '21'),
-                                            )
+                                            'NOT' => array(
+                                                'OR' => array(
+                                                    'Usuario.id' => array('20', '21'),
+                                                    'Tarefa.id' => array('22', '23'),
+                                                ),
+                                            ),
+                                            'Tarefa9.id' => '29',
                                         ),
-                                        'fields' => array('Usuario.nome','Tarefa.nome'),
+                                        
+                                        'fields' => array(
+                                            'Usuario.nome',
+                                            'Tarefa.nome',
+                                            'Idade.titulo',
+                                        ),
                                         'order' => 'Usuario.id ASC',
-                                        'limit' => '20',
+                                        //'limit' => '10',
                                     ),
                                     "all"
             );

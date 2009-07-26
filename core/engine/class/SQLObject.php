@@ -21,32 +21,33 @@ class SQLObject {
     }
 
     /**
-     * method FIND()
+     * SELECT()
      *
-     * Transforma um pedido em código SQL para ser executado
+     * Transforma um pedido em código SQL
      *
      * @param array $options
      * @return string Código SQL
      */
-    public function find($options){
+    public function select($options){
         //pr($options);
+
         /**
          * AJUSTA MODEL PRINCIPAL
          */
         $mainModel = $options["mainModel"];
+        
         /**
-         * Configurações gerais
+         * CONFIGURAÇÕES GERAIS
          *
          * Ajusta os parâmetros passados em variáveis específicas
          */
-
         /**
          * TABLE
-         * 
+         *
          * $table -> Tabela a ser usada
          */
         $tableAlias = ( empty($options['tableAlias']) ) ? '' : $options['tableAlias'];
-        
+
         $table = array(
             $mainModel->useTable." AS ".get_class($mainModel)
         );
@@ -72,7 +73,7 @@ class SQLObject {
         /**
          * $join -> Left Join, Right Join, Inner Join, etc
          */
-        $leftJoin = (empty($leftJoinTemp)) ? '' : implode(' ', $leftJoinTemp) ;
+        $leftJoin = (empty($leftJoinTemp)) ? '' : implode(' ', $leftJoinTemp);
 
         /**
          * FIELDS
@@ -80,7 +81,7 @@ class SQLObject {
          * $fields -> Campos que devem ser carregados
          */
         /**
-         * Se nenhum campo foi indicado
+         * Fields: Se nenhum campo foi indicado
          */
         if( empty($options['fields']) ){
             foreach($usedModels as $model){
@@ -93,7 +94,7 @@ class SQLObject {
             }
         }
         /**
-         * Se algum campo foi indicado
+         * Fields: Se algum campo foi indicado
          */
         else {
             /**
@@ -101,6 +102,9 @@ class SQLObject {
              */
             if( is_array($options["fields"]) ){
                 foreach( $options["fields"] as $campo ){
+                    /**
+                     * Verifica sintaxe: "Model.campo"
+                     */
                     $underlinePos = strpos($campo, "." );
                     if( $underlinePos !== false ){
                         /**
@@ -108,14 +112,29 @@ class SQLObject {
                          */
                         $modelReturned = substr( $campo, 0, $underlinePos );
                     }
+                    
                     $fieldModelUsed[$modelReturned] = $modelReturned;
                     $fields[] = $campo. " AS ".str_replace(".", "__", $campo);
                 }
+                /**
+                 * Sempre carrega junto o id e o foreignKey das tabelas
+                 * relacionadas
+                 */
                 foreach($fieldModelUsed as $model){
+                    /**
+                     * 'id' do registro
+                     */
                     $fields[] = $model.".id AS ".$model."__id";
+                    if( $model != get_class($mainModel) ){
+                        if( array_key_exists($model, $mainModel->hasOne) ){
+                            $fields[] = $model.".".$mainModel->hasOne[$model]["foreignKey"]." AS ".$model."__".$mainModel->hasOne[$model]["foreignKey"];
+                        } else if( array_key_exists($model, $mainModel->hasMany) ){
+                            $fields[] = $model.".".$mainModel->hasMany[$model]["foreignKey"]." AS ".$model."__".$mainModel->hasMany[$model]["foreignKey"];
+                        }
+                    }
                 }
 
-                
+
             }
             /**
              * Se fields == string
@@ -124,7 +143,6 @@ class SQLObject {
                 $fields[] = $options["fields"];
             }
         } // fim fields
-
 
         /**
          * ORDER
@@ -138,23 +156,33 @@ class SQLObject {
 
         /**
          * CONDITIONS
-         * 
+         *
          * Verifica condições passadas, formatando o comando SQL de acordo
          */
         if(!empty($options['conditions'])){
             $conditions = $options['conditions'];
-            /**
-             * Chama conditions que monta a estrutura de regras SQL
-             */
-            foreach($conditions as $chave=>$valor){
-                $tempRule = $this->conditions($chave, $conditions[$chave]);
-                if(is_array($tempRule)){
-                    $tempRule = implode(' AND ', $tempRule);
-                }
-                $rules[] = '('.$tempRule.')';
-            }
-        }
 
+            /**
+             * Models para Conditions
+             *
+             * Se models foram passados como parâmetro, envia-os para criação
+             * de conditions em conformidade com os campos disponíveis.
+             *
+             * Esta é uma medida de segurança.
+             */
+            $options = array();
+            if( !empty($usedModels) ){
+                foreach($usedModels as $models){
+                    $options["models"][] = get_class($models);
+                }
+            }
+            /**
+             * Chama $this->conditions que monta a estrutura de regras SQL WHERE
+             */
+            $rules = $this->conditions($conditions, $options);
+        }
+        //pr($rules);
+        
         /**
          *
          * GERA SQL
@@ -168,7 +196,16 @@ class SQLObject {
         if(is_array($rules)){
             $rules = 'WHERE ' . implode(' AND ', $rules);
         }
-        $sql = "SELECT
+
+        /**
+         * VERIFICA LIMIT
+         *
+         * Se 'limit' for setado, o DB limita a quantidade de registros
+         * retornados, não importando os registros relacionados de outras
+         * tabelas, como no caso de Left Join.
+         */
+        //if( empty($hit) $)
+        $sql[] = "SELECT
                     ". implode(", ", $fields) ."
                 FROM
                     ". implode(", ", $table) ."
@@ -177,7 +214,6 @@ class SQLObject {
                     $order
                     $limit
                 ";
-
         /**
          * Retornar somente SQL
          *
@@ -188,94 +224,167 @@ class SQLObject {
         }
         return $sql;
 
-        /**
-         * Debuggar
-         *
-         * Descomente a linha abaixo para debugar
-         */
-    }
+    } // fim select()
 
-    /*
-     * CONDITIONS
+    /**
+     * CONDITIONS()
      *
      * Monta regras SQL para cada condition
+     *
+     * MODOS
+     *      - 'NOT'  : Representa uma condição negativa;
+     *      - 'OR'   : Representa uma condição de alternativa;
+     *      - 'NOTOR': NOT (OR), representa "(not in) or (not in)"
+     *
+     * @param array $conditions
+     * @param array $options Contém opções adicionais
+     * @return string
      */
-
-    function conditions($modo, $conditions){
-
-        $rules = array();
+    function conditions($conditions, $options=""){
+        //pr($options);
         /**
-         * NOT
+         * Passa cada condição e cria operações lógicas SQL
          */
-        if($modo == 'NOT'){
-            foreach($conditions as $campo=>$valor){
-                /**
-                 * Se for uma array com vários valores
-                 */
-                if(is_array($valor)){
-                    $rules[] = $campo .' NOT IN(\''. implode('\', \'', $valor) . '\')';
-                } else {
-                    $rules[] = $campo .' NOT IN(\''. $valor . '\')';
-                }
-            }
-        /**
-         * OR
-         */
-        } elseif($modo == 'OR'){
-            foreach($conditions as $campo=>$valor){
-                /**
-                 * Se for uma array com vários valores
-                 */
-                //pr($conditions);
-                if(is_array($valor)){
-                    //echo 'oi';
-                    $rules[] = $campo .' IN(\''. implode('\', \'', $valor) . '\')';
-                } else {
-                    //echo 'oi2';
-                    $rules[] = $campo .' IN(\''. $valor . '\')';
-                }
-
-            }
-            //if(is_array)
-            $rules = implode(' OR ', $rules);
-        /**
-         * CAMPOS COMUNS
-         */
-        } else {
+        foreach($conditions as $modo=>$cond){
 
             /**
-             * Ajusta o nome do campo
+             * Configurações iniciais
              */
-            $campo = $modo;
-            if(is_array($conditions)){
-                foreach($conditions as $valor){
+            /**
+             * $modo: Se algum modo foi setado forçado, reconfigura
+             */
+            $modo = ( !empty($options["modo"]) ) ? $options["modo"] : $modo;
+            /**
+             * $cond: se não for array, certifica-se de se tornar uma
+             */
+            $cond = ( !is_array($cond) ) ? array($modo => $cond) : $cond;
+
+            $rules = array();
+
+            /**
+             * Loop por cada campo passado como parâmetro
+             */
+            foreach($cond as $campo=>$valor){
+                
+                /**
+                 * Ajusta modos
+                 *
+                 * $glue é o operador lógico da condição
+                 */
+                /**
+                 * OR
+                 */
+                if( $modo == "OR" ){
+                    $glue = "IN";
+                }
+                /**
+                 * NOT
+                 */
+                else if( $modo == "NOT" ){
+                    $glue = "NOT IN";
+                }
+                /**
+                 * NOTOR
+                 *
+                 * Representa '(not in) or (not in). É feito novo loop e
+                 * o parâmetro $modo é passado de forma forçada 'NOTOR'
+                 */
+                else if( $modo == "NOTOR" ){
+                    $glue = "NOT IN";
+                }
+                /**
+                 * Verificação normal
+                 */
+                else {
+                    $glue = "IN";
+                }
+
+                /**
+                 * Verifica se o campo é array ou não
+                 */
+                $loopQuery = false;
+                if( !is_array($valor) ){
                     /**
-                     * Vários valores para este campo
+                     * Para diminuir código, transforma $valor em array
                      */
-                    if(is_array($valor)){
-                        foreach($valor as $cadaValor){
-                            $tempRules[] = $campo.'=\''. $cadaValor . '\'';
+                    $valor = array($valor);
+                } else {
+                    /**
+                     * NOVO LOOP?
+                     *
+                     * Verifica se há necessidade de um novo loop e chama
+                     * $this->conditions novamente.
+                     */
+                    foreach($valor as $subvalores){
+                        if( is_array( $subvalores ) ){
+                            $subOptions = $options;
+                            $subOptions["modo"] = "NOTOR";
+                            $valor = $this->conditions($cond, $subOptions );
+                            unset($subOptions);
+                            $loopQuery = true;
                         }
-                    /**
-                     * Um único valor para este campo
-                     */
-                    } else {
-                        $tempRules[] = $campo.'=\''. $valor . '\'';
                     }
                 }
-                $rules[] = implode(' AND ', $tempRules);
-            } else {
-                //echo $conditions;
+                
+                /**
+                 * Ajusta regra SQL
+                 *
+                 * Pega $campo e valores necessário e mescla para gerar uma
+                 * regra SQL em conformidade.
+                 *
+                 */
+                if( !$loopQuery ){
+                    /**
+                     * Se models foram passados, verifica se o nome do campo
+                     * digitado é condizente com o schema do DB
+                     */
+                    if( !empty($options["models"]) ){
+                        $underlinePos = strpos($campo, "." );
+                        if( $underlinePos !== false ){
+                            /**
+                             * Model e Campo
+                             */
+                            $modelReturned = substr( $campo, 0, $underlinePos );
+                            if( !in_array($modelReturned, $options["models"]) ){
+                                $campoError = true;
+                            }
+                        }
 
-                $rules[] = $campo.'=\''. $conditions . '\'';
+                    }
+                    /**
+                     * Se está tudo OK com as verificações do campo
+                     */
+                    if( !$campoError )
+                        $rules[] = $campo .' '.$glue.' (\''. implode('\', \'', $valor) . '\')';
+                } else {
+                    $rules[] = implode('\', \'', $valor);
+                }
+
+                unset($glue);
+
             }
-
+            /**
+             * Ajustes finais da operação atual
+             */
+            if( !empty($rules) AND is_array($rules) ){
+                if( $modo == "OR" ){
+                    $rules = implode(' OR ', $rules);
+                } else if($modo == "NOTOR") {
+                    $rules = implode(' OR ', $rules);
+                } else {
+                    $rules = implode(' AND ', $rules);
+                }
+            $finalRules[] = '('.$rules.')';
+            }
+            //pr($rules);
+            unset($modo);
+            unset($rules);
         }
         //pr($rules);
-        $return = $rules;
+        $return = $finalRules;
         return $return;
 
-    }
+    } // fim conditions()
 
 }
 ?>

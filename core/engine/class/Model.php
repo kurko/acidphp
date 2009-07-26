@@ -1,6 +1,6 @@
 <?php
 /**
- * Arquivo que representa a estrutura MODEL de um MCV
+ * Arquivo que representa a estrutura MODEL de um MVC
  *
  * @package MVC
  * @name Model
@@ -117,9 +117,14 @@ class Model
         }
 
         /**
-         * SQLObject
+         * Instancia DatabaseAbstractor
+         *
+         * Responsável pela abstração de bancos de dados.
          */
-        $this->sqlObject = new SQLObject();
+        $this->databaseAbstractor = new DatabaseAbstractor(array(
+                'conn' => $this->conn,
+            )
+        );
     }
 
     /**
@@ -264,6 +269,10 @@ class Model
     } // FIM SAVEALL()
 
     /**
+     * FIND()
+     * 
+     * Função responsável por retornar dados de uma base de dados através de
+     * classes DatabaseAbstractor
      *
      * @param array $options Contém opçoes de carregamento
      *      - '' : 
@@ -276,12 +285,15 @@ class Model
         /**
          * CONFIGURAÇÕES DE RELACIONAMENTO
          */
+        /**
+         * Informações sobre tabelas dos models
+         */
         $options["tableAlias"] = $this->tableAlias;
         foreach( $options["tableAlias"] as $model=>$valor ){
             $options["models"][$model] = $this->{$model};
         }
         /**
-         * Dfine model principal
+         * Define model principal
          */
         $options["mainModel"] = $this;
 
@@ -290,76 +302,21 @@ class Model
          *
          * Gera SQL com SQLObject
          */
-        $sqlGerado = $this->sqlObject->find($options);
-        $query = $this->conn->query( $sqlGerado, ASSOC );
-        
-        /**
-         * Trata os dados para retornarem no formato adequado
-         */
-        $return = array();
-        $registro = array();
-        $i = 0;
-        foreach($query as $chave=>$dados){
-            /**
-             * ANALISA RESULTADO DO DB
-             */
-            /*
-             * Transforma o resultado em uma array legível. O resultado do
-             * DB vem desformatado do SQL Object.
-             */
-            foreach( $dados as $campo=>$valor){
-                $underlinePos = strpos($campo, "__" );
-                if( $underlinePos !== false ){
-                    /**
-                     * Model e Campo
-                     */
-                    $modelReturned = substr( $campo, 0, $underlinePos );
-                    $campoReturned = substr( $campo, $underlinePos+2, 100 );
+        $sqlsGerados = $this->databaseAbstractor->find($options);
+        return $sqlsGerados;
+        return true;
 
-                    /**
-                     * Codigo
-                     */
-                    $tempResult[$i][$modelReturned][$campoReturned] = $valor;
-                }
-            }
-            $i++;
 
-        }
 
-        /**
-         * Monta estruturas de saída de acordo como o modo pedido
-         *
-         * O modo padrão é ALL conforme configurado nos parâmetros da função
-         */
-        foreach( $tempResult as $index ){
-            // ID principal do model principal
-            $mainId = $index[ get_class($this) ]["id"];
 
-            $hasManyResult = array();
 
-            
-            foreach($index as $model=>$dados){
 
-                /**
-                 * Ajusta retorno da array de dados
-                 */
-                /**
-                 * Se o model hasMany
-                 */
-                if( array_key_exists( $model , $this->hasMany) ){
-                    $hasManyResult = $dados;
-                    $registro[ $index[ get_class($this) ]["id"] ][$model][] = $hasManyResult;
-                }
-                /**
-                 * Senão, simplesmente salva na array o resultado do model
-                 */
-                else {
-                    $registro[ $index[ get_class($this) ]["id"] ][$model] = $dados;
-                }
-            }
-            unset($hasManyResult);
-            
-        }
+        unset($result);
+
+        //pr($query);
+
+
+
 
         $return = $registro;
         return $return;
