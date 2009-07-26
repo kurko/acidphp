@@ -304,57 +304,26 @@ class Model
          */
         $sqlsGerados = $this->databaseAbstractor->find($options);
         return $sqlsGerados;
-        return true;
+        
 
-
-
-
-
-
-        unset($result);
-
-        //pr($query);
-
-
-
-
-        $return = $registro;
-        return $return;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            //if(  )
-            /**
-             * ALL
-             */
-            if($mode == 'all'){
-                //pr($dados);
-                //array_push($return, $registro);
-                //array_push($return, $dados);
+        /**
+         * ALL
+         */
+        if($mode == 'all'){
+            //pr($dados);
+            //array_push($return, $registro);
+            //array_push($return, $dados);
+        }
+        /**
+         * FIRST
+         */
+        elseif($mode == 'first' and (count($fields) == 1 or is_string($fields))){
+            if(is_array($fields)){
+                $return[] = $dados[$fields[0]];
+            } else {
+                $return[] = $dados[$fields];
             }
-            /**
-             * FIRST
-             */
-            elseif($mode == 'first' and (count($fields) == 1 or is_string($fields))){
-                if(is_array($fields)){
-                    $return[] = $dados[$fields[0]];
-                } else {
-                    $return[] = $dados[$fields];
-                }
-            }
+        }
 
     }// fim find()
 

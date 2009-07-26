@@ -72,20 +72,57 @@ class DatabaseAbstractor extends DataAbstractor
          * Faz verificações para saber que tipo de busca deve ser feita
          */
         /**
+         * LIMIT
+         * 
          * Verificação: Se SQL Limit definido
          */
         if( !empty($options["limit"]) ){
             /**
              * Desativa relacionamentos hasMany para buscá-los separadamente
              */
+            $hasManyTemp = $mainModel->hasMany;
             $options["mainModel"]->hasMany = array();
-            $sql = $this->sqlObject->select($options);
-            
-            //foreach( $mainModel->hasMany as $model=>$properties ){
-                
-            //}
-        }
 
+            $sql = $this->sqlObject->select($options);
+
+            /**
+             * Carrega os dados da tabela principal
+             */
+            $query = array();
+            if( is_array($sql) ){
+                foreach( $sql as $sqlAtual ){
+                    $result = $this->conn->query( $sqlAtual, ASSOC );
+                    $query = array_merge( $query, $result );
+                }
+            }
+
+            /**
+             * Pega os ids dos resultados atuais
+             */
+            foreach($query as $campos){
+                $mainIds[] = $campos[ get_class($mainModel)."__id" ];
+            }
+
+            /**
+             * Recupera dados de relacionamento
+             */
+
+            $mainModel->hasMany = $hasManyTemp;
+            foreach( $mainModel->hasMany as $model=>$properties ){
+                $subOptions["mainModel"] = $mainModel->{$model};
+                $subOptions["conditions"] = array(
+                    'OR' => array(
+                        $model.".".$properties["foreignKey"] => $mainIds,
+                    )
+                );
+                $sql = array_merge($sql, $this->sqlObject->select($subOptions) );
+            }
+
+            //pr($query);
+        }
+        /**
+         * LIMIT desligado
+         */
         else {
             $sql = $this->sqlObject->select($options);
         }
@@ -97,14 +134,18 @@ class DatabaseAbstractor extends DataAbstractor
          * Retorna dados para Models
          */
         /**
+         * Prepara $query se necessário
+         */
+        if( empty($query))
+            $query = array();
+
+        /**
          * Roda SQLs criado, verificando se são arrays
          */
-        $query = array();
         if( is_array($sql) ){
             foreach( $sql as $sqlAtual ){
                 $result = $this->conn->query( $sqlAtual, ASSOC );
                 $query = array_merge( $query, $result );
-
             }
         }
         //return $query;

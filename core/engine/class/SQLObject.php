@@ -35,7 +35,7 @@ class SQLObject {
          * AJUSTA MODEL PRINCIPAL
          */
         $mainModel = $options["mainModel"];
-        
+
         /**
          * CONFIGURAÇÕES GERAIS
          *
@@ -76,6 +76,14 @@ class SQLObject {
         $leftJoin = (empty($leftJoinTemp)) ? '' : implode(' ', $leftJoinTemp);
 
         /**
+         * usedModels definido
+         */
+        foreach($usedModels as $models){
+            $options["models"][] = get_class($models);
+        }
+
+
+        /**
          * FIELDS
          *
          * $fields -> Campos que devem ser carregados
@@ -112,9 +120,11 @@ class SQLObject {
                          */
                         $modelReturned = substr( $campo, 0, $underlinePos );
                     }
-                    
-                    $fieldModelUsed[$modelReturned] = $modelReturned;
-                    $fields[] = $campo. " AS ".str_replace(".", "__", $campo);
+
+                    if( in_array($modelReturned, $options["models"]) ){
+                        $fieldModelUsed[$modelReturned] = $modelReturned;
+                        $fields[] = $campo. " AS ".str_replace(".", "__", $campo);
+                    }
                 }
                 /**
                  * Sempre carrega junto o id e o foreignKey das tabelas
@@ -125,6 +135,9 @@ class SQLObject {
                      * 'id' do registro
                      */
                     $fields[] = $model.".id AS ".$model."__id";
+                    /**
+                     * foreignKey da tabela relacionada
+                     */
                     if( $model != get_class($mainModel) ){
                         if( array_key_exists($model, $mainModel->hasOne) ){
                             $fields[] = $model.".".$mainModel->hasOne[$model]["foreignKey"]." AS ".$model."__".$mainModel->hasOne[$model]["foreignKey"];
@@ -133,8 +146,6 @@ class SQLObject {
                         }
                     }
                 }
-
-
             }
             /**
              * Se fields == string
@@ -172,6 +183,10 @@ class SQLObject {
              */
             $options = array();
             if( !empty($usedModels) ){
+                /**
+                 * @todo - verificar se $options precisa estar aqui a seguir
+                 */
+                unset($options["models"]);
                 foreach($usedModels as $models){
                     $options["models"][] = get_class($models);
                 }
