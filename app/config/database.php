@@ -14,12 +14,5 @@
         'encoding' => 'utf8',
     );
 
-                /*
-                    $central['db']['servidor'] = '192.168.2.107';
-                    $central['db']['db'] = 'acgrupo';
-                    $central['db']['usuario'] = 'root';
-                    $central['db']['senha'] = '';
-                 *
-                 */
 
 ?>

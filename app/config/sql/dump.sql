@@ -1,3 +1,5 @@
+# DUMPS PARA TESTES
+
 CREATE TABLE usuarios (
     id int auto_increment,
     nome varchar(80),

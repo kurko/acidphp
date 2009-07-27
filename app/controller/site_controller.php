@@ -14,7 +14,11 @@ class SiteController extends AppController
     var $uses = array("Usuario","Tarefa");
 
     function index(){
-        $temp = "";
+
+        /*
+         * Código de exemplo
+         */
+        
         $temp = $this->Usuario->find(array(
                                         'order' => array('Tarefa.id ASC'),
                                         'limit' => '3',

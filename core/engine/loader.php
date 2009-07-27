@@ -10,9 +10,6 @@
  */
 
 
-error_reporting(E_ALL);
-ini_set('display_errors', TRUE);
-ini_set('display_startup_errors', TRUE);
 
 include(CORE_FUNCTIONS_FILE);
 
@@ -62,6 +59,18 @@ if( is_file(APP_MODEL_DEFAULT) ){
 include(APP_CONFIG_ROUTES);
 include(APP_CONFIG_CORE);
 include(APP_CONFIG_DATABASE);
+
+/**
+ * AJUSTA CONFIGURAÇÃO DE DEBUG
+ */
+if( Config::read("debug") > 1 ){
+    error_reporting(E_ALL);
+    ini_set('display_errors', TRUE);
+    ini_set('display_startup_errors', TRUE);
+} else {
+    error_reporting(0);
+}
+
 
 /**
  * Carrega todos os models

@@ -31,7 +31,7 @@ function pr($str){
  * Retorna se E_USER_ERROR devem aparecer de acordo com debug
  */
 function isDebugMode(){
-
+    return Config::read("debug");
 }
 
 /**
@@ -76,33 +76,36 @@ function showLoadingTime($totalTime){
     }
 }
 
+/**
+ * Mostra tabela com todos os SQLs rodados
+ *
+ * @param array $sql Códigos SQL já rodados
+ */
 function debugSQLs($sql){
-    if( Config::read("debug") > 0 ){
-        echo '<table width="100%" style="background: white; padding: 10px;">';
+    echo '<table width="100%" style="background: white; padding: 10px;">';
+    echo '<tr>';
+    echo '<td style="font-size: 12px;">';
+    echo "<strong>Instruções SQL</strong>";
+    echo '</td>';
+    echo '<td style="font-size: 12px;">';
+    echo "<strong>Tempo</strong>";
+    echo '</td>';
+    echo '</tr>';
+
+    foreach($sql as $chave=>$valor){
         echo '<tr>';
-        echo '<td style="font-size: 12px;">';
-        echo "<strong>Instruções SQL</strong>";
-        echo '</td>';
-        echo '<td style="font-size: 12px;">';
-        echo "<strong>Tempo</strong>";
-        echo '</td>';
+            echo '<td style="font-size: 12px;">';
+            echo $valor["sql"];
+            echo '</td>';
+            echo '<td style="font-size: 12px;">';
+            echo showLoadingTime( $valor["time"] );
+            echo '</td>';
         echo '</tr>';
 
-        foreach($sql as $chave=>$valor){
-            echo '<tr>';
-                echo '<td style="font-size: 12px;">';
-                echo $valor["sql"];
-                echo '</td>';
-                echo '<td style="font-size: 12px;">';
-                echo showLoadingTime( $valor["time"] );
-                echo '</td>';
-            echo '</tr>';
+        echo '<tr><td colspan="2" style="font-size: 0; background: silver;"></td></tr>';
 
-            echo '<tr><td colspan="2" style="font-size: 0; background: silver;"></td></tr>';
-
-        }
-        echo '</table>';
     }
+    echo '</table>';
 }
 
 ?>
