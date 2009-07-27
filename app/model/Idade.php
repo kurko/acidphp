@@ -8,7 +8,8 @@ class Idade extends AppModel {
             "foreignKey" => "usuario_id"
         ),
     );
-    
+
+
 }
 
 ?>

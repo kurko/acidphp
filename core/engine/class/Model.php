@@ -24,6 +24,7 @@ class Model
      */
     public $hasOne = array();
     public $hasMany = array();
+    public $belongsTo = array();
     public $modelsLoaded = array();
     public $tableAlias = array();
 
@@ -62,7 +63,20 @@ class Model
      * @param array $params
      *      "conn" object : conexão com o db;
      */
-    function  __construct($params = "") {
+
+    function  __construct($params) {
+
+        /**
+         * RECURSIVE
+         */
+        if( empty($params["currentRecursive"]) ){
+            $currentRecursive = 0;
+        } else {
+            $currentRecursive = $params["currentRecursive"];
+        }
+
+        //echo "<strong>". get_class($this) . " - " . $currentRecursive . "</strong><br />";
+
         /**
          * CONEXÃO
          *
@@ -90,15 +104,23 @@ class Model
         }
 
         /**
-         * CRIA RELAÇÕES
+         * CRIA RELACIONAMENTOS
          */
+        /*
+         * Prepara Recursive + 1
+         */
+        $params["currentRecursive"] = $currentRecursive+1;
         /**
          * hasOne
          */
         if( !empty($this->hasOne) ){
             foreach( $this->hasOne as $model=>$propriedades ){
-                $this->{$model} = new $model($params);
-                $this->modelsLoaded[] = $model;
+
+                if( $params["currentRecursive"] <= $params["recursive"] ){
+                    $this->{$model} = new $model($params);
+                    $this->modelsLoaded[] = $model;
+                }
+
             }
         }
         /**
@@ -106,10 +128,25 @@ class Model
          */
         if( !empty($this->hasMany) ){
             foreach( $this->hasMany as $model=>$propriedades ){
-                $this->{$model} = new $model($params);
-                $this->modelsLoaded[] = $model;
+                if( $params["currentRecursive"] <= $params["recursive"] ){
+                    $this->{$model} = new $model($params);
+                    $this->modelsLoaded[] = $model;
+                }
             }
         }
+
+        /**
+         * belongsTo
+         */
+        if( !empty($this->belongsTo) ){
+            foreach( $this->belongsTo as $model=>$propriedades ){
+                if( $params["currentRecursive"] <= $params["recursive"] ){
+                    $this->{$model} = new $model($params);
+                    $this->modelsLoaded[] = $model;
+                }
+            }
+        }
+
         /**
          * Carrega as tabelas de cada model
          */
@@ -118,6 +155,9 @@ class Model
             $this->tableAlias[$valor] = $this->{$valor}->useTable;
         }
 
+        /**
+         * DATA ABSTRACTOR
+         */
         /**
          * Instancia DatabaseAbstractor
          *
@@ -295,8 +335,11 @@ class Model
          * Informações sobre tabelas dos models
          */
         $options["tableAlias"] = $this->tableAlias;
+        //pr($options["tableAlias"]);
         foreach( $options["tableAlias"] as $model=>$valor ){
-            $options["models"][$model] = $this->{$model};
+            if( get_class($this) != $model ){
+                $options["models"][$model] = $this->{$model};
+            }
         }
         /**
          * Define model principal

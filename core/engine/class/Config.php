@@ -31,6 +31,9 @@ class Config {
      * @return bool Se a variável foi gravada com sucesso.
      */
     public function add($varName, $varValor){
+        if( empty(self::$config[$varName]) ){
+            self::$config[$varName] = null;
+        }
         $tempVar = self::$config[$varName];
         if( !is_array($tempVar) )
             $tempVar = array();

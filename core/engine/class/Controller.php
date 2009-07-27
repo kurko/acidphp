@@ -43,10 +43,28 @@ class Controller
      */
     protected $uses = array();
     /**
+     *
+     * @var int Models que se interrelacionam precisam de um limite de
+     * carregamento recursivo. Por exemplo:
+     *
+     *      1) Usuario hasMany Tarefa;
+     *      2) Tarefa belongsTo Usuario;
+     *
+     * O usuário Model carregaria Usuario e então os Models filhos (Tarefa).
+     * Tendo carregado Tarefa, veria que ele pertence a Usuario, e carregaria
+     * Usuario dentro de Tarefa. Isto aconteceria infinitamente sem
+     * Model::recursive setado.
+     *
+     * O padrão é 1, mas pode-se setar recursividade na profundidade desejada.
+     */
+    public $recursive = 1;
+
+    /**
      * CONFIGURAÇÃO DE AMBIENTE
      */
     protected $layout = "default";
     protected $autoRender = true;
+    protected $isRendered = false;
 
     /**
      *
@@ -109,6 +127,7 @@ class Controller
                     'conn' => $this->engine->conn,
                     'dbTables' => $this->engine->dbTables,
                     'modelName' => $className,
+                    'recursive' => $this->recursive,
                 );
 
                 if( !class_exists($className) ){

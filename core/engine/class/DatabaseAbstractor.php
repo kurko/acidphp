@@ -107,6 +107,7 @@ class DatabaseAbstractor extends DataAbstractor
             $hasManyTemp = $mainModel->hasMany;
             $options["mainModel"]->hasMany = array();
 
+            //pr($options);
             $sql = $this->sqlObject->select($options);
 
             /**
@@ -115,7 +116,7 @@ class DatabaseAbstractor extends DataAbstractor
             $query = array();
             if( is_array($sql) ){
                 foreach( $sql as $sqlAtual ){
-                    $result = $this->conn->query( $sqlAtual, ASSOC );
+                    $result = $this->conn->query( $sqlAtual, 'ASSOC' );
                     $query = array_merge( $query, $result );
                 }
             }
@@ -221,7 +222,8 @@ class DatabaseAbstractor extends DataAbstractor
          *
          * O modo padrão é ALL conforme configurado nos parâmetros da função
          */
-         $oo = 0;
+
+        $loopProcessments = 0;
         foreach( $tempResult as $index ){
             /**
              * ID principal do registro retornado do model principal
@@ -259,12 +261,14 @@ class DatabaseAbstractor extends DataAbstractor
                 } else {
                     $registro[ $index[ get_class($mainModel) ]["id"] ][$model] = $dados;
                 }
-                $oo++;
+                $loopProcessments++;
             }
             unset($hasManyResult);
 
         }
-        echo $oo;
+        
+        Config::write("dataFormatted", $loopProcessments);
+
         return $registro;
 
     } // fim find()

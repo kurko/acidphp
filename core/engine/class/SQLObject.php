@@ -191,7 +191,8 @@ class SQLObject {
         /**
          * Analisa condições passadas, formatando o comando SQL de acordo
          */
-        if(!empty($options['conditions'])){
+        $rules = "";
+        if( !empty($options['conditions']) ){
             $conditions = $options['conditions'];
 
             /**
@@ -229,7 +230,7 @@ class SQLObject {
         /*
          * Quebra as regras dentro do WHERE para SQL
          */
-        if(is_array($rules)){
+        if( !empty($rules) AND is_array($rules) ){
             $rules = 'WHERE ' . implode(' AND ', $rules);
         }
 
@@ -255,9 +256,9 @@ class SQLObject {
          *
          * Se modo==sql
          */
-        if ( $modo == 'sql' ){
-            return $sql;
-        }
+        //if ( $modo == 'sql' ){
+            //return $sql;
+        //}
         return $sql;
 
     } // fim select()

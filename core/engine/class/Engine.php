@@ -65,7 +65,10 @@ class Engine
         /**
          * Verifica tabelas
          */
-        $this->checkTables($conn);
+        $this->checkTables( array(
+                'conn' => $this->conn
+            )
+        );
     }
 
     /**

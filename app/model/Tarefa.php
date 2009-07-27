@@ -8,6 +8,7 @@ class Tarefa extends AppModel {
             "foreignKey" => "usuario_id"
         ),
     );
+
     
 }
 

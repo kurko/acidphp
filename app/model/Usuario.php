@@ -14,6 +14,10 @@ class Usuario extends AppModel {
         ),
     );
 
+    //function __construct($params){
+        //echo "oi";
+    //}
+
 
 }
 
