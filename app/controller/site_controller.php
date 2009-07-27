@@ -15,7 +15,7 @@ class SiteController extends AppController
 
     function index(){
         $temp = "";
-        $temp = $this->Tarefa->find(array(
+        $temp = $this->Usuario->find(array(
                                         'conditions' => array(
                                             /*
                                             'NOT' => array(
@@ -24,20 +24,18 @@ class SiteController extends AppController
                                                     'Tarefa.id' => array('22', '23'),
                                                 ),
                                             ),
-                                            'Tarefa.id' => '29',
-                                             * 
+                                             *
                                              */
+                                            'Usuario.id' => '20',
                                         ),
 
-                                        /*
+
                                         'fields' => array(
                                             //'Usuario.nome',
                                             //'Tarefa.nome',
                                             //'Idade.titulo',
                                         ),
-                                         * 
-                                         */
-                                        'order' => 'Tarefa.id ASC',
+                                        'order' => array('Tarefa.id ASC'),
                                         'limit' => '3',
                                     ),
                                     "all"

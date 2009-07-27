@@ -55,18 +55,54 @@ class SQLObject {
          * JOIN
          */
         /**
-         * Left Join
+         * LEFT JOIN
          *
          * Ajusta Left Joins de acordo com relacionamentos dos models
          */
         $hasOne = $mainModel->hasOne;
         $hasMany = $mainModel->hasMany;
+        $belongsTo = $mainModel->belongsTo;
         $has = array();
-        $has = array_merge( $hasOne , $hasMany );
+        $has = array_merge( $hasOne , $hasMany, $belongsTo );
         foreach( $has as $model=>$info ){
-            $usedModels[] = $options["models"][$model];
-            $leftJoinTemp[] = "LEFT JOIN ".$options["tableAlias"][$model] . " AS " . $model
-                        . " ON ". get_class( $mainModel ).".id=".$model.".".$info["foreignKey"];
+
+            /**
+             * Verifica recursividade atual
+             */
+            if( $mainModel->currentRecursive < $mainModel->recursive ){
+
+                $usedModels[] = $options["models"][$model];
+                $leftJoinSyntax = "LEFT JOIN ".$options["tableAlias"][$model] . " AS " . $model;
+
+                /**
+                 * Sintaxe SQL Left Join ON
+                 */
+                /**
+                 * Se o Model atual está na regra belongsTo, ajusta a sintaxe ON
+                 * da regra SQL Left Join de forma diferente
+                 */
+                /**
+                 * LeftJoin ON:
+                 *      - BelongsTo
+                 */
+                if( array_key_exists($model, $belongsTo) )
+                    $leftJoinOnSyntax = "ON ". get_class( $mainModel ).".".$info["foreignKey"]."=".$model.".id";
+                /**
+                 * LeftJoin ON:
+                 *      - hasOne
+                 *      - hasMany
+                 */
+                else
+                    $leftJoinOnSyntax = "ON ". get_class( $mainModel ).".id=".$model.".".$info["foreignKey"];
+
+                /**
+                 *
+                 * @global array $GLOBALS['leftJoinTemp']
+                 * @name $leftJoinTemp Contém frase Left Join para código SQL
+                 */
+                $leftJoinTemp[] = $leftJoinSyntax." ".$leftJoinOnSyntax;
+            }
+                        
         }
         /**
          * $join -> Left Join, Right Join, Inner Join, etc
@@ -155,8 +191,55 @@ class SQLObject {
 
         /**
          * ORDER
+         *
+         * Trata "order" requisitada
          */
-        $order = (empty($options['order'])) ? '' : ( (is_array($options['order'])) ? 'ORDER BY '. implode(', ', $options['order']) : "ORDER BY ". $options['order'] );
+        /**
+         * Se order não especificada
+         */
+        if( empty($options['order']) ){
+            $order = "";
+        }
+        /**
+         * Se order foi passado em formato array
+         */
+        else if( is_array($options['order']) ) {
+            /**
+             * Verifica se o campo/Model pedido realmente existe
+             */
+            foreach( $options["order"] as $chave=>$currentOrder ){
+                /**
+                 * Verifica sintaxe: "Model.campo"
+                 */
+                $underlinePos = strpos($currentOrder, "." );
+                if( $underlinePos !== false ){
+                    /**
+                     * Model do campo usado
+                     */
+                    $modelReturned = substr( $currentOrder, 0, $underlinePos );
+                    $campoReturned = substr( $currentOrder, $underlinePos+1, 100 );
+                }
+                if( !in_array($modelReturned, $options["models"]) ){
+
+                    //pr($options);
+                    if( array_key_exists($modelReturned, $options["hiddenHasMany"]) )
+                        unset($options["order"][$chave]);
+                    else
+                        trigger_error( "Specified Model <em>".$modelReturned."</em> is not a related model (hasMany, hasOne, etc)" , E_USER_ERROR);
+                }
+            }
+
+            if( !empty($options["order"]) )
+                $order = implode(', ', $options['order']);
+        } else {
+            $order = $options['order'];
+        }
+        /**
+         * Formato final de ORDER BY
+         */
+        if( !empty($order) ) $order = "ORDER BY ".$order;
+        else $order = "";
+
 
         /**
          * LIMIT
@@ -403,7 +486,7 @@ class SQLObject {
                     /**
                      * Se está tudo OK com as verificações do campo
                      */
-                    if( !$campoError )
+                    if( empty($campoError) OR !$campoError )
                         $rules[] = $campo .' '.$glue.' (\''. implode('\', \'', $valor) . '\')';
                 } else {
                     $rules[] = implode('\', \'', $valor);

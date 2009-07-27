@@ -69,10 +69,11 @@ class Model
         /**
          * RECURSIVE
          */
+        $this->recursive = $params["recursive"];
         if( empty($params["currentRecursive"]) ){
-            $currentRecursive = 0;
+            $this->currentRecursive = 0;
         } else {
-            $currentRecursive = $params["currentRecursive"];
+            $this->currentRecursive = $params["currentRecursive"];
         }
 
         //echo "<strong>". get_class($this) . " - " . $currentRecursive . "</strong><br />";
@@ -109,7 +110,7 @@ class Model
         /*
          * Prepara Recursive + 1
          */
-        $params["currentRecursive"] = $currentRecursive+1;
+        $params["currentRecursive"] = $this->currentRecursive+1;
         /**
          * hasOne
          */

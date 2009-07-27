@@ -28,6 +28,18 @@ function pr($str){
 }
 
 /**
+ * Retorna se E_USER_ERROR devem aparecer de acordo com debug
+ */
+function isDebugMode(){
+
+}
+
+/**
+ * MENSAGENS DE USUÁRIOS
+ *
+ * Erro, notice, warning
+ */
+/**
  * function showWarning()
  *
  * Mostra um aviso para o usuário. Somente se debug > 0
@@ -35,8 +47,20 @@ function pr($str){
  * @param string $str Aviso a ser mostrado
  */
 function showWarning($str){
+    var_dump($str);
     if( Config::read("debug") > 0 ){
-        trigger_error( $str , E_USER_WARNING);
+        //trigger_error( $str , E_USER_WARNING);
+    }
+}
+
+/**
+ * showError() mostra uma mensagem de erro na tela.
+ *
+ * @param <type> $str
+ */
+function showError($str){
+    if( Config::read("debug") > 0 ){
+        trigger_error( $str , E_USER_ERROR);
     }
 }
 

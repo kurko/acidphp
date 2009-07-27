@@ -89,6 +89,7 @@ class DatabaseAbstractor extends DataAbstractor
          * Models
          */
         $mainModel = $options["mainModel"];
+        //echo get_class($mainModel);
 
         /**
          * VERIFICA $OPTIONS
@@ -102,14 +103,19 @@ class DatabaseAbstractor extends DataAbstractor
          */
         if( !empty($options["limit"]) ){
             /**
+             * hasMany
+             * 
              * Desativa relacionamentos hasMany para buscá-los separadamente
              */
             $hasManyTemp = $mainModel->hasMany;
             $options["mainModel"]->hasMany = array();
+            $options["hiddenHasMany"] = $hasManyTemp;
 
-            //pr($options);
+            /**
+             * Toma os códigos SQL gerados por sqlObject para o Model principal
+             */
             $sql = $this->sqlObject->select($options);
-
+            
             /**
              * Carrega os dados da tabela principal
              */
@@ -120,7 +126,8 @@ class DatabaseAbstractor extends DataAbstractor
                     $query = array_merge( $query, $result );
                 }
             }
-
+            //pr($query);
+            
             /**
              * Desmancha $sql do model principal para não haver recarregamento
              */
@@ -134,9 +141,11 @@ class DatabaseAbstractor extends DataAbstractor
             }
 
             /**
+             * CARREGA DADOS hasMANY
+             */
+            /**
              * Recupera dados de relacionamento
              */
-
             $mainModel->hasMany = $hasManyTemp;
             foreach( $mainModel->hasMany as $model=>$properties ){
                 $subOptions["mainModel"] = $mainModel->{$model};
@@ -145,6 +154,7 @@ class DatabaseAbstractor extends DataAbstractor
                         $model.".".$properties["foreignKey"] => $mainIds,
                     )
                 );
+                $subOptions["order"] = $options["order"];
                 $sql = array_merge($sql, $this->sqlObject->select($subOptions) );
             }
 
@@ -173,7 +183,7 @@ class DatabaseAbstractor extends DataAbstractor
          */
         if( is_array($sql) ){
             foreach( $sql as $sqlAtual ){
-                $result = $this->conn->query( $sqlAtual, ASSOC );
+                $result = $this->conn->query( $sqlAtual, "ASSOC" );
                 $query = array_merge( $query, $result );
             }
         }
@@ -222,13 +232,14 @@ class DatabaseAbstractor extends DataAbstractor
          *
          * O modo padrão é ALL conforme configurado nos parâmetros da função
          */
-
         $loopProcessments = 0;
-        foreach( $tempResult as $index ){
+        foreach( $tempResult as $chave=>$index ){
             /**
              * ID principal do registro retornado do model principal
              */
-            $mainId = $index[ get_class($mainModel) ]["id"];
+            //if( !empty($index[ get_class($mainModel) ]["id"]) ){
+                //$mainId = $index[ get_class($mainModel) ]["id"];
+            //}
 
             $hasManyResult = array();
 
@@ -253,7 +264,7 @@ class DatabaseAbstractor extends DataAbstractor
                         $registro[ $hasManyResult[ $mainModel->hasMany[$model]["foreignKey"] ] ][$model][] = $hasManyResult;
                 }
                 /**
-                 * Senão, simplesmente salva na array o resultado do model
+                 * Senão é hasMany, simplesmente salva na array o resultado do model
                  */
                 else if( array_key_exists( $model , $mainModel->hasOne) ) {
                     if( !empty($dados[ $mainModel->hasOne[$model]["foreignKey"] ]) )
@@ -264,6 +275,7 @@ class DatabaseAbstractor extends DataAbstractor
                 $loopProcessments++;
             }
             unset($hasManyResult);
+            //unset($mainId);
 
         }
         
