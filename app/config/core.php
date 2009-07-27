@@ -10,6 +10,9 @@
 
 /**
  * DEBUG
+ */
+/**
+ * Modo de Debugging
  *
  * Configura em que modo de debug o sistema rodará. As opções possíveis são.
  *
@@ -18,6 +21,10 @@
  *      - 2: Mostra todos os erros mais configuração do modo 1;
  */
 Config::write("debug", 1);
+/**
+ * Debug: SQL com estilo (negrito, cores, etc) para melhor interpretação
+ */
+Config::write("debugSQLStyle", true);
 
 /**
  * CHARSET

@@ -82,6 +82,19 @@ function showLoadingTime($totalTime){
  * @param array $sql Códigos SQL já rodados
  */
 function debugSQLs($sql){
+
+    $sqlCommands = array(
+        "SELECT", "UPDATE", "DELETE", "INSERT", "REPLACE",
+        "FROM", "ASC", "WHERE", "ORDER BY", "LIMIT", "TABLES",
+        "LEFT JOIN", "DISTINCT", "COUNT", "ON", "DESCRIBE", "SHOW",
+        "INTO", "VALUES",
+        "IN", "NOT IN", "OR", "AND", "AS", "DESC"
+    );
+    $boldSqlCommands = array();
+    foreach( $sqlCommands as $valor ){
+        $boldSqlCommands[] = "<strong>".$valor."</strong>";
+    }
+
     echo '<table width="100%" style="background: white; padding: 10px;">';
     echo '<tr>';
     echo '<td style="font-size: 12px;">';
@@ -95,7 +108,13 @@ function debugSQLs($sql){
     foreach($sql as $chave=>$valor){
         echo '<tr>';
             echo '<td style="font-size: 12px;">';
-            echo $valor["sql"];
+            if( Config::read("debugSQLStyle") ){
+                $sql = $valor["sql"];
+                $sql = str_replace($sqlCommands, $boldSqlCommands, $sql );
+                echo $sql;
+            } else {
+                echo $valor["sql"];
+            }
             echo '</td>';
             echo '<td style="font-size: 12px;">';
             echo showLoadingTime( $valor["time"] );
