@@ -1,6 +1,11 @@
 CHANGELOG
 
-v0.1 -------
+v0.0.3 -------
+Revision 11
+    - Model::find() e Model::saveAll() criado
+    - Models: propriedade recursive criada
+    - Models: Habilidade hasMany, hasOne e belongsTo criadas
+    - Amostragem de Debug pronta, mostrando SQLs rodados e duração de carregamento
 Revision 4 - FormHelper criado (19/07/09)
 Revision 3 - Inicialização Pronta (análise de URL, carregamento CSS, criado
              HtmlHelper, controller/view funcionando) (19/07/09)

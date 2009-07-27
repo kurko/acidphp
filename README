@@ -1,1 +1,10 @@
-acphp
+ACPHP
+
+Framework PHP concebido para propiciar facilidade de programação que grandes
+frameworks já possuem, mas de uma forma rápida e simples.
+
+-----------------
+Versões de testes
+
+Se você está rodando uma versão de testes, configure o banco de dados e crie
+as tabelas que estão presentes em app/config/sql/dump.sql.
