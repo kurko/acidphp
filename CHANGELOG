@@ -1,6 +1,8 @@
 CHANGELOG
 
 v0.0.3 -------
+Revision 12
+    - SQL Debug com estilos em negrito para melhor interpretação
 Revision 11
     - Model::find() e Model::saveAll() criado
     - Models: propriedade recursive criada
