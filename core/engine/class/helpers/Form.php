@@ -11,17 +11,28 @@
  * @author Alexandre de Oliveira <chavedomundo@gmail.com>
  * @since v0.1, 19/07/2009
  */
-class FormHelper
+class FormHelper extends Helper
 {
 
     protected $modelName;
+    /**
+     *
+     * @var array Contém as propriedades do respectivo Model objeto
+     */
+    protected $modelProperties;
 
     function __construct(){
 
     }
 
     /**
-     * Inicializa um formulário HTML
+     * create()
+     *
+     * Inicializa um formulário HTML e um novo objeto de formulário.
+     *
+     * Cada formulário é criado sob o domínio de um Model. Estas informações
+     * ficam guardadas em $this->modelProperties, que retém propriedades
+     * relacionadas a cada model.
      *
      * @param string $modelName Nome do Model responsável pelo tratamento dos
      *                          dados
@@ -37,6 +48,14 @@ class FormHelper
         if( !empty($modelName) ){
             $this->modelName = $modelName;
         }
+
+        /**
+         * DescribedTables
+         *
+         * Carrega as tabelas descritas deste respectivo Model deste $form
+         */
+        global $describedTables;
+        $this->modelProperties["describedTables"] = $describedTables;
 
         /**
          * Controller
@@ -102,7 +121,7 @@ class FormHelper
         $conteudo.= '<div class="input">';
 
         /**
-         * ANÁLISE DE OPTIONS
+         * ANÁLISE DO ARGUMENTO $OPTIONS
          */
         /**
          * ["label"]
@@ -122,8 +141,6 @@ class FormHelper
          */
         if( !empty($options["select"]) ){
             $inputType = "select";
-        } else {
-            $inputType = "text";
         }
         /**
          * ["value"]
@@ -136,7 +153,8 @@ class FormHelper
         /**
          * PROPRIEDADES-PADRÃO
          */
-        $standardAtrib = 'id="input-'.$fieldName.'" '. $fieldValue;
+        $standardAtrib = 'id="input-'.$fieldName.'" ';
+        $standardAtribValue = $fieldValue;
 
         /**
          * NOMES DO INPUTS
@@ -173,16 +191,85 @@ class FormHelper
         /**
          * ANÁLISE DE TIPOS DE CAMPOS
          */
-
         /**
          * Mostra inputs de acordo com o especificado
          */
         /**
-         * INPUT TEXT
+         * Se não há tipos especificados na configuração do $form, verifica qual
+         * o tipo de campo na tabela e mostra o campo <input> de acordo
+         */
+        if( empty($inputType) ){
+            /**
+             * Verifica global $describedTables que já está carregado e salvo
+             * em $this->modelProperties[$modelName]["describedTables"]
+             */
+             $physicalType = $this->modelProperties["describedTables"][$modelName][$fieldName]["Type"];
+             /**
+              * Esta variável com nome gigante tem a posição do primeiro
+              * parêntesis no nome físico deste campo na tabela do banco de
+              * dados. Isto serve para tomar o nome do tipo de dados somente.
+              *
+              * Ex.:
+              *     - varchar() -> pega somente "varchar"
+              *     - tinyint() -> pega somente "tinyint"
+              */
+             //pr($this->modelProperties[$this->modelName]["describedTables"]);
+             $physicalTypeNameParenthesisPos = strpos( $physicalType, "(" );
+             if( $physicalTypeNameParenthesisPos > 0 ){
+                 $physicalType = substr( $physicalType, 0, $physicalTypeNameParenthesisPos );
+             }
+
+             /**
+              * Segundo o tipo de dado físico de cada campo na tabela,
+              * instancia um tipo para um campo do formulário.
+              */
+             switch($physicalType){
+                 /**
+                  * Textos pequenos como varchar
+                  */
+                 case "varchar"     : $inputType = "text"; break;
+                 /**
+                  * Textos grandes como text, blob
+                  */
+                 case "text"        : $inputType = "textarea"; break;
+                 case "blob"        : $inputType = "textarea"; break;
+                 /**
+                  * Números como int
+                  */
+                 case "int"         : $inputType = "text"; break;
+                 /**
+                  * Boolean, tinyint
+                  */
+                 case "bool"        : $inputType = "text"; break;
+                 case "tinyint"     : $inputType = "text"; break;
+                 /**
+                  * Datas e time
+                  */
+                 case "datetime"    : $inputType = "text"; break;
+                 case "date"        : $inputType = "text"; break;
+                 case "time"        : $inputType = "text"; break;
+                 default            : $inputType = "text"; break;
+             }
+
+        }
+        /**
+         * INPUT TYPE="TEXT"
          */
         if( $inputType == "text" ){
             $conteudo.= '<div class="input_field input_text">';
             $conteudo.= '<input type="text" name="'.$inputName.'" '.$standardAtrib.' />';
+        }
+        /**
+         * <TEXTAREA>
+         *
+         * Quando o tipo de dados do DB for text, blog, etc, o campo será
+         * textarea.
+         */
+        else if( $inputType == "textarea"){
+            $conteudo.= '<div class="input_field input_textarea">';
+            $conteudo.= '<textarea name="'.$inputName.'" '.$standardAtrib.' />';
+            $conteudo.= $standardAtribValue;
+            $conteudo.= '</textarea>';
         }
         /**
          * INPUT <SELECT>

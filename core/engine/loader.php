@@ -26,6 +26,8 @@ include(CORE_CLASS_DIR."DataAbstractor.php");
 include(CORE_CLASS_DIR."SQLObject.php");
 include(CORE_CLASS_DIR."DatabaseAbstractor.php");
 
+include(CORE_CLASS_DIR."Helper.php");
+
 /**
  * Classe de configuração do sistema
  */

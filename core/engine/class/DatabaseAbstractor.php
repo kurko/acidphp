@@ -141,21 +141,26 @@ class DatabaseAbstractor extends DataAbstractor
             }
 
             /**
-             * CARREGA DADOS hasMANY
+             * Se há dados no banco de dados
              */
-            /**
-             * Recupera dados de relacionamento
-             */
-            $mainModel->hasMany = $hasManyTemp;
-            foreach( $mainModel->hasMany as $model=>$properties ){
-                $subOptions["mainModel"] = $mainModel->{$model};
-                $subOptions["conditions"] = array(
-                    'OR' => array(
-                        $model.".".$properties["foreignKey"] => $mainIds,
-                    )
-                );
-                $subOptions["order"] = $options["order"];
-                $sql = array_merge($sql, $this->sqlObject->select($subOptions) );
+            if( !empty($mainIds) ){
+                /**
+                 * CARREGA DADOS hasMANY
+                 */
+                /**
+                 * Recupera dados de relacionamento
+                 */
+                $mainModel->hasMany = $hasManyTemp;
+                foreach( $mainModel->hasMany as $model=>$properties ){
+                    $subOptions["mainModel"] = $mainModel->{$model};
+                    $subOptions["conditions"] = array(
+                        'OR' => array(
+                            $model.".".$properties["foreignKey"] => $mainIds,
+                        )
+                    );
+                    $subOptions["order"] = $options["order"];
+                    $sql = array_merge($sql, $this->sqlObject->select($subOptions) );
+                }
             }
 
             //pr($query);
@@ -231,6 +236,15 @@ class DatabaseAbstractor extends DataAbstractor
          * Monta estruturas de saída de acordo com o modo pedido
          *
          * O modo padrão é ALL conforme configurado nos parâmetros da função
+         */
+        /**
+         * Verificação de existência de dados no DB
+         */
+        if( empty($tempResult) )
+            $tempResult = array();
+
+        /**
+         * Loop por cada item do banco de dados retornado
          */
         $loopProcessments = 0;
         foreach( $tempResult as $chave=>$index ){

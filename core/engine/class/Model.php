@@ -98,12 +98,12 @@ class Model
          * repetimos o processo.
          */
         global $describedTables;
-        if( !array_key_exists($this->useTable, $describedTables) ){
+        if( !array_key_exists( get_class($this), $describedTables) ){
             $this->describeTable();
         } else {
-            $this->tableDescribed = $describedTables[$this->useTable];
+            $this->tableDescribed = $describedTables[ get_class($this) ];
         }
-
+        
         /**
          * CRIA RELACIONAMENTOS
          */
@@ -381,6 +381,12 @@ class Model
      * MÉTODOS INTERNOS (PRIVATE)
      */
 
+    /**
+     * Descreve as tabelas
+     *
+     * @global array $describedTables
+     * @param array $params
+     */
     private function describeTable($params = ""){
         $conn = ( empty($params["conn"]) ) ? $this->conn : $params["conn"];
 
@@ -392,12 +398,8 @@ class Model
 
         foreach($conn->query($describeSql, "ASSOC") as $tabela=>$info){
             $this->tableDescribed[$info['Field']] = $info;
-            $describedTables[$this->useTable][$info['Field']] = $info;
+            $describedTables[ get_class($this) ][$info['Field']] = $info;
         }
     }
-
-
-
 }
-
 ?>
