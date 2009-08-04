@@ -43,6 +43,7 @@ class Controller
      * Controller, tais como autenticação e login
      */
     protected $components = array();
+    protected $loadedComponents = array();
 
     /**
      * USES (MODELS)
@@ -110,6 +111,7 @@ class Controller
         $this->params["controller"] = $this->engine->callController;
         $this->params["action"] = $this->engine->callAction;
         $this->params["args"] = $this->engine->arguments;
+        $this->params["webroot"] = $this->engine->webroot;
         /**
          * Ajusta $_POST
          */
@@ -203,7 +205,9 @@ class Controller
                 /**
                  * Envia o Component para a Action do Controller
                  */
-                $this->{strtolower($valor)} = $$valor;
+                $loadedComponentName = StrTreament::firstToLower($valor);
+                $this->{$loadedComponentName} = $$valor;
+                $this->loadedComponents[] = $loadedComponentName;
             }
         }
 
@@ -234,7 +238,7 @@ class Controller
      * MÉTODOS DE SUPORTE
      *
      * Todos os métodos que dão suporte ao funcionamento do sistema.
-     *      ex.: render, set, beforeFilter, afterFilter, trigger, ect
+     *      ex.: render, set, redirect, beforeFilter, afterFilter, trigger, ect
      */
     /**
      * TRIGGER()
@@ -275,9 +279,20 @@ class Controller
          */
         if( $actionExists ){
             /**
-             * $this->beforeFilter() é chamado sempre antes de qualquer açãoo
+             * $this->beforeFilter() é chamado sempre antes de qualquer ação
              */
             $this->beforeFilter();
+            /**
+             * Components->afterBeforeFilter()
+             *
+             * Se há afterBeforeFilter() no component, carrega
+             */
+            foreach( $this->loadedComponents as $component ){
+                if( method_exists($this->$component, "afterBeforeFilter") ){
+                    $this->$component->afterBeforeFilter();
+                }
+            }
+
             /**
              * Chama a action requerida com seus respectivos argumentos.
              */
@@ -342,10 +357,40 @@ class Controller
         return true;
     }
 
+    /**
+     * Envia um valor $varValue para um view em uma variável com nome $varNome.
+     *
+     * @param string $varName Nome da variável com valor dentro do view
+     * @param mixed $varValue Valor da variável a ser passada para o view
+     */
     protected function set($varName, $varValue){
         $this->globalVars[$varName] = $varValue;
     }
 
+    /**
+     * @todo - implementar
+     *
+     * @param <type> $url
+     */
+    protected function redirect($url){
+        if( is_array($url) ){
+            if( !empty($url["controller"]) ){
+                echo $this->webroot.$url["controller"].$url["action"];
+            } else {
+                echo $this->webroot."<---";
+            }
+        } else if( is_string($url) ){
+            
+        } else {
+            
+        }
+    }
+
+    /**
+     * EVENTOS
+     *
+     * beforeFilter, afterFilter
+     */
 
     protected function beforeFilter(){
 

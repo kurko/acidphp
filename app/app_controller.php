@@ -7,10 +7,12 @@ class AppController extends Controller
         
         $this->auth->allow(array(
             "site" => array(
-                "outro"
+                "outro", "index"
             ),
         ));
-        //echo $this->auth->test();
+
+        $this->auth->loginPage( array("controller" => "site", "action" => "login") );
+        
     }
     
 }

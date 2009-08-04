@@ -43,6 +43,10 @@ class SiteController extends AppController
         $this->render("save");
     }
 
+    function login(){
+        
+    }
+
 
 }
 ?>

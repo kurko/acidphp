@@ -36,8 +36,15 @@ class StrTreament
         }
 
         return $result;
-        
-    }
+    } // fim getNameSubStr()
 
+    static function firstToLower($str){
+        if( isset($str[1]) ){
+            $firstChar = strToLower( $str[0] );
+            $restChars = substr($str, 1);
+
+            return $firstChar.$restChars;
+        }
+    }
 }
 ?>
