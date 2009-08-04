@@ -46,7 +46,14 @@ include(CORE_CLASS_DIR."DataAbstractor.php");
 include(CORE_CLASS_DIR."SQLObject.php");
 include(CORE_CLASS_DIR."DatabaseAbstractor.php");
 
+/**
+ * Helpers
+ */
 include(CORE_CLASS_DIR."Helper.php");
+/**
+ * Components
+ */
+include(CORE_CLASS_DIR."Component.php");
 
 /**
  * CONTROLLERS

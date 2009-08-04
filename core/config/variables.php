@@ -46,6 +46,8 @@ define("CORE_CLASS_DIR", CORE_DIR."engine/class/");
  */
 define("HELPER_CLASSNAME_SUFFIX", "Helper");
 define("CORE_HELPERS_DIR", CORE_CLASS_DIR."helpers/");
+define("COMPONENT_CLASSNAME_SUFFIX", "Component");
+define("CORE_COMPONENTS_DIR", CORE_CLASS_DIR."components/");
 
 define("CORE_VIEW_DIR", CORE_DIR.VIEW_DIR);
 define("CORE_LAYOUT_DIR", CORE_DIR.VIEW_DIR.LAYOUT_DIR);

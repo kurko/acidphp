@@ -27,12 +27,22 @@ class Controller
     protected $params;
     protected $webroot;
     /**
+     * HELPERS/COMPONENTS/BEHAVIORS
+     */
+    /**
      * HELPERS
      *
      * @var array Helpers são objetos que auxiliam em tarefas de View, como
      * Formulários, Javascript, entre outros.
      */
     protected $helpers = array("Html", "Form");
+    /**
+     * COMPONENTS
+     *
+     * @var array Components são objetos que automatizam processos de nível de
+     * Controller, tais como autenticação e login
+     */
+    protected $components = array();
 
     /**
      * USES (MODELS)
@@ -72,6 +82,14 @@ class Controller
      */
     protected $actionCallback;
 
+    /**
+     * MÉTODOS
+     */
+    /**
+     * __construct();
+     *
+     * @param array $param Parâmetros de inicialização
+     */
     function __construct($param = ''){
 
         /**
@@ -139,6 +157,8 @@ class Controller
 
         /**
          * HELPERS, COMPONENTS, BEHAVIORS
+         *
+         * Inicialização destes automatizadores de processos.
          */
         /**
          * HELPERS
@@ -155,10 +175,37 @@ class Controller
                 include_once( CORE_HELPERS_DIR.$valor.".php" );
                 $helperName = $valor.HELPER_CLASSNAME_SUFFIX;
                 $$valor = new $helperName();
+                /**
+                 * Envia Helper para o view
+                 */
                 $this->set( strtolower($valor), $$valor);
             }
         }
-
+        /**
+         * COMPONENTS
+         */
+        if( count($this->components) ){
+            /**
+             * Loop por cada component requisitado.
+             *
+             * Carrega classe do Component, instancia e envia para o Controller
+             */
+            foreach($this->components as $valor){
+                include_once( CORE_COMPONENTS_DIR.$valor.".php" );
+                $componentName = $valor.COMPONENT_CLASSNAME_SUFFIX;
+                /**
+                 * Instancia compoment
+                 */
+                $componentParams = array(
+                    "params" => $this->params,
+                );
+                $$valor = new $componentName($componentParams);
+                /**
+                 * Envia o Component para a Action do Controller
+                 */
+                $this->{strtolower($valor)} = $$valor;
+            }
+        }
 
 
         /**
