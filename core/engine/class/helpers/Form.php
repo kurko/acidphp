@@ -4,8 +4,6 @@
  *
  * Contém gerador de elementos FORM automáticos.
  *
- * Sua construção foi inicializada no AustCMS.
- *
  * @package Helpers
  * @name Form
  * @author Alexandre de Oliveira <chavedomundo@gmail.com>
@@ -13,7 +11,15 @@
  */
 class FormHelper extends Helper
 {
-
+    /**
+     * Aqui é guardado o nome do Model principal do formulário.
+     *
+     * Alguns campos são especificados na seguinte sintaxe: "Model.campo". Se
+     * "Model" for diferente do primeiro Model criado, $this->modelName é
+     * alterado para o novo "Model".
+     *
+     * @var string Nome do Model principal
+     */
     protected $modelName;
     /**
      *
@@ -101,8 +107,8 @@ class FormHelper extends Helper
         $conteudo.= '<input type="hidden" name="sender" value="formHelper" />';
 
         return $conteudo;
-
     }
+    
     /**
      * Cria inputs de formulários HTML automaticamente, necessitando somente
      * indicar o nome do campo relacionado na base de dados.
@@ -116,6 +122,9 @@ class FormHelper extends Helper
      * @return string Código HTML para o form input pedido.
      */
     public function input($fieldName, $options = ''){
+
+        $argFieldName = $fieldName;
+        
         $conteudo ='';
 
         $conteudo.= '<div class="input">';
@@ -123,16 +132,6 @@ class FormHelper extends Helper
         /**
          * ANÁLISE DO ARGUMENTO $OPTIONS
          */
-        /**
-         * ["label"]
-         *
-         * Se Label não foi especificado
-         */
-        if( empty($options["label"]) ){
-            $conteudo.= '<label for="input-'.$fieldName.'">'.$fieldName.'</label>';
-        } else {
-            $conteudo.= '<label for="input-'.$fieldName.'">'.$options["label"].'</label>';
-        }
 
         /**
          * ["select"]
@@ -213,7 +212,6 @@ class FormHelper extends Helper
               *     - varchar() -> pega somente "varchar"
               *     - tinyint() -> pega somente "tinyint"
               */
-             //pr($this->modelProperties[$this->modelName]["describedTables"]);
              $physicalTypeNameParenthesisPos = strpos( $physicalType, "(" );
              if( $physicalTypeNameParenthesisPos > 0 ){
                  $physicalType = substr( $physicalType, 0, $physicalTypeNameParenthesisPos );
@@ -240,8 +238,8 @@ class FormHelper extends Helper
                  /**
                   * Boolean, tinyint
                   */
-                 case "bool"        : $inputType = "text"; break;
-                 case "tinyint"     : $inputType = "text"; break;
+                 case "bool"        : $inputType = "checkbox"; break;
+                 case "tinyint"     : $inputType = "checkbox"; break;
                  /**
                   * Datas e time
                   */
@@ -250,14 +248,35 @@ class FormHelper extends Helper
                  case "time"        : $inputType = "text"; break;
                  default            : $inputType = "text"; break;
              }
-
         }
+        
         /**
-         * INPUT TYPE="TEXT"
+         * Analisa $options["label"]
+         *
+         * Se Label não foi especificado
+         */
+        $label = ( empty($options["label"]) ) ? $argFieldName : $options["label"];
+
+        if( !in_array($inputType, array("checkbox")) ){
+            $conteudo.= '<label for="input-'.$fieldName.'">'.$label.'</label>';
+        }
+
+        /**
+         * INPUTS
+         *
+         * TYPE="TEXT"
          */
         if( $inputType == "text" ){
             $conteudo.= '<div class="input_field input_text">';
             $conteudo.= '<input type="text" name="'.$inputName.'" '.$standardAtrib.' />';
+        }
+        /**
+         * CHECKBOX
+         */
+        else if( $inputType == "checkbox" ){
+            $conteudo.= '<div class="input_field input_checkbox">';
+            $conteudo.= '<input type="checkbox" name="'.$inputName.'" '.$standardAtrib.' />';
+            $conteudo.= '<label for="input-'.$fieldName.'">'.$label.'</label>';
         }
         /**
          * <TEXTAREA>
@@ -272,7 +291,7 @@ class FormHelper extends Helper
             $conteudo.= '</textarea>';
         }
         /**
-         * INPUT <SELECT>
+         * <SELECT>
          *
          * Pega as informações de $options["select"] e cria
          * um <select> com vários <option></option>

@@ -14,6 +14,7 @@ echo $form->create("Usuario", array(
 );
 echo $form->input('nome');
 echo $form->input('biografia');
+echo $form->input('checkbox', array("label" => "Você deseja marcar o checkbox?") );
 
 echo $form->input('Tarefa.nome');
 echo $form->input('Tarefa.descricao');
