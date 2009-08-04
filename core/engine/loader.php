@@ -11,8 +11,27 @@
 
 
 
+/**
+ * CLASSES CRÍTICAS
+ *
+ * Classe de configuração do sistema
+ */
+include(CORE_CLASS_DIR."Config.php");
+
+/**
+ * FUNÇÕES
+ */
 include(CORE_FUNCTIONS_FILE);
 include(CORE_FUNCTIONS_DIR."StrTreatment.php");
+
+/**
+ * CONFIGURAÇÕES
+ */
+/**
+ * core/config/models.php contem configurações genéricas relacionadas a Models
+ * e diretivas de dados.
+ */
+include(CORE_CONFIG_DIR."models.php");
 
 /**
  * CARREGA CLASSES
@@ -28,12 +47,6 @@ include(CORE_CLASS_DIR."SQLObject.php");
 include(CORE_CLASS_DIR."DatabaseAbstractor.php");
 
 include(CORE_CLASS_DIR."Helper.php");
-
-/**
- * Classe de configuração do sistema
- */
-include(CORE_CLASS_DIR."Config.php");
-
 
 /**
  * CONTROLLERS

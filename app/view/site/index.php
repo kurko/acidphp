@@ -1,3 +1,4 @@
+
 <?php
 /* 
  * To change this template, choose Tools | Templates
@@ -8,28 +9,24 @@ if( !empty($temp) ){
     //pr($temp);
 }
 
+?>
+<h2>Cadastro</h2>
+<?php
+
 echo $form->create("Usuario", array(
         "controller" => "site",
     )
 );
-echo $form->input('nome', array(
-                            "after" => "Teste do after",
-                            "before" => "Teste do before",
-                            "between" => "Meu between"
-                        ));
-echo $form->input('biografia');
-echo $form->input('checkbox', array(
-                            "label" => "Você deseja marcar o checkbox?",
-                            "value" => "1"
-                        ));
 
-echo $form->input('Tarefa.nome');
-echo $form->input('Tarefa.descricao');
+echo $form->input('nome', array( "label" => "Seu nome" ));
+echo $form->input('email');
+echo $form->input('senha');
 
-echo $form->end("uhuhl");
+echo $form->end("Enviar");
 
-
-
+?>
+<h2>Login</h2>
+<?php
 echo $form->create("Tarefa", array(
         "controller" => "site",
         "action" => "savetarefa"

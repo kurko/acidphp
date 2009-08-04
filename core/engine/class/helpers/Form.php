@@ -332,8 +332,18 @@ class FormHelper extends Helper
          * TYPE="TEXT"
          */
         if( $inputType == "text" ){
+
+            /**
+             * Verifica campo de password
+             */
+            if( in_array($fieldName, Config::read("modelPasswordFields")) )
+                $inputType = "password";
+
+            /**
+             * Gera conteúdo para o formulário
+             */
             $conteudo.= '<div class="input_field input_text">';
-            $conteudo.= '<input type="text" name="'.$inputName.'" '.$standardAtrib.' />';
+            $conteudo.= '<input type="'.$inputType.'" name="'.$inputName.'" '.$standardAtrib.' />';
         }
         /**
          * CHECKBOX
