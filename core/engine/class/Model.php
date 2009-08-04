@@ -176,6 +176,9 @@ class Model
     /**
      * SAVEALL()
      *
+     * $data deve ter o seguinte formato:
+     *      [model]=>array([campo]=>valor), [modelFilho]=>array([campo]=>valor)
+     *
      * @author Alexandre de Oliveira <chavedomundo@gmail.com>
      * @since v0.1
      * @param array $data Dados enviados para salvar no DB
@@ -185,7 +188,7 @@ class Model
     public function saveAll($data, $options = array()){
         if( is_array($data) ){
             /**
-             * Loop por cada tabela com valores enviados
+             * Loop por cada tabela dos valores enviados em $data
              */
             foreach($data as $model=>$campos){
 
@@ -227,6 +230,18 @@ class Model
 
                             if( array_key_exists($campo, $this->tableDescribed) ){
                                 $camposStr[] = $campo;
+
+                                /**
+                                 * Checkbox? Tinyint?
+                                 * 
+                                 * Verifica se o campo é do tipo checkbox.
+                                 */
+                                $type = StrTreament::getNameSubStr($this->tableDescribed[ $campo ]["Type"], "(");
+                                if( in_array($type, array("tinyint","bool") )){
+                                    if( !empty($valor) )
+                                        $valor = '1';
+                                }
+                                
                                 $valorStr[] = $valor;
                             } else {
                                 showWarning("Campo inexistente configurado no formulário.");

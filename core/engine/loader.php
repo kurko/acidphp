@@ -12,6 +12,7 @@
 
 
 include(CORE_FUNCTIONS_FILE);
+include(CORE_FUNCTIONS_DIR."StrTreatment.php");
 
 /**
  * CARREGA CLASSES

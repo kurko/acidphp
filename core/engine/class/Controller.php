@@ -172,7 +172,7 @@ class Controller
         $this->action = (empty( $this->engine->callAction )) ? 'index' : $this->engine->callAction;
 
         /**
-         * EXECUTA
+         * EXECUTA MVC
          *
          * Começa execução de métodos necessários.
          */

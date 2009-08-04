@@ -12,9 +12,16 @@ echo $form->create("Usuario", array(
         "controller" => "site",
     )
 );
-echo $form->input('nome');
+echo $form->input('nome', array(
+                            "after" => "Teste do after",
+                            "before" => "Teste do before",
+                            "between" => "Meu between"
+                        ));
 echo $form->input('biografia');
-echo $form->input('checkbox', array("label" => "Você deseja marcar o checkbox?") );
+echo $form->input('checkbox', array(
+                            "label" => "Você deseja marcar o checkbox?",
+                            "value" => "1"
+                        ));
 
 echo $form->input('Tarefa.nome');
 echo $form->input('Tarefa.descricao');

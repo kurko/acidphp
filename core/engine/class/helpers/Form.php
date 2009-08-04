@@ -127,11 +127,25 @@ class FormHelper extends Helper
         
         $conteudo ='';
 
-        $conteudo.= '<div class="input">';
+        $conteudo.= '<div class="input input_'.str_replace(".","_", $fieldName).'">';
 
         /**
          * ANÁLISE DO ARGUMENTO $OPTIONS
+         *
+         * Após análise, cada item de $options é deletado, os que sobrarem são
+         * inseridos na tag HTML como propriedade
          */
+        /**
+         * Analisa $options["label"]
+         *
+         * Se Label não foi especificado
+         */
+        if( empty($options["label"]) ){
+            $label = $argFieldName;
+        } else {
+            $label = $options["label"];
+            unset($options["label"]);
+        }
 
         /**
          * ["select"]
@@ -140,14 +154,47 @@ class FormHelper extends Helper
          */
         if( !empty($options["select"]) ){
             $inputType = "select";
+            unset($options["select"]);
         }
+
         /**
          * ["value"]
          *
          * Padrão padrão do input
          */
-        $fieldValue = ( empty($options["value"]) ) ? "" : 'value="'.$options["value"].'" ';
+        $fieldValue = "";
+        if( !empty($options["value"]) ){
+            $fieldValue = 'value="'.$options["value"].'" ';
+            unset($options["value"]);
+        }
 
+        /**
+         * ["before"]
+         */
+        if( !empty($options["before"]) ){
+            $before = $options["before"];
+            unset($options["before"]);
+        }
+
+        /**
+         * ["after"]
+         */
+        if( !empty($options["after"]) ){
+            $after = $options["after"];
+            unset($options["after"]);
+        }
+
+        /**
+         * ["between"]
+         *
+         * Texto entre label e input
+         */
+        if( !empty($options["between"]) ){
+            $between = $options["between"];
+            unset($options["between"]);
+        }
+        // fim análise $options
+        
 
         /**
          * PROPRIEDADES-PADRÃO
@@ -194,6 +241,8 @@ class FormHelper extends Helper
          * Mostra inputs de acordo com o especificado
          */
         /**
+         * Verifica tabela
+         *
          * Se não há tipos especificados na configuração do $form, verifica qual
          * o tipo de campo na tabela e mostra o campo <input> de acordo
          */
@@ -251,14 +300,30 @@ class FormHelper extends Helper
         }
         
         /**
-         * Analisa $options["label"]
-         *
-         * Se Label não foi especificado
+         * Se BEFORE está especificado
          */
-        $label = ( empty($options["label"]) ) ? $argFieldName : $options["label"];
+        if( !empty($before) ){
+            $conteudo.= '<span class="input_before">';
+            $conteudo.= $before;
+            $conteudo.= '</span>';
+        }
 
+        /**
+         * Ajusta o label se não for do tipo checkbox, etc
+         *
+         * Somente inputs com labels podem ter o atributo between
+         */
         if( !in_array($inputType, array("checkbox")) ){
             $conteudo.= '<label for="input-'.$fieldName.'">'.$label.'</label>';
+            
+            /**
+             * Se BETWEEN está especificado
+             */
+            if( !empty($between) ){
+                $conteudo.= '<span class="input_between">';
+                $conteudo.= $between;
+                $conteudo.= '</span>';
+            }
         }
 
         /**
@@ -337,6 +402,15 @@ class FormHelper extends Helper
             $conteudo.= '<input type="text" name="'.$inputName.'" value="ERRO NO TIPO DE CAMPO" '.$standardAtrib.'>';
         }
         $conteudo.= '</div>'; // fecha div do .input_field
+
+        /**
+         * Se AFTER está especificado
+         */
+        if( !empty($after) ){
+            $conteudo.= '<span class="input_after">';
+            $conteudo.= $after;
+            $conteudo.= '</span>';
+        }
 
         $conteudo.= '</div>'; // fecha div do .input
 
