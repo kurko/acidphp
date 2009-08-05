@@ -39,7 +39,7 @@ class AuthComponent extends Component
      */
     protected $allow = array(
         "site" => array(
-            "index", "login", "outro"
+            "index", "login", "logout"
         ),
     );
 
@@ -149,6 +149,7 @@ class AuthComponent extends Component
          */
         if( $this->params["action"] == "logout" ){
             unset($_SESSION["Sys"]["Auth"]);
+            unset($_SESSION["Sys"]["FormHelper"]["statusMessage"]);
             redirect( translateUrl( $this->loginPage() ) );
         }
 
