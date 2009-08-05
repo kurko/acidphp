@@ -464,7 +464,6 @@ class FormHelper extends Helper
     }
 
     public function statusMessage(){
-
         /**
          * Se de fato existe alguma mensagem de status
          */
@@ -472,9 +471,12 @@ class FormHelper extends Helper
             $sM = $_SESSION["Sys"]["FormHelper"]["statusMessage"];
             $conteudo = '';
             $conteudo.= '<div class="form_status_message">';
-            
+
             if( $sM["class"] == "incorrect"){
                 $conteudo.= '<div class="error incorrect">';
+                $conteudo.= $sM["message"];
+            } else if( $sM["class"] == "denied" OR $sM["class"] == "denied2" ){
+                $conteudo.= '<div class="error denied">';
                 $conteudo.= $sM["message"];
             }
 

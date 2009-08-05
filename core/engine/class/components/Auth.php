@@ -102,6 +102,10 @@ class AuthComponent extends Component
         "password" => "password"
     );
 
+    protected $incorrectLoginError = "Incorrect Login!";
+
+    protected $deniedAccessError = "Denied Access!";
+
     function __construct($params = ""){
         parent::__construct($params);
 
@@ -126,8 +130,20 @@ class AuthComponent extends Component
      * @author Alexandre de Oliveira
      */
     public function afterBeforeFilter(){
+        
+        /**
+         * Limpa statusMessage
+         */
+        if( !empty($_SESSION["Sys"]["FormHelper"]["statusMessage"]) ){
+            $sM = $_SESSION["Sys"]["FormHelper"]["statusMessage"];
+            if( $sM["class"] == "denied" ){
+                $_SESSION["Sys"]["FormHelper"]["statusMessage"]["class"] = "denied2";
+            } else {
+                unset($_SESSION["Sys"]["FormHelper"]["statusMessage"]);
+            }
+        }
 
-        unset($_SESSION["Sys"]["FormHelper"]["statusMessage"]);
+
         /**
          * Ordem de Logout
          */
@@ -177,21 +193,23 @@ class AuthComponent extends Component
                                         );
                     $tempResult = array_keys($result);
 
+                    /**
+                     * Usuário existe
+                     */
                     if( !empty($result) AND count($result) == 1 ){
                         $this->logged = true;
 
                         $_SESSION["Sys"]["Auth"]["logged"] = true;
                         $_SESSION["Sys"]["Auth"][$this->model()] = $result[$tempResult[0]][$this->model()];
                         header("Location: ". translateUrl( $this->redirectTo() ) );
-                    } else {
-                        
-                        $message = "Login Error!";
-                        if( !empty($this->incorrectLoginMessage) ){
-                            $message = $this->incorrectLoginMessage;
-                        }
+                    }
+                    /**
+                     * Usuário inexistente
+                     */
+                    else {
                         $_SESSION["Sys"]["FormHelper"]["statusMessage"] = array(
                             "class" => "incorrect",
-                            "message" => $message
+                            "message" => $this->incorrectLoginMessage
                         );
                     }
                 }
@@ -282,7 +300,12 @@ class AuthComponent extends Component
          * Se proibido e há uma $newUrl estipulada
          */
         if( !empty($newUrl) ){
-            return header("Location: ".$newUrl);
+
+            $_SESSION["Sys"]["FormHelper"]["statusMessage"] = array(
+                "class" => "denied",
+                "message" => $this->deniedAccessMessage
+            );
+            redirect($newUrl);
         } else {
             return true;
         }
@@ -371,6 +394,11 @@ class AuthComponent extends Component
         }
     }
 
+    /**
+     * Mensagem de erro de Login
+     *
+     * @param string $message Mensagem a ser mostrada ao usuário
+     */
     public function errorMessage($message=""){
         if( !empty($message) ){
             $this->incorrectLoginMessage = $message;
@@ -379,5 +407,17 @@ class AuthComponent extends Component
         }
     }
 
+    /**
+     * Mensagem a ser mostrada relacionada a acesso negado
+     *
+     * @param string $message Mensagem a ser mostrada ao usuário
+     */
+    public function deniedMessage($message=""){
+        if( !empty($message) ){
+            $this->deniedAccessMessage = $message;
+        } else {
+            return $this->deniedAccessMessage;
+        }
+    }
 }
 ?>

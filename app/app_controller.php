@@ -15,6 +15,7 @@ class AppController extends Controller
         $this->auth->redirectTo( array("controller" => "site", "action" => "index") );
         $this->auth->loginPage( array("controller" => "site", "action" => "login") );
         $this->auth->errorMessage("Seus dados estão incorretos!");
+        $this->auth->deniedMessage("Você não tem permissão de acesso!");
         $this->auth->model("Usuario");
 
         //pr($_SESSION);
