@@ -9,6 +9,7 @@ if( !empty($temp) ){
     //pr($temp);
 }
 
+$html->link( "logout", array("controller" => "site", "action" => "logout", "/arg1/arg2/arg3") );
 ?>
 <h2>Cadastro</h2>
 <?php

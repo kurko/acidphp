@@ -59,7 +59,6 @@ class FormHelper extends Helper
          * Se há um login estipulado, sobrescreve <form action> atual
          */
         if( !empty($globalVars["defaultLoginPage"]) ){
-
             if( !empty($globalVars["defaultLoginPage"]["controller"]) )
                 $options["controller"] = $globalVars["defaultLoginPage"]["controller"];
             if( !empty($globalVars["defaultLoginPage"]["action"]) )
@@ -462,6 +461,29 @@ class FormHelper extends Helper
         $conteudo.= '<input type="submit" name="formSubmit" value="'.$submitValue.'" class="submit" />';
         $conteudo.= '</form>';
         return $conteudo;
+    }
+
+    public function statusMessage(){
+
+        /**
+         * Se de fato existe alguma mensagem de status
+         */
+        if( !empty( $_SESSION["Sys"]["FormHelper"]["statusMessage"] ) ){
+            $sM = $_SESSION["Sys"]["FormHelper"]["statusMessage"];
+            $conteudo = '';
+            $conteudo.= '<div class="form_status_message">';
+            
+            if( $sM["class"] == "incorrect"){
+                $conteudo.= '<div class="error incorrect">';
+                $conteudo.= $sM["message"];
+            }
+
+            $conteudo.= '</div>';
+            $conteudo.= '</div>';
+
+            return $conteudo;
+        }
+        return false;
     }
 
 }

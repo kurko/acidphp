@@ -106,6 +106,14 @@ class AuthComponent extends Component
         parent::__construct($params);
 
         $this->forbidden = false;
+
+        /**
+         * Verifica se usuário está logado
+         */
+        if( !empty($_SESSION["Sys"]["Auth"]["logged"]) AND $_SESSION["Sys"]["Auth"]["logged"] ){
+            $this->logged = true;
+        }
+
     }
 
     /**
@@ -119,7 +127,25 @@ class AuthComponent extends Component
      */
     public function afterBeforeFilter(){
 
+        unset($_SESSION["Sys"]["FormHelper"]["statusMessage"]);
         /**
+         * Ordem de Logout
+         */
+        if( $this->params["action"] == "logout" ){
+            unset($_SESSION["Sys"]["Auth"]);
+            redirect( translateUrl( $this->loginPage() ) );
+        }
+
+        /**
+         * Se usuário está logado e está no action login, redireciona
+         */
+        if( $this->logged AND $this->params["action"] == "login" ){
+            redirect( $this->redirectTo() );
+        }
+
+        /**
+         * Tentativa de Login
+         *
          * Verifica se dados enviados estão corretos para Login
          */
         if( !$this->logged AND !empty($this->data) ){
@@ -149,14 +175,24 @@ class AuthComponent extends Component
                                                 "conditions" => $conditions
                                             )
                                         );
+                    $tempResult = array_keys($result);
+
                     if( !empty($result) AND count($result) == 1 ){
                         $this->logged = true;
 
                         $_SESSION["Sys"]["Auth"]["logged"] = true;
-                        echo 'logado';
-
+                        $_SESSION["Sys"]["Auth"][$this->model()] = $result[$tempResult[0]][$this->model()];
+                        header("Location: ". translateUrl( $this->redirectTo() ) );
                     } else {
-                        echo 'não logado';
+                        
+                        $message = "Login Error!";
+                        if( !empty($this->incorrectLoginMessage) ){
+                            $message = $this->incorrectLoginMessage;
+                        }
+                        $_SESSION["Sys"]["FormHelper"]["statusMessage"] = array(
+                            "class" => "incorrect",
+                            "message" => $message
+                        );
                     }
                 }
             }
@@ -307,8 +343,12 @@ class AuthComponent extends Component
      * @param array $redirectTo Contém endereço para onde o usuário será
      *                          redirecionado após efetuar login
      */
-    public function redirectTo($redirectTo){
-        $this->redirectTo = $redirectTo;
+    public function redirectTo($redirectTo=""){
+        if( !empty($redirectTo) ){
+            $this->redirectTo = $redirectTo;
+        } else {
+            return $this->redirectTo;
+        }
     }
     /**
      * loginFields()
@@ -328,6 +368,14 @@ class AuthComponent extends Component
             $this->model = $model;
         } else {
             return $this->model;
+        }
+    }
+
+    public function errorMessage($message=""){
+        if( !empty($message) ){
+            $this->incorrectLoginMessage = $message;
+        } else {
+            return $this->incorrectLoginMessage;
         }
     }
 

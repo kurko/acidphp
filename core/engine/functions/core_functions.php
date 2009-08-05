@@ -9,11 +9,15 @@
  * @since v0.1
  */
 
-
-function pr($str){
+/**
+ * Faz print_r() com tag <pre> antes de e depois de.
+ *
+ * @param mixed $str
+ */
+function pr($mixed){
     if( Config::read("debug") > 0 ){
         echo "<pre>";
-        print_r($str);
+        print_r($mixed);
         echo "</pre>";
     }
 }

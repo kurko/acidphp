@@ -36,7 +36,7 @@ class Controller
      * @var array Helpers são objetos que auxiliam em tarefas de View, como
      * Formulários, Javascript, entre outros.
      */
-    protected $helpers = array("Html", "Form");
+    protected $helpers = array("Html");
     /**
      * COMPONENTS
      *

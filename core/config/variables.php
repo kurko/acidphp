@@ -24,6 +24,7 @@ define("CORE_CONFIG_DIR", CORE_DIR."config/");
 
 define("CORE_FUNCTIONS_DIR", CORE_DIR."engine/functions/");
 define("CORE_FUNCTIONS_FILE", CORE_FUNCTIONS_DIR."core_functions.php");
+define("URL_FUNCTIONS_FILE", CORE_FUNCTIONS_DIR."url_functions.php");
 
 /**
  * MVC CONFIG
