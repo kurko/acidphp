@@ -17,6 +17,16 @@ class Component
      */
     protected $params;
     /**
+     *
+     * @var array Dados enviados de um formulário
+     */
+    protected $data;
+    /**
+     *
+     * @var array Models carregados no ambiente
+     */
+    protected $models;
+    /**
      * Cada classe contém um versão. Esta versão é descrita nesta variável.
      *
      * @var string Versão desta classe
@@ -33,6 +43,14 @@ class Component
          * $this->params
          */
         $this->params = ( empty($params["params"]) ) ? array() : $params["params"];
+        /**
+         * $this->data
+         */
+        $this->data = ( empty($params["data"]) ) ? array() : $params["data"];
+        /**
+         * $this->models
+         */
+        $this->models = ( empty($params["models"]) ) ? array() : $params["models"];
     }
 
     /**

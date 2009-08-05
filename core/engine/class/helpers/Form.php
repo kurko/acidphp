@@ -12,6 +12,8 @@
 class FormHelper extends Helper
 {
     /**
+     * modelName
+     *
      * Aqui é guardado o nome do Model principal do formulário.
      *
      * Alguns campos são especificados na seguinte sintaxe: "Model.campo". Se
@@ -27,8 +29,9 @@ class FormHelper extends Helper
      */
     protected $modelProperties;
 
-    function __construct(){
-
+    function __construct($params=""){
+        parent::__construct($params);
+        
     }
 
     /**
@@ -47,6 +50,21 @@ class FormHelper extends Helper
      */
     public function create($modelName, $options = ''){
         $conteudo = "";
+
+        global $globalVars;
+
+        /**
+         * Login
+         *
+         * Se há um login estipulado, sobrescreve <form action> atual
+         */
+        if( !empty($globalVars["defaultLoginPage"]) ){
+
+            if( !empty($globalVars["defaultLoginPage"]["controller"]) )
+                $options["controller"] = $globalVars["defaultLoginPage"]["controller"];
+            if( !empty($globalVars["defaultLoginPage"]["action"]) )
+                $options["action"] = $globalVars["defaultLoginPage"]["action"];
+        }
 
         /**
          * Ajusta o nome do model no objeto instanciado
@@ -108,7 +126,7 @@ class FormHelper extends Helper
 
         return $conteudo;
     }
-    
+
     /**
      * Cria inputs de formulários HTML automaticamente, necessitando somente
      * indicar o nome do campo relacionado na base de dados.
@@ -201,6 +219,10 @@ class FormHelper extends Helper
          */
         $standardAtrib = 'id="input-'.$fieldName.'" ';
         $standardAtribValue = $fieldValue;
+        /**
+         * @todo - Escrever value digitado anteriormente quando envia formulário
+         * e retorna para ele de volta.
+         */
 
         /**
          * NOMES DO INPUTS

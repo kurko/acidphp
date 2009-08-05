@@ -37,4 +37,10 @@ Config::write("debugSQLStyle", true);
  */
 Config::write("charset", "UTF-8");
 
+/**
+ * CHAVE DE SEGURANÇA
+ */
+
+Config::write("securityKey", "woeviwp9g7W9G6wovinvo8wHBWEIBH");
+
 ?>

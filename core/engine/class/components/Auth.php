@@ -81,9 +81,26 @@ class AuthComponent extends Component
      */
     /**
      *
+     * @var string Model principal relacionado com o login
+     */
+    protected $model = "";
+    /**
+     *
      * @var string Action padrão onde se localiza um login
      */
     protected $defaultLoginAction = "login";
+    /**
+     *
+     * @var array Endereço para onde deve ser redirecionado o usuário após login
+     */
+    public $redirectTo;
+
+    public $logged;
+
+    protected $loginFields = array(
+        "username" => "username",
+        "password" => "password"
+    );
 
     function __construct($params = ""){
         parent::__construct($params);
@@ -91,44 +108,102 @@ class AuthComponent extends Component
         $this->forbidden = false;
     }
 
+    /**
+     * afterBeforeFilter()
+     *
+     * Acontece depois (after) de Controller::beforeFilter()
+     *
+     * Redireciona o usuário para a página de login se ele tiver acesso negado.
+     *
+     * @author Alexandre de Oliveira
+     */
     public function afterBeforeFilter(){
 
         /**
-         * Se está tudo bloqueado
+         * Verifica se dados enviados estão corretos para Login
          */
-        if( in_array("*", $this->deny) ){
-
-            $this->forbidden = true;
+        if( !$this->logged AND !empty($this->data) ){
             /**
-             * Verificar se há alguma configuração que sobrescreve a
-             * proibição atual para liberar o acesso.
-             *
-             * Obs.: $this->allow sobrescreve $this->deny
+             * Se um model foi especificado
              */
-            if( !empty($this->allow) ){
+            if( !empty($this->model) ){
                 /**
-                 * Se o controller atual está totalmente liberado
+                 * Se os dados enviados correspondem ao model do Auth
                  */
-                if( in_array($this->params["controller"], $this->allow) ){
-                    $this->forbidden = false;
-                }
-                /**
-                 * Se há actions do controller atual liberados, verifica se o
-                 * action atual está liberado
-                 */
-                else if( array_key_exists($this->params["controller"], $this->allow) ){
+                if( array_key_exists($this->model(), $this->data)){
+
                     /**
-                     * Verifica se o Action está liberado
+                     * Carrega o $model verdadeiro relacionado ao Login
                      */
-                    if( in_array($this->params["action"], $this->allow[$this->params["controller"]]) ){
+                    $model = $this->models[ $this->model() ];
+
+                    $dataFields = $this->data[ $this->model() ];
+                    /**
+                     * Cria conditions
+                     */
+                    foreach( $dataFields as $campo=>$valor ){
+                        $conditions[$this->model().'.'.$campo] = $valor;
+                    }
+
+                    $result = $model->find( array(
+                                                "conditions" => $conditions
+                                            )
+                                        );
+                    if( !empty($result) AND count($result) == 1 ){
+                        $this->logged = true;
+
+                        $_SESSION["Sys"]["Auth"]["logged"] = true;
+                        echo 'logado';
+
+                    } else {
+                        echo 'não logado';
+                    }
+                }
+            }
+        }
+        
+
+        /**
+         * Usuário Logado
+         */
+        if( !$this->logged ){
+            /**
+             * Se está tudo bloqueado
+             */
+            if( in_array("*", $this->deny) ){
+
+                $this->forbidden = true;
+                /**
+                 * Verificar se há alguma configuração que sobrescreve a
+                 * proibição atual para liberar o acesso.
+                 *
+                 * Obs.: $this->allow sobrescreve $this->deny
+                 */
+                if( !empty($this->allow) ){
+                    /**
+                     * Se o controller atual está totalmente liberado
+                     */
+                    if( in_array($this->params["controller"], $this->allow) ){
                         $this->forbidden = false;
                     }
                     /**
-                     * Se não está, verifica ainda se o action é login. Login
-                     * é universalmente liberado
+                     * Se há actions do controller atual liberados, verifica se o
+                     * action atual está liberado
                      */
-                    else if( in_array($this->params["action"], array("login","logout")) ){
-                        $this->forbidden = false;
+                    else if( array_key_exists($this->params["controller"], $this->allow) ){
+                        /**
+                         * Verifica se o Action está liberado
+                         */
+                        if( in_array($this->params["action"], $this->allow[$this->params["controller"]]) ){
+                            $this->forbidden = false;
+                        }
+                        /**
+                         * Se não está, verifica ainda se o action é login. Login
+                         * é universalmente liberado
+                         */
+                        else if( in_array($this->params["action"], array("login","logout")) ){
+                            $this->forbidden = false;
+                        }
                     }
                 }
             }
@@ -171,8 +246,11 @@ class AuthComponent extends Component
          * Se proibido e há uma $newUrl estipulada
          */
         if( !empty($newUrl) ){
-            header("Location: ".$newUrl);
+            return header("Location: ".$newUrl);
+        } else {
+            return true;
         }
+
     } // fim afterBeforeFilter()
 
     /**
@@ -183,8 +261,25 @@ class AuthComponent extends Component
      *
      * @param array $loginPage Qual é a página de login
      */
-    public function loginPage($loginPage){
-        $this->loginPage = $loginPage;
+    public function loginPage($loginPage=""){
+        if( !empty($loginPage) ){
+            /**
+             * Se o usuário não está logado
+             */
+            if( !$this->logged ){
+                /**
+                 * defaultLoginPage
+                 *
+                 * Para automatizar sistema de login, usa a variável global para
+                 * criar formulário com FormHelper
+                 */
+                global $globalVars;
+                $globalVars["defaultLoginPage"] = $loginPage;
+                $this->loginPage = $loginPage;
+            }
+        } else {
+            return $this->loginPage;
+        }
     }
 
     /**
@@ -205,6 +300,35 @@ class AuthComponent extends Component
      */
     public function deny($deny){
         $this->deny = $deny;
+    }
+    /**
+     * redirectTo()
+     *
+     * @param array $redirectTo Contém endereço para onde o usuário será
+     *                          redirecionado após efetuar login
+     */
+    public function redirectTo($redirectTo){
+        $this->redirectTo = $redirectTo;
+    }
+    /**
+     * loginFields()
+     *
+     * @param array $loginFields Indica quais os campos de login
+     */
+    public function loginFields($loginFields){
+        $this->loginFields = $loginFields;
+    }
+    /**
+     * model()
+     *
+     * @param array $model Qual o model relacionado ao login
+     */
+    public function model($model=""){
+        if( !empty($model) ){
+            $this->model = $model;
+        } else {
+            return $this->model;
+        }
     }
 
 }

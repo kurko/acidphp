@@ -25,6 +25,7 @@ class Controller
      * actions
      */
     protected $params;
+    protected $data;
     protected $webroot;
     /**
      * HELPERS/COMPONENTS/BEHAVIORS
@@ -53,6 +54,7 @@ class Controller
      * @var array Contém o nome dos models a serem usados
      */
     protected $uses = array();
+    protected $usedModels = array();
     /**
      *
      * @var int Models que se interrelacionam precisam de um limite de
@@ -154,6 +156,8 @@ class Controller
                     include(APP_MODEL_DIR.$className.".php");
                 }
                 $this->{$className} = new $className($modelParams);
+                $this->usedModels[$className] = &$this->{$className};
+
             }
         }
 
@@ -176,7 +180,12 @@ class Controller
             foreach($this->helpers as $valor){
                 include_once( CORE_HELPERS_DIR.$valor.".php" );
                 $helperName = $valor.HELPER_CLASSNAME_SUFFIX;
-                $$valor = new $helperName();
+
+                $helperParams = array(
+                    "params" => $this->params,
+                    "data" => $this->data,
+                );
+                $$valor = new $helperName($helperParams);
                 /**
                  * Envia Helper para o view
                  */
@@ -200,6 +209,8 @@ class Controller
                  */
                 $componentParams = array(
                     "params" => $this->params,
+                    "data" => $this->data,
+                    "models" => $this->usedModels
                 );
                 $$valor = new $componentName($componentParams);
                 /**
