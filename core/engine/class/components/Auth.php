@@ -35,13 +35,11 @@ class AuthComponent extends Component
      * 
      * Obs.: $this->allow sobrescreve $this->deny
      *
+     * Dica: use allow em vez de deny
+     *
      * @var array Controllers e Actions permitidos
      */
-    protected $allow = array(
-        "site" => array(
-            "index", "login", "logout"
-        ),
-    );
+    protected $allow = array();
 
     /**
      * $deny
@@ -66,6 +64,8 @@ class AuthComponent extends Component
      *
      * Obs.: $this->allow sobrescreve $this->deny
      *
+     * Dica: use allow em vez de deny
+     * 
      * @var array Controllers e Actions probibidos
      */
     protected $deny = array("*");
@@ -79,28 +79,28 @@ class AuthComponent extends Component
     /**
      * CONFIGURAÇÃO
      */
-    /**
-     *
-     * @var string Model principal relacionado com o login
-     */
-    protected $model = "";
-    /**
-     *
-     * @var string Action padrão onde se localiza um login
-     */
-    protected $defaultLoginAction = "login";
-    /**
-     *
-     * @var array Endereço para onde deve ser redirecionado o usuário após login
-     */
-    public $redirectTo;
+        /**
+         *
+         * @var string Model principal relacionado com o login
+         */
+        protected $model = "";
+        /**
+         *
+         * @var string Action padrão onde se localiza um login
+         */
+        protected $defaultLoginAction = "login";
+        /**
+         *
+         * @var array Endereço para onde deve ser redirecionado o usuário após login
+         */
+        public $redirectTo;
 
-    public $logged;
+        public $logged;
 
-    protected $loginFields = array(
-        "username" => "username",
-        "password" => "password"
-    );
+        protected $loginFields = array(
+            "username" => "username",
+            "password" => "password"
+        );
 
     protected $incorrectLoginError = "Incorrect Login!";
 
@@ -111,13 +111,7 @@ class AuthComponent extends Component
 
         $this->forbidden = false;
 
-        /**
-         * Verifica se usuário está logado
-         */
-        if( !empty($_SESSION["Sys"]["Auth"]["logged"]) AND $_SESSION["Sys"]["Auth"]["logged"] ){
-            $this->logged = true;
-        }
-
+        $this->checkLogin();
     }
 
     /**
@@ -127,10 +121,59 @@ class AuthComponent extends Component
      *
      * Redireciona o usuário para a página de login se ele tiver acesso negado.
      *
-     * @author Alexandre de Oliveira
+     * @author Alexandre de Oliveira <chavedomundo@gmail.com>
      */
     public function afterBeforeFilter(){
         
+        /**
+         * LOGOUT
+         *
+         * Redireciona para $this->loginPage
+         */
+        if( $this->params["action"] == "logout" ){
+            unset($_SESSION["Sys"]["Auth"]);
+            unset($_SESSION["Sys"]["FormHelper"]["statusMessage"]);
+            $this->checkLogin();
+            redirect( translateUrl( $this->loginPage() ) );
+        }
+
+        /**
+         * AUTOMATIZAÇÃO
+         */
+            /**
+             * $this->loginPage não especificado
+             */
+            if( empty($this->loginPage["controller"]) AND empty($this->loginPage["action"]) ){
+                $this->loginPage( array(
+                    "controller" => $this->params["controller"],
+                    "action" => "login"
+                ));
+            } else if( empty($this->loginPage["action"]) ){
+                $this->loginPage( array(
+                    "controller" => $this->loginPage["controller"],
+                    "action" => "login"
+                ));
+            }
+
+            /**
+             * $this->redirectTo não especificado
+             */
+            if( empty($this->redirectTo["controller"]) AND empty($this->redirectTo["action"]) ){
+                $this->redirectTo( array(
+                    "controller" => $this->params["controller"],
+                    "action" => "index"
+                ));
+            } else if( empty($this->redirectTo["action"]) ){
+                $this->redirectTo( array(
+                    "controller" => $this->redirectTo["controller"],
+                    "action" => "index"
+                ));
+            }
+            /**
+             * @todo - redirectTo automático, sendo este igual à página que
+             * o usuário estava tentando acessar.
+             */
+
         /**
          * Limpa statusMessage
          */
@@ -141,16 +184,6 @@ class AuthComponent extends Component
             } else {
                 unset($_SESSION["Sys"]["FormHelper"]["statusMessage"]);
             }
-        }
-
-
-        /**
-         * Ordem de Logout
-         */
-        if( $this->params["action"] == "logout" ){
-            unset($_SESSION["Sys"]["Auth"]);
-            unset($_SESSION["Sys"]["FormHelper"]["statusMessage"]);
-            redirect( translateUrl( $this->loginPage() ) );
         }
 
         /**
@@ -224,7 +257,7 @@ class AuthComponent extends Component
                     }
                 }
             }
-        }
+        } // fim IF tentativa de login
         
 
         /**
@@ -238,6 +271,8 @@ class AuthComponent extends Component
 
                 $this->forbidden = true;
                 /**
+                 * $THIS->ALLOW
+                 *
                  * Verificar se há alguma configuração que sobrescreve a
                  * proibição atual para liberar o acesso.
                  *
@@ -268,6 +303,15 @@ class AuthComponent extends Component
                         else if( in_array($this->params["action"], array("login","logout")) ){
                             $this->forbidden = false;
                         }
+                    }
+                }
+                /**
+                 * Se $this->allow está vazio, não configurado, os actions login
+                 * e logout são permitidos
+                 */
+                else {
+                    if( in_array($this->params["action"], array("login","logout")) ){
+                        $this->forbidden = false;
                     }
                 }
             }
@@ -329,13 +373,14 @@ class AuthComponent extends Component
      * Define qual é a página de login padrão
      *
      * @param array $loginPage Qual é a página de login
+     * @author Alexandre de Oliveira <chavedomundo@gmail.com>
      */
     public function loginPage($loginPage=""){
         if( !empty($loginPage) ){
             /**
              * Se o usuário não está logado
              */
-            if( !$this->logged ){
+            //if( !$this->logged ){
                 /**
                  * defaultLoginPage
                  *
@@ -345,7 +390,7 @@ class AuthComponent extends Component
                 global $globalVars;
                 $globalVars["defaultLoginPage"] = $loginPage;
                 $this->loginPage = $loginPage;
-            }
+            //}
         } else {
             return $this->loginPage;
         }
@@ -356,6 +401,7 @@ class AuthComponent extends Component
      *
      * @param array $allow Quais Controllers/actions liberados (para sintaxe,
      *                      ver propriedade $this->allow)
+     * @author Alexandre de Oliveira <chavedomundo@gmail.com>
      */
     public function allow($allow){
         $this->allow = $allow;
@@ -366,6 +412,7 @@ class AuthComponent extends Component
      *
      * @param array $deny Quais Controllers/actions proibidos (para sintaxe,
      *                    ver propriedade $this->deny)
+     * @author Alexandre de Oliveira <chavedomundo@gmail.com>
      */
     public function deny($deny){
         $this->deny = $deny;
@@ -375,6 +422,7 @@ class AuthComponent extends Component
      *
      * @param array $redirectTo Contém endereço para onde o usuário será
      *                          redirecionado após efetuar login
+     * @author Alexandre de Oliveira <chavedomundo@gmail.com>
      */
     public function redirectTo($redirectTo=""){
         if( !empty($redirectTo) ){
@@ -387,6 +435,7 @@ class AuthComponent extends Component
      * loginFields()
      *
      * @param array $loginFields Indica quais os campos de login
+     * @author Alexandre de Oliveira <chavedomundo@gmail.com>
      */
     public function loginFields($loginFields){
         $this->loginFields = $loginFields;
@@ -395,6 +444,7 @@ class AuthComponent extends Component
      * model()
      *
      * @param array $model Qual o model relacionado ao login
+     * @author Alexandre de Oliveira <chavedomundo@gmail.com>
      */
     public function model($model=""){
         if( !empty($model) ){
@@ -408,6 +458,7 @@ class AuthComponent extends Component
      * Mensagem de erro de Login
      *
      * @param string $message Mensagem a ser mostrada ao usuário
+     * @author Alexandre de Oliveira <chavedomundo@gmail.com>
      */
     public function errorMessage($message=""){
         if( !empty($message) ){
@@ -421,12 +472,33 @@ class AuthComponent extends Component
      * Mensagem a ser mostrada relacionada a acesso negado
      *
      * @param string $message Mensagem a ser mostrada ao usuário
+     * @author Alexandre de Oliveira <chavedomundo@gmail.com>
      */
     public function deniedMessage($message=""){
         if( !empty($message) ){
             $this->deniedAccessMessage = $message;
         } else {
             return $this->deniedAccessMessage;
+        }
+    }
+
+    /**
+     * MÉTODOS DE VERIFICAÇÃO
+     */
+    /**
+     * checkLogin()
+     *
+     * Verifica se o usuário está logado
+     * @author Alexandre de Oliveira <chavedomundo@gmail.com>
+     */
+    protected function checkLogin(){
+        /**
+         * Verifica se usuário está logado
+         */
+        if( !empty($_SESSION["Sys"]["Auth"]["logged"]) AND $_SESSION["Sys"]["Auth"]["logged"] == 1 ){
+            $this->logged = true;
+        } else {
+            $this->logged = false;
         }
     }
 }

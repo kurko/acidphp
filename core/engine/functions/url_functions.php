@@ -19,7 +19,6 @@
 function translateUrl($mixed){
 
     global $engine;
-
     /**
      * $mixed é array
      */
@@ -27,8 +26,8 @@ function translateUrl($mixed){
         $controller = ( empty($mixed["controller"]) ) ? $engine->callController : $mixed["controller"];
         $action = ( empty($mixed["action"]) ) ? "index" : $mixed["action"];
         $args = ( empty($mixed[0]) ) ? "" : $mixed[0];
-        
-        if( $args[0] != "/" ){
+
+        if( isset($args[0]) AND $args[0] != "/" ){
             $args = "/".$args;
         }
 
@@ -74,6 +73,8 @@ function translateUrl($mixed){
 
 /**
  * Redireciona o cliente para o endereço $url indicado.
+ *
+ * Se $url é uma array, trata-a para um endereço válido
  *
  * @param string $url Endereço Url válido a ser aberto
  * @return boolean Retorna falso se não conseguir redirecionar
