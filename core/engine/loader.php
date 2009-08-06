@@ -24,6 +24,7 @@ include(CORE_CLASS_DIR."Config.php");
 include(CORE_FUNCTIONS_FILE);
 include(URL_FUNCTIONS_FILE);
 include(CORE_FUNCTIONS_DIR."StrTreatment.php");
+include(CORE_FUNCTIONS_DIR."Security.php");
 
 /**
  * CONFIGURAÇÕES

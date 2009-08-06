@@ -8,7 +8,7 @@ class AppController extends Controller
         
         $this->auth->allow(array(
             "site" => array(
-                //"outro", "index"
+                "index"
             ),
         ));
 
@@ -18,11 +18,6 @@ class AppController extends Controller
         $this->auth->deniedMessage("Você não tem permissão de acesso!");
         $this->auth->model("Usuario");
 
-        //pr($_SESSION);
-
-
-        //pr( $this->auth->loginPage() );
-        
     }
     
 }

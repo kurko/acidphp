@@ -161,11 +161,17 @@ class AuthComponent extends Component
         }
 
         /**
-         * Tentativa de Login
+         * TENTATIVA DE LOGIN
          *
          * Verifica se dados enviados estão corretos para Login
          */
         if( !$this->logged AND !empty($this->data) ){
+
+            /**
+             * Assegura os dados passados pelo usuário
+             */
+            $data = Security::Sanitize($this->data);
+            
             /**
              * Se um model foi especificado
              */
@@ -173,14 +179,14 @@ class AuthComponent extends Component
                 /**
                  * Se os dados enviados correspondem ao model do Auth
                  */
-                if( array_key_exists($this->model(), $this->data)){
+                if( array_key_exists($this->model(), $data)){
 
                     /**
                      * Carrega o $model verdadeiro relacionado ao Login
                      */
                     $model = $this->models[ $this->model() ];
 
-                    $dataFields = $this->data[ $this->model() ];
+                    $dataFields = $data[ $this->model() ];
                     /**
                      * Cria conditions
                      */
@@ -194,6 +200,9 @@ class AuthComponent extends Component
                                         );
                     $tempResult = array_keys($result);
 
+                    /**
+                     * VERIFICAÇÃO DE DADOS PARA LOGIN
+                     */
                     /**
                      * Usuário existe
                      */

@@ -187,6 +187,7 @@ class Model
      */
     public function saveAll($data, $options = array()){
         if( is_array($data) ){
+            $data = Security::Sanitize($data);
             /**
              * Loop por cada tabela dos valores enviados em $data
              */

@@ -1,11 +1,11 @@
 <?php
 /**
- * Arquivo que representa a estrutura MODEL de um MVC
+ * Classe de tratamento e leitura especial de strings e variáveis em geral
  *
- * @package MVC
- * @name Model
+ * @package Core Functions
+ * @name StrTreatment
  * @author Alexandre de Oliveira <chavedomundo@gmail.com>
- * @since v0.1, 19/07/2009
+ * @since v0.1, 04/08/2009
  */
 class StrTreament
 {
