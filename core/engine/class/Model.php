@@ -98,12 +98,12 @@ class Model
          * repetimos o processo.
          */
         global $describedTables;
-        if( !array_key_exists($this->useTable, $describedTables) ){
+        if( !array_key_exists( get_class($this), $describedTables) ){
             $this->describeTable();
         } else {
-            $this->tableDescribed = $describedTables[$this->useTable];
+            $this->tableDescribed = $describedTables[ get_class($this) ];
         }
-
+        
         /**
          * CRIA RELACIONAMENTOS
          */
@@ -176,6 +176,9 @@ class Model
     /**
      * SAVEALL()
      *
+     * $data deve ter o seguinte formato:
+     *      [model]=>array([campo]=>valor), [modelFilho]=>array([campo]=>valor)
+     *
      * @author Alexandre de Oliveira <chavedomundo@gmail.com>
      * @since v0.1
      * @param array $data Dados enviados para salvar no DB
@@ -184,8 +187,9 @@ class Model
      */
     public function saveAll($data, $options = array()){
         if( is_array($data) ){
+            $data = Security::Sanitize($data);
             /**
-             * Loop por cada tabela com valores enviados
+             * Loop por cada tabela dos valores enviados em $data
              */
             foreach($data as $model=>$campos){
 
@@ -227,6 +231,18 @@ class Model
 
                             if( array_key_exists($campo, $this->tableDescribed) ){
                                 $camposStr[] = $campo;
+
+                                /**
+                                 * Checkbox? Tinyint?
+                                 * 
+                                 * Verifica se o campo é do tipo checkbox.
+                                 */
+                                $type = StrTreament::getNameSubStr($this->tableDescribed[ $campo ]["Type"], "(");
+                                if( in_array($type, array("tinyint","bool") )){
+                                    if( !empty($valor) )
+                                        $valor = '1';
+                                }
+                                
                                 $valorStr[] = $valor;
                             } else {
                                 showWarning("Campo inexistente configurado no formulário.");
@@ -381,6 +397,12 @@ class Model
      * MÉTODOS INTERNOS (PRIVATE)
      */
 
+    /**
+     * Descreve as tabelas
+     *
+     * @global array $describedTables
+     * @param array $params
+     */
     private function describeTable($params = ""){
         $conn = ( empty($params["conn"]) ) ? $this->conn : $params["conn"];
 
@@ -392,12 +414,8 @@ class Model
 
         foreach($conn->query($describeSql, "ASSOC") as $tabela=>$info){
             $this->tableDescribed[$info['Field']] = $info;
-            $describedTables[$this->useTable][$info['Field']] = $info;
+            $describedTables[ get_class($this) ][$info['Field']] = $info;
         }
     }
-
-
-
 }
-
 ?>

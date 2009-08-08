@@ -18,13 +18,12 @@ class SiteController extends AppController
         /*
          * Código de exemplo
          */
-        
         $temp = $this->Usuario->find(array(
                                         'order' => array('Tarefa.id ASC'),
                                         'limit' => '3',
                                     ),
                                     "all"
-            );
+        );
 
         $this->set('temp', $temp);
     }
@@ -34,6 +33,7 @@ class SiteController extends AppController
     }
 
     function save(){
+        pr( $this->data );
         pr( $this->Usuario->saveAll( $this->data ) );
     }
 
@@ -43,6 +43,17 @@ class SiteController extends AppController
         $this->render("save");
     }
 
+    function login(){
+        
+    }
+
+    function outro(){
+
+    }
+
+    function outro2(){
+        
+    }
 
 }
 ?>

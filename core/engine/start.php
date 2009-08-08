@@ -17,6 +17,14 @@
 $startTime = microtime(true);
 
 /**
+ * SESSION
+ *
+ * Inicializa Session
+ */
+session_name( Config::read("securityKey") );
+session_start();
+
+/**
  * CONEXÃO
  *
  * Conexão principal com o banco de dados
@@ -40,6 +48,10 @@ $engine = new Engine(array(
  * Tabelas que já foram descritas
  */
 $describedTables = array();
+/**
+ * Página com tela de login padrão
+ */
+$globalVars = array();
 
 /**
  * CARREGA O CONTROLLER NECESSÁRIO

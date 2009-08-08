@@ -1,0 +1,95 @@
+== AuthComponent ==
+
+O AuthComponent serve para autenticar usuários (login) automaticamente. Após
+configurá-lo dentro de AppController, ele toma conta de todo o processo de
+autenticação.
+
+=== Guia de Configuração ===
+
+Você precisa configurar alguns itens básicos, como qual é a página que o usuário
+será redirecionado após login, quais página são liberadas para usuários não
+logados, entre outros.
+
+Você deve chamar o AuthComponent nas propriedades do AppController.php (ou
+controller que você deseja usar).
+
+A seguir, estão os comandos básicos de configuração. Copie o código abaixo e
+cole dentro do método beforeFilter() do arquivo app/app_controller.php (se o
+método não existe, crie-o).
+
+eg.
+
+// app/app_controller.php
+
+class AppController extends Controller
+{
+
+    var $components = array("Auth");
+
+    /**
+     * beforeFilter() é chamado automaticamente sempre antes de qualquer action
+     */
+    function beforeFilter(){
+
+        /**
+         * Auth::allow(array) indica quais os controllers e actions usuários não
+         * logados podem acessar.
+         *
+         * Há três formatos possíveis de indicar estas permissões:
+         *      - Libera um Controller inteiro -> Controller é um valor na array:
+         *      ex.: array(
+         *               "controllerA", "controllerB"
+         *           );
+         *
+         *      - Libera Actions específicos -> Controller é um índice com
+         *        subarray de Actions.
+         *      ex.: array(
+         *               "controllerA" => array(
+         *                   "actionA", "actionB"
+         *               ),
+         *               "controllerB"
+         *           );
+         *
+         *      - Libera todos os Controllers -> Um valor de array com asterísco (*)
+         *      ex.: array("*");
+         *
+         * Auth::deny() tem o efeito contrário a allow(), indicando quais os
+         * controllers e actions são proibidos. Dica: use allow() sempre.
+         *
+         * Obs.: Auth::allow() sobrescreve Auth::deny().
+         */
+            $this->auth->allow(array(
+                "site" => array(
+                    "index"
+                ),
+            ));
+            
+        // Após login com sucesso, para onde o usuário deve ser redirecionado
+        $this->auth->redirectTo( array("controller" => "site", "action" => "index") );
+
+        // Qual é a página de login
+        $this->auth->loginPage( array("controller" => "site", "action" => "login") );
+
+        // Mensagem de erro: dados incorretos
+        $this->auth->errorMessage("Seus dados estão incorretos!");
+
+        // Mensagem de erro: quando usuário tenta acessar action proibida
+        $this->auth->deniedMessage("Você não tem permissão de acesso!");
+
+        // Qual é o model que contém username e password dos usuários para login
+        $this->auth->model("Usuario");
+    }
+
+}
+
+=== Regras de liberação ===
+
+As regras de liberação a usuários não logados são como as demonstradas a seguir.
+
+Actions: a,b,c,d;
+
+Regras:
+
+a) allow(a,c)           -> libera a,c e trava b,d
+b) allow(a,c) deny(a,c) -> libera a,c (se allow está configurado, ignora deny)
+c) deny(a)              -> bloqueia somente a e libera o resto

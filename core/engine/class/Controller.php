@@ -25,14 +25,26 @@ class Controller
      * actions
      */
     protected $params;
+    protected $data;
     protected $webroot;
+    /**
+     * HELPERS/COMPONENTS/BEHAVIORS
+     */
     /**
      * HELPERS
      *
      * @var array Helpers são objetos que auxiliam em tarefas de View, como
      * Formulários, Javascript, entre outros.
      */
-    protected $helpers = array("Html", "Form");
+    protected $helpers = array("Html");
+    /**
+     * COMPONENTS
+     *
+     * @var array Components são objetos que automatizam processos de nível de
+     * Controller, tais como autenticação e login
+     */
+    protected $components = array();
+    protected $loadedComponents = array();
 
     /**
      * USES (MODELS)
@@ -42,6 +54,7 @@ class Controller
      * @var array Contém o nome dos models a serem usados
      */
     protected $uses = array();
+    protected $usedModels = array();
     /**
      *
      * @var int Models que se interrelacionam precisam de um limite de
@@ -72,6 +85,14 @@ class Controller
      */
     protected $actionCallback;
 
+    /**
+     * MÉTODOS
+     */
+    /**
+     * __construct();
+     *
+     * @param array $param Parâmetros de inicialização
+     */
     function __construct($param = ''){
 
         /**
@@ -92,6 +113,7 @@ class Controller
         $this->params["controller"] = $this->engine->callController;
         $this->params["action"] = $this->engine->callAction;
         $this->params["args"] = $this->engine->arguments;
+        $this->params["webroot"] = $this->engine->webroot;
         /**
          * Ajusta $_POST
          */
@@ -134,11 +156,15 @@ class Controller
                     include(APP_MODEL_DIR.$className.".php");
                 }
                 $this->{$className} = new $className($modelParams);
+                $this->usedModels[$className] = &$this->{$className};
+
             }
         }
 
         /**
          * HELPERS, COMPONENTS, BEHAVIORS
+         *
+         * Inicialização destes automatizadores de processos.
          */
         /**
          * HELPERS
@@ -154,11 +180,47 @@ class Controller
             foreach($this->helpers as $valor){
                 include_once( CORE_HELPERS_DIR.$valor.".php" );
                 $helperName = $valor.HELPER_CLASSNAME_SUFFIX;
-                $$valor = new $helperName();
+
+                $helperParams = array(
+                    "params" => $this->params,
+                    "data" => $this->data,
+                );
+                $$valor = new $helperName($helperParams);
+                /**
+                 * Envia Helper para o view
+                 */
                 $this->set( strtolower($valor), $$valor);
             }
         }
-
+        /**
+         * COMPONENTS
+         */
+        if( count($this->components) ){
+            /**
+             * Loop por cada component requisitado.
+             *
+             * Carrega classe do Component, instancia e envia para o Controller
+             */
+            foreach($this->components as $valor){
+                include_once( CORE_COMPONENTS_DIR.$valor.".php" );
+                $componentName = $valor.COMPONENT_CLASSNAME_SUFFIX;
+                /**
+                 * Instancia compoment
+                 */
+                $componentParams = array(
+                    "params" => $this->params,
+                    "data" => $this->data,
+                    "models" => $this->usedModels
+                );
+                $$valor = new $componentName($componentParams);
+                /**
+                 * Envia o Component para a Action do Controller
+                 */
+                $loadedComponentName = StrTreament::firstToLower($valor);
+                $this->{$loadedComponentName} = $$valor;
+                $this->loadedComponents[] = $loadedComponentName;
+            }
+        }
 
 
         /**
@@ -172,7 +234,7 @@ class Controller
         $this->action = (empty( $this->engine->callAction )) ? 'index' : $this->engine->callAction;
 
         /**
-         * EXECUTA
+         * EXECUTA MVC
          *
          * Começa execução de métodos necessários.
          */
@@ -187,7 +249,7 @@ class Controller
      * MÉTODOS DE SUPORTE
      *
      * Todos os métodos que dão suporte ao funcionamento do sistema.
-     *      ex.: render, set, beforeFilter, afterFilter, trigger, ect
+     *      ex.: render, set, redirect, beforeFilter, afterFilter, trigger, ect
      */
     /**
      * TRIGGER()
@@ -228,9 +290,20 @@ class Controller
          */
         if( $actionExists ){
             /**
-             * $this->beforeFilter() é chamado sempre antes de qualquer açãoo
+             * $this->beforeFilter() é chamado sempre antes de qualquer ação
              */
             $this->beforeFilter();
+            /**
+             * Components->afterBeforeFilter()
+             *
+             * Se há afterBeforeFilter() no component, carrega
+             */
+            foreach( $this->loadedComponents as $component ){
+                if( method_exists($this->$component, "afterBeforeFilter") ){
+                    $this->$component->afterBeforeFilter();
+                }
+            }
+
             /**
              * Chama a action requerida com seus respectivos argumentos.
              */
@@ -295,10 +368,40 @@ class Controller
         return true;
     }
 
+    /**
+     * Envia um valor $varValue para um view em uma variável com nome $varNome.
+     *
+     * @param string $varName Nome da variável com valor dentro do view
+     * @param mixed $varValue Valor da variável a ser passada para o view
+     */
     protected function set($varName, $varValue){
         $this->globalVars[$varName] = $varValue;
     }
 
+    /**
+     * @todo - implementar
+     *
+     * @param <type> $url
+     */
+    protected function redirect($url){
+        if( is_array($url) ){
+            if( !empty($url["controller"]) ){
+                echo $this->webroot.$url["controller"].$url["action"];
+            } else {
+                echo $this->webroot."<---";
+            }
+        } else if( is_string($url) ){
+            
+        } else {
+            
+        }
+    }
+
+    /**
+     * EVENTOS
+     *
+     * beforeFilter, afterFilter
+     */
 
     protected function beforeFilter(){
 
