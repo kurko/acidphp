@@ -81,3 +81,15 @@ class AppController extends Controller
     }
 
 }
+
+=== Regras de liberação ===
+
+As regras de liberação a usuários não logados são como as demonstradas a seguir.
+
+Actions: a,b,c,d;
+
+Regras:
+
+a) allow(a,c)           -> libera a,c e trava b,d
+b) allow(a,c) deny(a,c) -> libera a,c (se allow está configurado, ignora deny)
+c) deny(a)              -> bloqueia somente a e libera o resto

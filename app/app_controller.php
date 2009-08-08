@@ -5,20 +5,13 @@ class AppController extends Controller
     var $helpers = array("Html", "Form");
 
     function beforeFilter(){
-
-        /*
         $this->auth->allow(array(
             "site" => array(
-                //"index"
-            ),
-        ));
-         * 
-         */
+                "index","outro"
+            )
 
-        //$this->auth->redirectTo( array("controller" => "site", "action" => "outro") );
-        //$this->auth->loginPage( array("controller" => "site", "action" => "login") );
-        $this->auth->errorMessage("Seus dados estão incorretos!");
-        $this->auth->deniedMessage("Você não tem permissão de acesso!");
+        ));
+
         $this->auth->model("Usuario");
 
     }

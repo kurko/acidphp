@@ -47,6 +47,13 @@ class SiteController extends AppController
         
     }
 
+    function outro(){
+
+    }
+
+    function outro2(){
+        
+    }
 
 }
 ?>

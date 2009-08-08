@@ -9,6 +9,20 @@
  * @author Alexandre de Oliveira <chavedomundo@gmail.com>
  * @since v0.1, 04/08/2009
  */
+/**
+ * Configurações básicas necessárias:
+ *
+ *      a) var $components = array("Auth") -> propriedade de AppController
+ *
+ *      Em beforeFilter(), dentro de AppController:
+ *
+ *      b) $this->auth->allow( array() ) -> qual controller/action será liberado
+ *      c) $this->auth->redirectTo -> para onde o usuário é levado após login
+ *      d) $this->auth->loginPage -> qual a página de login
+ *      e) $this->auth->errorMessage -> mensagem de erro personalizada
+ *      f) $this->auth->deniedMessage -> mensagem personalizada de acesso negado
+ *      g) $this->auth->model -> model que contém os dados de login de usuário
+ */
 class AuthComponent extends Component
 {
     protected $loginPage = array();
@@ -77,6 +91,12 @@ class AuthComponent extends Component
     protected $forbidden = false;
 
     /**
+     *
+     * @var bool Indica se o usuário está logado ou não
+     */
+    public $logged;
+
+    /**
      * CONFIGURAÇÃO
      */
         /**
@@ -95,16 +115,29 @@ class AuthComponent extends Component
          */
         public $redirectTo;
 
-        public $logged;
-
+        /**
+         *
+         * @var array Indica quais são os campos de login padrão
+         */
         protected $loginFields = array(
             "username" => "username",
             "password" => "password"
         );
 
-    protected $incorrectLoginError = "Incorrect Login!";
+    /**
+     * MENSAGENS DE STATUS
+     */
+    /**
+     *
+     * @var string Mensagem de login incorreto
+     */
+    protected $incorrectLoginMessage = "Incorrect information given! Please retry.";
+    /**
+     *
+     * @var string Mensagem de acesso negado
+     */
+    protected $deniedAccessMessage = "Denied Access! Please login.";
 
-    protected $deniedAccessError = "Denied Access!";
 
     function __construct($params = ""){
         parent::__construct($params);
@@ -261,60 +294,118 @@ class AuthComponent extends Component
         
 
         /**
-         * Usuário Logado
+         * Usuário Não Logado
+         *
+         * Verifica controllers/actions proibidos
          */
         if( !$this->logged ){
-            /**
-             * Se está tudo bloqueado
-             */
-            if( in_array("*", $this->deny) ){
 
-                $this->forbidden = true;
+            /**
+             * $THIS->ALLOW & $THIS->DENY
+             *
+             * Verifica as duas propriedades allow e deny, faz ajustes de
+             * bloqueio e por fim verifica se o action atual não é de login ou
+             * logout. Estes dois últimos são liberados por padrão.
+             */
+            /**
+             * $THIS->ALLOW configurado
+             *
+             * Verificar se há alguma configuração que sobrescreve a
+             * proibição atual para liberar o acesso.
+             *
+             * Obs.: $this->allow sobrescreve $this->deny
+             */
+            if( !empty($this->allow) ){
+
                 /**
-                 * $THIS->ALLOW
-                 *
-                 * Verificar se há alguma configuração que sobrescreve a
-                 * proibição atual para liberar o acesso.
-                 *
-                 * Obs.: $this->allow sobrescreve $this->deny
+                 * Se allow está configurado, tudo está bloqueado por padrão,
+                 * exceto o que for especificado
                  */
-                if( !empty($this->allow) ){
-                    /**
-                     * Se o controller atual está totalmente liberado
-                     */
-                    if( in_array($this->params["controller"], $this->allow) ){
-                        $this->forbidden = false;
-                    }
-                    /**
-                     * Se há actions do controller atual liberados, verifica se o
-                     * action atual está liberado
-                     */
-                    else if( array_key_exists($this->params["controller"], $this->allow) ){
-                        /**
-                         * Verifica se o Action está liberado
-                         */
-                        if( in_array($this->params["action"], $this->allow[$this->params["controller"]]) ){
-                            $this->forbidden = false;
-                        }
-                        /**
-                         * Se não está, verifica ainda se o action é login. Login
-                         * é universalmente liberado
-                         */
-                        else if( in_array($this->params["action"], array("login","logout")) ){
-                            $this->forbidden = false;
-                        }
-                    }
+                $this->forbidden = true;
+                
+                /**
+                 * Se o controller atual está totalmente liberado
+                 */
+                if( in_array($this->params["controller"], $this->allow) ){
+                    $this->forbidden = false;
                 }
                 /**
-                 * Se $this->allow está vazio, não configurado, os actions login
-                 * e logout são permitidos
+                 * Se há actions do controller atual liberados, verifica se o
+                 * action atual está liberado
                  */
-                else {
-                    if( in_array($this->params["action"], array("login","logout")) ){
+                else if( array_key_exists($this->params["controller"], $this->allow) ){
+                    /**
+                     * Verifica se o Action está liberado
+                     */
+                    if( in_array($this->params["action"], $this->allow[$this->params["controller"]]) ){
                         $this->forbidden = false;
                     }
                 }
             }
+            /**
+             * Se $this->allow está vazio, não configurado, os actions login
+             * e logout são permitidos
+             */
+            else {
+
+                /**
+                 * Allow vazio
+                 *
+                 * Se deny está configurado, tudo está liberado por padrão,
+                 * exceto o que for especificado
+                 */
+                $this->forbidden = false;
+                
+                /**
+                 * $THIS->DENY configurado
+                 *
+                 * $this->allow está vazio
+                 *
+                 * Verifica se há um asterísco como valor na array $this->deny.
+                 * Se sim, tudo está bloqueado. Se não, verifica se há
+                 * alguma configuração específica para algum controller/action
+                 * e faz o bloqueado de acordo.
+                 */
+                if( !empty($this->deny) ){
+
+                    /**
+                     * *: Tudo bloqueado
+                     */
+                    if( in_array("*", $this->deny) ){
+                        $this->forbidden = true;
+                    }
+
+                    /**
+                     * Verifica se controller está completamente bloqueado
+                     */
+                    else if( in_array($this->params["controller"], $this->deny) ){
+                        $this->forbidden = true;
+                    }
+                    /**
+                     * Se o controller bloqueado contém configurações de
+                     * bloqueio de actions
+                     */
+                    else if( array_key_exists($this->params["controller"], $this->deny) ){
+                        /**
+                         * Verifica se o Action está bloqueado
+                         */
+                        if( in_array($this->params["action"], $this->deny[$this->params["controller"]]) ){
+                            $this->forbidden = true;
+                        }
+                    }
+
+                } else {
+                    $this->forbidden = true;
+                }
+            }
+
+            /**
+             * actions login/logout sempre liberados
+             */
+            if( in_array($this->params["action"], array("login","logout")) ){
+                $this->forbidden = false;
+            }
+
         }
 
         /**
