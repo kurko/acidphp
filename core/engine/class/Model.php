@@ -18,15 +18,17 @@ class Model
      * @var string Tabela a ser usada
      */
     protected $useTable;
+
     /**
-     *
-     * @var array Indica que este Model tem outros sub-Models
+     * RELACIONAMENTOS DE MODELS
      */
-    public $hasOne = array();
-    public $hasMany = array();
-    public $belongsTo = array();
-    public $modelsLoaded = array();
-    public $tableAlias = array();
+        /**
+         *
+         * @var array Indica que este Model tem outros sub-Models
+         */
+        public $hasOne = array();
+        public $hasMany = array();
+        public $belongsTo = array();
 
     /**
      * CONEXÃO
@@ -45,14 +47,21 @@ class Model
     /**
      * CONFIGURAÇÕES INTERNAS (PRIVATE)
      */
-    /**
-     * Array contendo as tabelas existentes na Base de Dados
-     *
-     * @var array
-     */
-    private $dbTables;
+        /**
+         * Array contendo as tabelas existentes na Base de Dados
+         *
+         * @var array
+         */
+        private $dbTables;
 
-    public $sqlObject;
+        public $sqlObject;
+
+        public $modelsLoaded = array();
+        public $tableAlias = array();
+
+        public $validation = array();
+
+        protected $params;
 
 
     /**
@@ -77,6 +86,11 @@ class Model
         }
 
         //echo "<strong>". get_class($this) . " - " . $currentRecursive . "</strong><br />";
+
+        /**
+         * CONFIGURAÇÃO DE AMBIENTE
+         */
+        $this->params = $params["params"];
 
         /**
          * CONEXÃO
@@ -188,141 +202,157 @@ class Model
     public function saveAll($data, $options = array()){
         if( is_array($data) ){
             $data = Security::Sanitize($data);
+
             /**
-             * Loop por cada tabela dos valores enviados em $data
+             * VALIDATE
              */
-            foreach($data as $model=>$campos){
+            if( $this->validate($data) ){
 
                 /**
-                 * Verifica se o Model requisitado é o próprio ou são filhos
+                 * Loop por cada tabela dos valores enviados em $data
                  */
-                if( get_class($this) == $model ){
-                    $tabela = $this->useTable;
-                    $modelPai = true;
+                foreach($data as $model=>$campos){
 
                     /**
-                     * Verifica se este Model pertence a outro
+                     * Verifica se o Model requisitado é o próprio ou são filhos
                      */
-                    if( !empty($this->belongsTo) ){
-                        foreach( $this->belongsTo as $model=>$propriedades ){
-                            if( array_key_exists($model, $data) ){
-                                $campos[ $propriedades["foreignKey"] ] = $data[$model]["id"];
+                    if( get_class($this) == $model ){
+                        $tabela = $this->useTable;
+                        $modelPai = true;
+
+                        /**
+                         * Verifica se este Model pertence a outro
+                         */
+                        if( !empty($this->belongsTo) ){
+                            foreach( $this->belongsTo as $model=>$propriedades ){
+                                if( array_key_exists($model, $data) ){
+                                    $campos[ $propriedades["foreignKey"] ] = $data[$model]["id"];
+                                }
                             }
+                        }
+
+                    } else {
+                        $tabela = $this->{$model}->useTable;
+                        $modelPai = false;
+                        if( array_key_exists($model, $this->hasOne) ){
+                            $modelsFilhos[$model] = $campos;
+                        } else if( array_key_exists($model, $this->hasMany) ){
+                            $modelsFilhos[$model] = $campos;
                         }
                     }
 
-                } else {
-                    $tabela = $this->{$model}->useTable;
-                    $modelPai = false;
-                    if( array_key_exists($model, $this->hasOne) ){
-                        $modelsFilhos[$model] = $campos;
-                    } else if( array_key_exists($model, $this->hasMany) ){
-                        $modelsFilhos[$model] = $campos;
-                    }
-                }
+                    if( $modelPai ){
 
-                if( $modelPai ){
+                        if( in_array($tabela, $this->dbTables) ){
+                            /**
+                             * Loop por cada campo e seus valores
+                             */
+                            foreach( $campos as $campo=>$valor ){
 
-                    if( in_array($tabela, $this->dbTables) ){
+                                if( array_key_exists($campo, $this->tableDescribed) ){
+                                    $camposStr[] = $campo;
+
+                                    /**
+                                     * Checkbox? Tinyint?
+                                     *
+                                     * Verifica se o campo é do tipo checkbox.
+                                     */
+                                    $type = StrTreament::getNameSubStr($this->tableDescribed[ $campo ]["Type"], "(");
+                                    if( in_array($type, array("tinyint","bool") )){
+                                        if( !empty($valor) )
+                                            $valor = '1';
+                                    }
+
+                                    $valorStr[] = $valor;
+                                } else {
+                                    showWarning("Campo inexistente configurado no formulário.");
+                                }
+                            }
+
+                            if( !empty($camposStr) ){
+                                $tempSql = "INSERT INTO
+                                                ".$tabela."
+                                                    (".implode(",", $camposStr).")
+                                            VALUES
+                                                ('".implode("','", $valorStr)."')
+                                            ";
+                                /**
+                                 * SQL deste campo
+                                 */
+                                $sql[] = $tempSql;
+                            }
+                            unset( $camposStr );
+                            unset( $valorStr );
+                        }
                         /**
-                         * Loop por cada campo e seus valores
+                         * Ops.. Alguma tabela não existe
                          */
-                        foreach( $campos as $campo=>$valor ){
+                        else {
+                            //showWarning("Alguma tabela especificada não existe");
+                        }
+                    } // fim modelFather==true
 
-                            if( array_key_exists($campo, $this->tableDescribed) ){
-                                $camposStr[] = $campo;
+                }
+                //return $sql;
+
+                /**
+                 * SALVA SQL CRIADO
+                 *
+                 * Se houverem dados de tabelas relacionadas, envia dados para seus
+                 * respectivos Models para serem salvas
+                 */
+                if( count($sql) > 0 ){
+                    foreach( $sql as $instrucao ){
+                        /**
+                         * Salva dados na tabela deste Model
+                         */
+                        //pr($instrucao. get_class($this));
+                        //$this->conn->exec($instrucao);
+                        //$lastInsertId = $this->conn->lastInsertId();
+                        echo 'INSERIDO LINHA 292';
+
+                        $modelsFilhos = array();
+                        /**
+                         * Se houverem Models filhos relacionados,
+                         * envia dados para serem salvos
+                         */
+                        if( !empty($modelsFilhos) ){
+                            foreach($modelsFilhos as $model=>$campos){
+                                $dataTemp[$model] = $campos;
 
                                 /**
-                                 * Checkbox? Tinyint?
-                                 * 
-                                 * Verifica se o campo é do tipo checkbox.
+                                 * Pega o ForeignKey
                                  */
-                                $type = StrTreament::getNameSubStr($this->tableDescribed[ $campo ]["Type"], "(");
-                                if( in_array($type, array("tinyint","bool") )){
-                                    if( !empty($valor) )
-                                        $valor = '1';
+                                if( array_key_exists($model, $this->hasOne) ){
+                                    $foreignKey = $this->hasOne[$model]["foreignKey"];
+                                } else if( array_key_exists($model, $this->hasMany) ){
+                                    $foreignKey = $this->hasMany[$model]["foreignKey"];
+                                } else if( array_key_exists($model, $this->belongsTo) ){
+                                    $foreignKey = $this->belongsTo[$model]["foreignKey"];
+                                } else if( array_key_exists($model, $this->hasAndBelongsToMany) ){
+                                    $foreignKey = $this->hasAndBelongsToMany[$model]["foreignKey"];
                                 }
-                                
-                                $valorStr[] = $valor;
-                            } else {
-                                showWarning("Campo inexistente configurado no formulário.");
+
+                                /**
+                                 * Envia dados para Models relacionados salvarem
+                                 */
+                                $dataTemp[$model][ $foreignKey ] = $lastInsertId;
+                                $this->$model->SaveAll( $dataTemp );
+
+                                unset($dataTemp);
                             }
                         }
-
-                        if( !empty($camposStr) ){
-                            $tempSql = "INSERT INTO
-                                            ".$tabela."
-                                                (".implode(",", $camposStr).")
-                                        VALUES
-                                            ('".implode("','", $valorStr)."')
-                                        ";
-                            /**
-                             * SQL deste campo
-                             */
-                            $sql[] = $tempSql;
-                        }
-                        unset( $camposStr );
-                        unset( $valorStr );
                     }
-                    /**
-                     * Ops.. Alguma tabela não existe
-                     */
-                    else {
-                        //showWarning("Alguma tabela especificada não existe");
-                    }
-                } // fim modelFather==true
 
-            }
-            //return $sql;
-
-            /**
-             * SALVA SQL CRIADO
-             *
-             * Se houverem dados de tabelas relacionadas, envia dados para seus
-             * respectivos Models para serem salvas
-             */
-            if( count($sql) > 0 ){
-                foreach( $sql as $instrucao ){
-                    /**
-                     * Salva dados na tabela deste Model
-                     */
-                    //pr($instrucao. get_class($this));
-                    $this->conn->exec($instrucao);
-                    $lastInsertId = $this->conn->lastInsertId();
-
-                    /**
-                     * Se houverem Models filhos relacionados,
-                     * envia dados para serem salvos
-                     */
-                    if( !empty($modelsFilhos) ){
-                        foreach($modelsFilhos as $model=>$campos){
-                            $dataTemp[$model] = $campos;
-
-                            /**
-                             * Pega o ForeignKey
-                             */
-                            if( array_key_exists($model, $this->hasOne) ){
-                                $foreignKey = $this->hasOne[$model]["foreignKey"];
-                            } else if( array_key_exists($model, $this->hasMany) ){
-                                $foreignKey = $this->hasMany[$model]["foreignKey"];
-                            } else if( array_key_exists($model, $this->belongsTo) ){
-                                $foreignKey = $this->belongsTo[$model]["foreignKey"];
-                            } else if( array_key_exists($model, $this->hasAndBelongsToMany) ){
-                                $foreignKey = $this->hasAndBelongsToMany[$model]["foreignKey"];
-                            }
-
-                            /**
-                             * Envia dados para Models relacionados salvarem
-                             */
-                            $dataTemp[$model][ $foreignKey ] = $lastInsertId;
-                            $this->$model->SaveAll( $dataTemp );
-
-                            unset($dataTemp);
-                        }
-                    }
+                    return true;
                 }
-
-                return true;
+            }
+            /**
+             * Não validou
+             */
+            else {
+                //pr($_SESSION);
+                redirect($this->params["post"]["formUrl"]);
             }
         }
 
@@ -392,6 +422,161 @@ class Model
         }
 
     }// fim find()
+
+
+    public function validate($mixed, $sub = false){
+
+        /**
+         * Limpa Session
+         */
+        if( !$sub )
+            unset($_SESSION["Sys"]["FormHelper"]["notValidated"]);
+
+
+        $validationRules = $this->validation;
+        $vE = array();
+
+        if( is_array($mixed) ){
+
+
+            foreach($mixed as $model=>$campos){
+
+                if( $model == get_class($this) ){
+
+                    if( !empty($validationRules) ){
+
+                        foreach( $campos as $campo=>$valor ){
+
+                            /**
+                             * Se o campo possui regras de validação
+                             */
+                            if( array_key_exists($campo, $validationRules ) ){
+
+                                //echo $model.'.'.$campo.$validationRules[$campo]["rule"];
+                                /**
+                                 * VALIDAÇÃO
+                                 */
+                                $vR = $validationRules[$campo];
+                                /**
+                                 * Cada campo pode ter mais de uma validação
+                                 */
+                                /**
+                                 * O campo tem somente uma validação
+                                 */
+                                if( array_key_exists("rule", $vR) ){
+
+                                    /**
+                                     * REGRA PERSONALIZADA
+                                     *
+                                     * Se a regra está configurada no Model
+                                     */
+                                    if( method_exists($this, $vR["rule"]) ){
+
+                                        /**
+                                         * Se não validou
+                                         */
+                                        if( !$this->{$vR["rule"]}($valor) ){
+
+                                            /**
+                                             * Caso seja um model-filho no
+                                             * relacionamento de models
+                                             */
+                                            if( $sub )
+                                                $vE[$campo] = '1';
+                                            else
+                                                $vE[$model][$campo] = '1';
+
+                                            /**
+                                             * Session para formHelper
+                                             */
+                                            if( !empty($vR["message"]) )
+                                                $message = $vR["message"];
+                                            else if( !empty($vR["m"]) )
+                                                $message = $vR["m"];
+                                            else {
+                                                if( isDebugMode() )
+                                                    showWarning("Mensagem de validação do campo ".$campo." não especificada");
+                                                $message = "Not validated!";
+                                            }
+                                                
+                                            $_SESSION["Sys"]["FormHelper"]["notValidated"][$model][$campo]["message"] = $message;
+                                        }
+                                    }
+                                    /**
+                                     * Se o usuário não configurou uma função com
+                                     * uma regra, verifica regras de validação
+                                     * do sistema
+                                     */
+                                    else if( method_exists("Validation", $vR["rule"]) ) {
+
+                                        /**
+                                         * Se não validou
+                                         */
+                                        if( !call_user_func("Validation::notEmpty", $valor) ){
+
+                                            /**
+                                             * Caso seja um model-filho no
+                                             * relacionamento de models
+                                             */
+                                            if( $sub )
+                                                $vE[$campo] = '1';
+                                            else
+                                                $vE[$model][$campo] = '1';
+
+                                            /**
+                                             * Session para formHelper
+                                             */
+                                            if( !empty($vR["message"]) )
+                                                $message = $vR["message"];
+                                            else if( !empty($vR["m"]) )
+                                                $message = $vR["m"];
+                                            else {
+                                                if( isDebugMode() )
+                                                    showWarning("Mensagem de validação do campo ".$campo." não especificada");
+                                                $message = "Not validated!";
+                                            }
+
+                                            $_SESSION["Sys"]["FormHelper"]["notValidated"][$model][$campo]["message"] = $message;
+
+                                        }
+
+                                    } else {
+                                        showError("Regra de validação ".$vR["rule"]." inexistente");
+                                    }
+                                }
+
+                            }
+                        } // fim foreach($campos)
+                    }
+                } // fim é o model atual
+                /**
+                 * Validação Model-Relacional
+                 */
+                else {
+
+                    if( !$this->{$model}->validate( array($model=> $campos), true ) ){
+                        $vE[$model] = 0;
+                    }
+
+                }
+                
+
+            }
+            
+        }
+
+        /**
+         * $vE: Validations Errors
+         */
+        /**
+         * Se validou, retorna true
+         */
+        if( !empty($vE) ){
+            return false;
+        } else {
+            return true;
+        }
+    }
 
     /**
      * MÉTODOS INTERNOS (PRIVATE)

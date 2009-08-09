@@ -125,7 +125,6 @@ class Controller
         }
 
         $this->webroot = $this->engine->webroot;
-        //$this->set("web", $varValue)
 
         /**
          * MODELS
@@ -150,6 +149,7 @@ class Controller
                     'dbTables' => $this->engine->dbTables,
                     'modelName' => $className,
                     'recursive' => $this->recursive,
+                    'params' => $this->params,
                 );
 
                 if( !class_exists($className) ){

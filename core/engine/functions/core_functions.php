@@ -25,8 +25,15 @@ function pr($mixed){
 /**
  * Retorna se E_USER_ERROR devem aparecer de acordo com debug
  */
-function isDebugMode(){
-    return Config::read("debug");
+function isDebugMode($level = 2){
+    if( !empty($level) ){
+        if( $level == Config::read("debug") )
+            return true;
+        else
+            return false;
+    } else {
+        return Config::read("debug");
+    }
 }
 
 /**

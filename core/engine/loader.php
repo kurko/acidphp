@@ -19,12 +19,20 @@
 include(CORE_CLASS_DIR."Config.php");
 
 /**
- * FUNÇÕES
+ * CORE FUNCTIONS
  */
-include(CORE_FUNCTIONS_FILE);
-include(URL_FUNCTIONS_FILE);
-include(CORE_FUNCTIONS_DIR."StrTreatment.php");
-include(CORE_FUNCTIONS_DIR."Security.php");
+    /**
+     * FUNÇÕES
+     */
+    include(CORE_FUNCTIONS_FILE);
+    include(URL_FUNCTIONS_FILE);
+
+    /**
+     * Classes de funções
+     */
+    include(CORE_FUNCTIONS_DIR."StrTreatment.php");
+    include(CORE_FUNCTIONS_DIR."Security.php");
+    include(CORE_FUNCTIONS_DIR."Validation.php");
 
 /**
  * CONFIGURAÇÕES

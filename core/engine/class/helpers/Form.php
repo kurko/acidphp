@@ -123,6 +123,16 @@ class FormHelper extends Helper
          */
         $conteudo.= '<input type="hidden" name="sender" value="formHelper" />';
 
+        /**
+         * Qual o endereço do formulário
+         */
+            $formUrl = translateUrl( array(
+                "controller" => $this->params["controller"],
+                "action" => $this->params["action"],
+                implode("/", $this->params["args"])
+            ));
+        $conteudo.= '<input type="hidden" name="formUrl" value="'.$formUrl.'" />';
+
         return $conteudo;
     }
 
@@ -433,6 +443,17 @@ class FormHelper extends Helper
             $conteudo.= '<input type="text" name="'.$inputName.'" value="ERRO NO TIPO DE CAMPO" '.$standardAtrib.'>';
         }
         $conteudo.= '</div>'; // fecha div do .input_field
+
+        /**
+         * VALIDAÇÃO
+         *
+         * Mostra mensagens de erro de validação
+         */
+        if( !empty($_SESSION["Sys"]["FormHelper"]["notValidated"][$modelName][$fieldName] ) ){
+            $conteudo.= '<div class="input_validation_error">';
+            $conteudo.= $_SESSION["Sys"]["FormHelper"]["notValidated"][$modelName][$fieldName]["message"];
+            $conteudo.= '</div>';
+        }
 
         /**
          * Se AFTER está especificado
