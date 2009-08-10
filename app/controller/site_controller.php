@@ -33,7 +33,7 @@ class SiteController extends AppController
     }
 
     function save(){
-        pr( $this->data );
+        //pr( $this->data );
         pr( $this->Usuario->saveAll( $this->data ) );
     }
 

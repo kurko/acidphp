@@ -1,10 +1,12 @@
 <?php
 class AppController extends Controller
 {
-    var $components = array("Auth");
+    //var $components = array("Auth");
     var $helpers = array("Html", "Form");
 
     function beforeFilter(){
+
+        /**
         $this->auth->allow(array(
             "site" => array(
                 "index","outro"
@@ -13,6 +15,8 @@ class AppController extends Controller
         ));
 
         $this->auth->model("Usuario");
+         * 
+         */
 
     }
     
