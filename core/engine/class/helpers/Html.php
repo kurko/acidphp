@@ -11,8 +11,29 @@
  * @author Alexandre de Oliveira <chavedomundo@gmail.com>
  * @since v0.1, 19/07/2009
  */
-class HtmlHelper
+class HtmlHelper extends Helper
 {
+
+    public function link($linkText, $linkDestination, $options=array()){
+
+        $inlineProperties = "";
+
+        /**
+         * Opções reservadas. Todas $options serão elementos inline da tag,
+         * exceto os índices abaixo.
+         */
+        $reservedOptions = array();
+        /**
+         * Analisa cada valor de $options
+         */
+        foreach($options as $chave=>$valor){
+            if( !in_array($chave, $reservedOptions) ){
+                $inlineProperties.= ' '.$class.'="'.$valor.'"';
+            }
+        }
+
+        echo '<a href="'.translateUrl($linkDestination).'" '.$inlineProperties.'>'.$linkText.'</a>';
+    }
 
     /**
      * Cria e retorna o código HTML para carregar um arquivo CSS

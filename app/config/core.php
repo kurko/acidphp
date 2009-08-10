@@ -20,7 +20,7 @@
  *      - 1: Mostra quais comandos SQL foram rodados;
  *      - 2: Mostra todos os erros mais configuração do modo 1;
  */
-Config::write("debug", 1);
+Config::write("debug", 2);
 /**
  * Debug: SQL com estilo (negrito, cores, etc) para melhor interpretação
  */
@@ -36,5 +36,11 @@ Config::write("debugSQLStyle", true);
  * internacional de caracteres mais amplamente aceito.
  */
 Config::write("charset", "UTF-8");
+
+/**
+ * CHAVE DE SEGURANÇA
+ */
+
+Config::write("securityKey", "woeviwp9g7W9G6wovinvo8wHBWEIBH");
 
 ?>
