@@ -1,6 +1,14 @@
 CHANGELOG
 
 v0.0.3 -------
+Revision 30 (09/08/2009)
+    - FormHelper cria formulario para login automaticamente com Auth ativado
+    - AuthComponent finalizado
+    - Security::Sanitize() funcionando para strings e arrays completas
+    - Class Security criada
+    - Classe Components criada
+    - FormHelper: input checkbox pronto pra campos tinyint
+    - FormHelper: Criaçao de campos HTML de acordo com tipo fisico no DB
 Revision 12
     - SQL Debug com estilos em negrito para melhor interpretação
 Revision 11
