@@ -132,9 +132,74 @@ class Conexao {
 
     /**
      * CRUD
+     *
+     * Funções de leitura e escrito no banco de dados
      */
     /**
-     * Função integradora para Query's
+     * crud()
+     *
+     * Função integradora para Query's. Verifica se deve ser rodado PDO::query()
+     * ou PDO::exec()
+     *
+     * @param mixed $sql
+     * @param array $options
+     *      Contém opções de execução CRUD
+     *          - 'type': Tipo de dados retornados(ex.:PDO::FETCH_ASSOC)
+     * 
+     * @return mixed Dados retornados do banco de dados
+     */
+    public function crud($sql, $options = array("type"=>PDO::FETCH_ASSOC) ){
+
+        /**
+         * Padrão de amostragem é FETCH_ASSOC
+         */
+        if( empty($options["type"]) ){
+            $options["type"] = PDO::FETCH_ASSOC;
+        }
+        /**
+         * SQL == string
+         */
+        if( is_string($sql) ){
+
+            /**
+             * SELECT, INSERT, UPDATE, DELETE?
+             *
+             * Verifica que tipo de instrução SQL é esta
+             */
+                $instructionType = strpos($sql, " ");
+                $sqlType = substr( $sql, 0, $instructionType );
+
+            /**
+             * Tipo de instrução SQL, se deve retornar dados ou não
+             */
+                if( in_array( strtoupper($sqlType), array(
+                                                    "SELECT",
+                                                    "SHOW",
+                                                )
+                )){
+
+                    return $this->query($sql, $options["type"]);
+
+                } else {
+                    return $this->exec($sql);
+                }
+
+        }
+        /**
+         * @todo - implementar query de sql array
+         */
+        else if( is_array($sql) ) {
+            
+        }
+
+
+    } // fim crud()
+
+    /**
+     * QUERY()
+     *
+     * Executa comandos no banco de dados. Usando PDO, serve para SQLs que devem
+     * retornar dados, como SELECT.
      *
      * @param string $sql
      * @return array Resultado em formato array
@@ -146,56 +211,41 @@ class Conexao {
         $sT = microtime(true);
 
         /**
+         * PDO
+         *
          * Se a extensão PDO está ativada
          */
-        if($this->PdoExtension()){
-            /**
-             * Roda o SQL e três os resultados para um array
-             */
+        if( $this->PdoExtension() ){
             /**
              * Se o resultado deve ser num formato diferente
              */
-            if ( !empty( $type ) ){
-                /**
-                 * Se "ASSOC", usa por padrão PDO::FETCH_ASSOC.
-                 */
-                if( $type == "ASSOC" ){
-                    $query = $this->conn->query( $sql, PDO::FETCH_ASSOC );
-                }
+            $query = $this->conn->prepare($sql);
 
-                /**
-                 * Se for um tipo específico de resultado desejado aceito pelo
-                 * PDO, carrega automaticamente o tipo selecionado em
-                 * PDO::query().
-                 */
-                else if (
-                    in_array( 
-                        $type,
-                        array(
-                            PDO::FETCH_ASSOC,
-                            PDO::FETCH_BOTH,
-                            PDO::FETCH_BOUND,
-                            PDO::FETCH_CLASS,
-                            PDO::FETCH_INTO,
-                            PDO::FETCH_LAZY,
-                            PDO::FETCH_NUM,
-                            PDO::FETCH_OBJ,
-                        )
-                    )
-                ){
-                    $query = $this->conn->query( $sql, $type );
-                }
+            /**
+             * Se há resultados carregados das tabelas
+             */
+            $query->execute();
+
+            if( $type == "" OR strtolower($type) == "assoc" ){
+                $type = PDO::FETCH_ASSOC;
+            } else if( $type == "BOTH" ) {
+                $type = PDO::FETCH_BOTH;
             } else {
-                $query = $this->conn->query($sql);
+                $type = $type;
             }
+            $result = $query->fetchAll($type);
 
-            if( !empty($query) ){
+            /**
+             * Fecha cursor do PDO
+             */
+            if( !empty($query) AND empty($result) ){
 
-                foreach($query as $chave=>$valor){
+                foreach($query as $valor){
                     $result[] = $valor;
                 }
                 $query->closeCursor();
             }
+            $eT = microtime(true);
             
         } else {
             $mysql = mysql_query($sql);
@@ -208,7 +258,7 @@ class Conexao {
         /**
          * Timer Init
          */
-        $eT = microtime(true);
+        $eT = ( empty($eT) ) ? microtime(true) : $eT;
 
         Config::add("SQLs", array("sql" => $sql, "time" => $eT - $sT) );
 

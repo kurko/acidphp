@@ -127,7 +127,7 @@ class Engine
         /**
          * Carrega todas as tabelas do DB
          */
-        $mysql = $conn->query('SHOW TABLES');
+        $mysql = $conn->query('SHOW TABLES', "BOTH");
         /**
          * Salva as tabelas encontradas
          * 

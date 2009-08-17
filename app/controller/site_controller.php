@@ -11,49 +11,16 @@
 class SiteController extends AppController
 {
 
-    var $uses = array("Usuario","Tarefa");
+    var $uses = array("Usuario", "Tarefa", "Idade");
 
     function index(){
 
-        /*
-         * Código de exemplo
-         */
-        $temp = $this->Usuario->find(array(
-                                        'order' => array('Tarefa.id ASC'),
-                                        'limit' => '3',
-                                    ),
-                                    "all"
-        );
-
-        $this->set('temp', $temp);
-    }
-
-    function listar($id="nao", $id2="naotb"){
-        
     }
 
     function save(){
-        //pr( $this->data );
         pr( $this->Usuario->saveAll( $this->data ) );
     }
 
-    function savetarefa(){
-        pr( $this->Tarefa->saveAll( $this->data ) );
-
-        $this->render("save");
-    }
-
-    function login(){
-        
-    }
-
-    function outro(){
-
-    }
-
-    function outro2(){
-        
-    }
 
 }
 ?>

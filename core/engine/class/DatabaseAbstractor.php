@@ -12,14 +12,12 @@ class DatabaseAbstractor extends DataAbstractor
     /**
      * CONFIGURAÇÕES
      */
-
     /**
      * CONEXÃO
      *
      * @var object Contém a conexão com a base de dados
      */
     private $conn;
-    
 
     /**
      * CONFIGURAÇÕES INTERNAS (PRIVATE)
@@ -82,6 +80,7 @@ class DatabaseAbstractor extends DataAbstractor
      */
     public function find($options){
 
+        $findStartTime = microtime(true);
         /**
          * Configuração inicial
          */
@@ -137,7 +136,7 @@ class DatabaseAbstractor extends DataAbstractor
              * Pega os ids dos resultados atuais
              */
             foreach($query as $campos){
-                $mainIds[] = $campos[ get_class($mainModel)."__id" ];
+                $mainIds[] = $campos[ get_class($mainModel).".id" ];
             }
 
             /**
@@ -158,7 +157,7 @@ class DatabaseAbstractor extends DataAbstractor
                             $model.".".$properties["foreignKey"] => $mainIds,
                         )
                     );
-                    $subOptions["order"] = $options["order"];
+                    $subOptions["order"] = ( empty($options["order"]) ) ? "" : $options["order"];
                     $sql = array_merge($sql, $this->sqlObject->select($subOptions) );
                 }
             }
@@ -169,8 +168,11 @@ class DatabaseAbstractor extends DataAbstractor
          * LIMIT desligado
          */
         else {
+
             $sql = $this->sqlObject->select($options);
         }
+
+        $loopStartTime = microtime(true);
 
         /**
          * RETURN
@@ -186,6 +188,8 @@ class DatabaseAbstractor extends DataAbstractor
         /**
          * Roda SQLs criado, verificando se são arrays
          */
+        $loopCount = 0;
+
         if( is_array($sql) ){
             foreach( $sql as $sqlAtual ){
                 $result = $this->conn->query( $sqlAtual, "ASSOC" );
@@ -199,10 +203,14 @@ class DatabaseAbstractor extends DataAbstractor
          *
          * Trata os dados que vieram em formato cru do DB para um formato
          * mais tragável (adequado).
+         *
+         * ATENÇÃO: o código a seguir é onde leva mais tempo de processamento
          */
+
         $return = array();
         $registro = array();
         $i = 0;
+        $o = 0;
         foreach($query as $chave=>$dados){
             /**
              * ANALISA RESULTADO DO DB
@@ -212,24 +220,30 @@ class DatabaseAbstractor extends DataAbstractor
              * DB vem desformatado do SQL Object.
              */
             foreach( $dados as $campo=>$valor){
-                $underlinePos = strpos($campo, "__" );
+                $underlinePos = strpos($campo, "." );
                 if( $underlinePos !== false ){
                     /**
                      * Model e Campo
                      */
                     $modelReturned = substr( $campo, 0, $underlinePos );
-                    $campoReturned = substr( $campo, $underlinePos+2, 100 );
+                    $campoReturned = substr( $campo, $underlinePos+1, 100 );
 
                     /**
                      * Codigo
                      */
                     $tempResult[$i][$modelReturned][$campoReturned] = $valor;
                 }
+                $o++;
             }
             $i++;
 
         }
+        //echo "<table width=100%><tr><td style='font-size: 12px;'>";
+        //pr($tempResult);
+        echo $o;
+        //echo "</td></tr></table>";
 
+        $loopEndTime = microtime(true);
         /**
          * FORMATA VARIÁVEL LEGÍVEL E TRATÁVEL
          *
@@ -247,6 +261,7 @@ class DatabaseAbstractor extends DataAbstractor
          * Loop por cada item do banco de dados retornado
          */
         $loopProcessments = 0;
+
         foreach( $tempResult as $chave=>$index ){
             /**
              * ID principal do registro retornado do model principal
@@ -292,8 +307,15 @@ class DatabaseAbstractor extends DataAbstractor
             //unset($mainId);
 
         }
-        
+
+        echo "Quantidade de Loops: ". $loopProcessments."<br>";
+        $findEndTime = microtime(true);
+        $loopEndTime = ( empty($loopEndTime) ) ? microtime(true) : $loopEndTime;
+        echo "Loop Time: ".($loopEndTime - $loopStartTime)."<br />";
+
         Config::write("dataFormatted", $loopProcessments);
+        Config::write("modelLoops", $loopEndTime - $loopStartTime);
+        Config::add("findStartTime", array($findEndTime - $findStartTime) );
 
         return $registro;
 

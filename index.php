@@ -3,8 +3,7 @@
  * Bem-vindo ao AcidPHP. Este é o arquivo principal do sistema, o centralizador
  * que chamará todos os outros necessários.
  *
- * @package Sistema
- * @category [Categoria a que o arquivo pertence]
+ * @package Core
  * @name Index
  * @author Alexandre de Oliveira <chavedomundo@gmail.com>
  * @since v0.1 15/07/2009

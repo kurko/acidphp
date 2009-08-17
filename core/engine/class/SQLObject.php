@@ -123,6 +123,10 @@ class SQLObject {
          * $fields -> Campos que devem ser carregados
          */
         /**
+         * Separador de model.campo
+         */
+        $separadorModelCampo = ".";
+        /**
          * Fields: Se nenhum campo foi indicado
          */
         if( empty($options['fields']) ){
@@ -131,7 +135,7 @@ class SQLObject {
                  * Loop por cada campo da tabela para montar Fields
                  */
                 foreach( $model->tableDescribed as $campo=>$info ){
-                    $fields[] = get_class( $model ).".".$campo." AS ".get_class( $model )."__".$campo;
+                    $fields[] = get_class( $model ).".".$campo." AS '".get_class( $model ).$separadorModelCampo.$campo."'";
                 }
             }
         }
@@ -157,7 +161,7 @@ class SQLObject {
 
                     if( in_array($modelReturned, $options["models"]) ){
                         $fieldModelUsed[$modelReturned] = $modelReturned;
-                        $fields[] = $campo. " AS ".str_replace(".", "__", $campo);
+                        $fields[] = $campo. " AS '".str_replace(".", $separadorModelCampo, $campo)."'";
                     }
                 }
                 /**
@@ -168,15 +172,23 @@ class SQLObject {
                     /**
                      * 'id' do registro
                      */
-                    $fields[] = $model.".id AS ".$model."__id";
+                    $fields[] = $model.".id AS '".$model.$separadorModelCampo."id'";
                     /**
                      * foreignKey da tabela relacionada
                      */
                     if( $model != get_class($mainModel) ){
+
+                        /**
+                         * hasOne
+                         */
                         if( array_key_exists($model, $mainModel->hasOne) ){
-                            $fields[] = $model.".".$mainModel->hasOne[$model]["foreignKey"]." AS ".$model."__".$mainModel->hasOne[$model]["foreignKey"];
-                        } else if( array_key_exists($model, $mainModel->hasMany) ){
-                            $fields[] = $model.".".$mainModel->hasMany[$model]["foreignKey"]." AS ".$model."__".$mainModel->hasMany[$model]["foreignKey"];
+                            $fields[] = $model.".".$mainModel->hasOne[$model]["foreignKey"]." AS '".$model.$separadorModelCampo.$mainModel->hasOne[$model]["foreignKey"]."'";
+                        }
+                        /**
+                         * hasMany
+                         */
+                        else if( array_key_exists($model, $mainModel->hasMany) ){
+                            $fields[] = $model.".".$mainModel->hasMany[$model]["foreignKey"]." AS '".$model.$separadorModelCampo.$mainModel->hasMany[$model]["foreignKey"]."'";
                         }
                     }
                 }

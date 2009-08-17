@@ -185,7 +185,7 @@ class Model
     }
 
     /**
-     * MÉTODOS DE SUPORTE
+     * MÉTODOS CRUD
      */
     /**
      * SAVEALL()
@@ -309,7 +309,6 @@ class Model
                         //pr($instrucao. get_class($this));
                         //$this->conn->exec($instrucao);
                         //$lastInsertId = $this->conn->lastInsertId();
-                        echo 'INSERIDO LINHA 292';
 
                         $modelsFilhos = array();
                         /**
@@ -373,7 +372,7 @@ class Model
      *      - 'all' (padrão) : Listagem completa
      * @return array
      */
-    public function find($options, $mode = "all"){
+    public function find($options = array(), $mode = "all"){
 
         /**
          * CONFIGURAÇÕES DE RELACIONAMENTO
@@ -398,32 +397,28 @@ class Model
          *
          * Gera SQL com SQLObject
          */
-        $sqlsGerados = $this->databaseAbstractor->find($options);
-        return $sqlsGerados;
-        
-
-        /**
-         * ALL
-         */
-        if($mode == 'all'){
-            //pr($dados);
-            //array_push($return, $registro);
-            //array_push($return, $dados);
-        }
-        /**
-         * FIRST
-         */
-        elseif($mode == 'first' and (count($fields) == 1 or is_string($fields))){
-            if(is_array($fields)){
-                $return[] = $dados[$fields[0]];
-            } else {
-                $return[] = $dados[$fields];
-            }
-        }
+        $querysGerados = $this->databaseAbstractor->find($options);
+        return $querysGerados;
 
     }// fim find()
 
-
+    public function query($sql = "", $options = array()){
+        return $this->conn->crud($sql);
+    }
+    /**
+     * MÉTODOS DE SUPORTE
+     */
+    /**
+     * VALIDATE()
+     *
+     * Valida dados enviados em formulários automaticamente de acordo com regras
+     * descritas nos respectivos Models.
+     *
+     * @param mixed $mixed Contém os dados para validação
+     * @param bool $sub Para verificar Models recursivamente, não deve ser usado
+     * externamente.
+     * @return bool Se validar, retorna verdadeiro
+     */
     public function validate($mixed, $sub = false){
 
         /**

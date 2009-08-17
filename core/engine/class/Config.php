@@ -34,7 +34,9 @@ class Config {
         if( empty(self::$config[$varName]) ){
             self::$config[$varName] = null;
         }
+
         $tempVar = self::$config[$varName];
+
         if( !is_array($tempVar) )
             $tempVar = array();
 
