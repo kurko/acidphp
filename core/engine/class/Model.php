@@ -402,9 +402,23 @@ class Model
 
     }// fim find()
 
+    /**
+     * QUERY()
+     *
+     * Roda um comando SQL definido pelo usuário
+     *
+     * @param string $sql
+     * @param array $options
+     * @return array Resultado formatado com PDO::fetchAll()
+     */
     public function query($sql = "", $options = array()){
-        return $this->conn->crud($sql);
+
+        if( is_string($sql) )
+            return $this->conn->crud($sql);
     }
+
+
+
     /**
      * MÉTODOS DE SUPORTE
      */

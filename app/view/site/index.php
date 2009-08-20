@@ -10,6 +10,8 @@ if( !empty($temp) ){
 }
 
 $html->link( "logout", array("controller" => "site", "action" => "logout", "/arg1/arg2/arg3") );
+echo "<br>";
+$html->link( "Listar usuários", array("controller" => "site", "action" => "listar", "") );
 
 //pr($user);
 

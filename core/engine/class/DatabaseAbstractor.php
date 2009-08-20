@@ -240,7 +240,7 @@ class DatabaseAbstractor extends DataAbstractor
         }
         //echo "<table width=100%><tr><td style='font-size: 12px;'>";
         //pr($tempResult);
-        echo $o;
+        //echo $o;
         //echo "</td></tr></table>";
 
         $loopEndTime = microtime(true);
@@ -308,10 +308,10 @@ class DatabaseAbstractor extends DataAbstractor
 
         }
 
-        echo "Quantidade de Loops: ". $loopProcessments."<br>";
+        //echo "Quantidade de Loops: ". $loopProcessments."<br>";
         $findEndTime = microtime(true);
         $loopEndTime = ( empty($loopEndTime) ) ? microtime(true) : $loopEndTime;
-        echo "Loop Time: ".($loopEndTime - $loopStartTime)."<br />";
+        //echo "Loop Time: ".($loopEndTime - $loopStartTime)."<br />";
 
         Config::write("dataFormatted", $loopProcessments);
         Config::write("modelLoops", $loopEndTime - $loopStartTime);
