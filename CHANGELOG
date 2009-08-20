@@ -1,6 +1,10 @@
 CHANGELOG
 
 v0.0.3 -------
+Revision 38 (09/08/2009)
+    - Novo nome Oficial: AcidPHP
+    - Models: Model::query() criado
+    - Bugfixes
 Revision 34 (09/08/2009)
     - Models: Sistema de validaçao pronta
         (faltando criaçao de regras de validaçao, como notEmpty, etc)
