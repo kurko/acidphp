@@ -36,6 +36,8 @@ class FormHelper extends Helper
      */
     protected $modelProperties;
 
+    protected $destionationUrl;
+
     function __construct($params=""){
         parent::__construct($params);
         
@@ -60,7 +62,6 @@ class FormHelper extends Helper
 
 
         global $globalVars;
-
         /**
          * Login
          *
@@ -105,7 +106,8 @@ class FormHelper extends Helper
         /**
          * ABRE FORMULÁRIO
          */
-        $conteudo.= '<form method="post" action="'.WEBROOT.''.$controller.'/'.$action.'" class="formHelper">';
+        $this->destionationUrl = WEBROOT.''.$controller.'/'.$action."/";
+        $conteudo.= '<form method="post" action="'.$this->destionationUrl.'" class="formHelper">';
 
         /**
          * INPUTS HIDDEN
@@ -139,7 +141,7 @@ class FormHelper extends Helper
                 "action" => $this->params["action"],
                 implode("/", $this->params["args"])
             ));
-        $conteudo.= '<input type="hidden" name="formUrl" value="'.$formUrl.'" />';
+        $conteudo.= '<input type="hidden" name="formUrl" value="'.$formUrl.'/" />';
 
         return $conteudo;
     }
@@ -178,6 +180,7 @@ class FormHelper extends Helper
             $this->params["data"] = $this->models[$this->modelName]->find($fieldValue, "first");
 
             $_SESSION["Sys"]["addToThisData"][$this->modelName]["id"] = $fieldValue;
+            $_SESSION["Sys"]["options"]["addToThisData"]["destLocation"] = $this->destionationUrl;
 
             return false;
         }
@@ -283,8 +286,8 @@ class FormHelper extends Helper
          * VALOR AUTOMÁTICO
          */
         if( empty($fieldValue) ) {
-            if( !empty($this->params["data"][$modelName][$fieldName]) ){
-                $fieldValue = 'value="'. $this->params["data"][$modelName][$fieldName]. '"';
+            if( !empty($this->data[$modelName][$fieldName]) ){
+                $fieldValue = 'value="'. $this->data[$modelName][$fieldName]. '"';
             }
         }
 
@@ -293,6 +296,7 @@ class FormHelper extends Helper
          */
         $standardAtrib = 'id="input-'.$fieldName.'" ';
         $standardAtribValue = $fieldValue;
+
         /**
          * @todo - Escrever value digitado anteriormente quando envia formulário
          * e retorna para ele de volta.

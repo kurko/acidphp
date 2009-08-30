@@ -61,6 +61,7 @@ class Helper
         /**
          * $this->data
          */
+        //pr($params["data"]);
         $this->data = ( empty($params["data"]) ) ? array() : $params["data"];
     }
 

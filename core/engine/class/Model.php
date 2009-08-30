@@ -216,7 +216,6 @@ class Model
              * VALIDATE
              */
             if( $this->validate($data) ){
-
                 /**
                  * Loop por cada tabela dos valores enviados em $data
                  */
@@ -318,7 +317,6 @@ class Model
                         //pr($instrucao. get_class($this));
                         $this->conn->exec($instrucao);
                         $lastInsertId = $this->conn->lastInsertId();
-                        unset( $_SESSION["Sys"]["addToThisData"] );
 
                         $modelsFilhos = array();
                         /**
@@ -360,7 +358,8 @@ class Model
              * Não validou
              */
             else {
-                //pr($_SESSION);
+                $_SESSION["Sys"]["addToThisData"] = $data;
+                $_SESSION["Sys"]["options"]["addToThisData"]["destLocation"] = $this->params["post"]["formUrl"];
                 redirect($this->params["post"]["formUrl"]);
             }
         }

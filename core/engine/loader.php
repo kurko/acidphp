@@ -26,6 +26,7 @@ include(CORE_CLASS_DIR."Config.php");
      */
     include(CORE_FUNCTIONS_FILE);
     include(URL_FUNCTIONS_FILE);
+    include(TOOLS_FUNCTIONS_FILE);
 
     /**
      * Classes de funções

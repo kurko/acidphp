@@ -14,11 +14,14 @@ class SiteController extends AppController
     var $uses = array("Usuario", "Tarefa", "Idade");
 
     function index(){
-        
+        //pr($_SESSION);
+        //pr($this->data);
+
     }
 
     function save(){
         pr( $this->Usuario->saveAll( $this->data ) );
+        pr($this->data);
     }
 
     function listar(){
@@ -43,6 +46,8 @@ class SiteController extends AppController
 
     function editar($id){
 
+        pr( $_SESSION);
+        pr( $this->params);
         //$this->Usuario->id = $id;
         //$usuario = $this->Usuario->find($id);
         //pr($usuario);
@@ -53,7 +58,7 @@ class SiteController extends AppController
         $this->autoRender = false;
 
         if($this->data){
-            //pr($this->data);
+            pr($this->data);
             $this->Usuario->saveAll($this->data);
         }
 

@@ -114,6 +114,7 @@ class Controller
         $this->params["action"] = $this->engine->callAction;
         $this->params["args"] = $this->engine->arguments;
         $this->params["webroot"] = $this->engine->webroot;
+        $this->params["url"] = $this->engine->webroot.$this->params["controller"]."/".$this->params["action"]."/".implode("/", $this->params["args"]);
         /**
          *
          * $THIS->DATA
@@ -137,10 +138,20 @@ class Controller
          *                  [$modelName]
          *                      [$campo] = $valor;
          */
+        /**
+         * Tem $this->data E tem addToThisData
+         */
         if( !empty($this->data) AND !empty($_SESSION["Sys"]["addToThisData"]) ){
-            $this->data = array_merge_recursive($this->data, $_SESSION["Sys"]["addToThisData"] );
+            $this->data = array_merge_recursive_distinct($_SESSION["Sys"]["addToThisData"], $this->data );
         } else if( !empty($_SESSION["Sys"]["addToThisData"]) ) {
-            unset( $_SESSION["Sys"]["addToThisData"] );
+
+            
+            if( $this->params["url"] !== $_SESSION["Sys"]["options"]["addToThisData"]["destLocation"] ){
+                unset( $_SESSION["Sys"]["addToThisData"] );
+            } else {
+                $this->data = $_SESSION["Sys"]["addToThisData"];
+            }
+            
         }
 
         $this->webroot = $this->engine->webroot;
