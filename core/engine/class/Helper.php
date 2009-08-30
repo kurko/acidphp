@@ -9,6 +9,13 @@
  * @author Alexandre de Oliveira <chavedomundo@gmail.com>
  * @since v0.1, 03/08/2009
  */
+/**
+ * SESSIONS
+ *
+ * A estrutura das sessions para reter informações de Helpers segue o padrão:
+ *      $_SESSION["Sys"][$nomeDoHelper."Helper"][$informacao] = $valor;
+ * 
+ */
 class Helper
 {
     /**
@@ -16,6 +23,14 @@ class Helper
      * @var array Parâmetros do sistema como $_POST, $_GET, Controller, Action
      */
     protected $params;
+
+    /**
+     * Models inicializados pelo controller principal, de forma a poderem ser
+     * usados por helpers
+     *
+     * @var Object
+     */
+    protected $models;
     /**
      *
      * @var array Dados vindos de um formulário
@@ -39,6 +54,10 @@ class Helper
          * $this->params
          */
         $this->params = ( empty($params["params"]) ) ? array() : $params["params"];
+        /**
+         * $this->models
+         */
+        $this->models = ( empty($params["models"]) ) ? array() : $params["models"];
         /**
          * $this->data
          */

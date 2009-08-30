@@ -41,6 +41,24 @@ class SiteController extends AppController
         
     }
 
+    function editar($id){
+
+        //$this->Usuario->id = $id;
+        //$usuario = $this->Usuario->find($id);
+        //pr($usuario);
+        $this->set("id", $id);
+    }
+
+    function edit(){
+        $this->autoRender = false;
+
+        if($this->data){
+            //pr($this->data);
+            $this->Usuario->saveAll($this->data);
+        }
+
+    }
+
 
 }
 ?>

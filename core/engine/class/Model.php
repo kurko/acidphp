@@ -279,7 +279,7 @@ class Model
                             }
 
                             if( !empty($camposStr) ){
-                                $tempSql = "INSERT INTO
+                                $tempSql = "REPLACE INTO
                                                 ".$tabela."
                                                     (".implode(",", $camposStr).")
                                             VALUES
@@ -318,6 +318,7 @@ class Model
                         //pr($instrucao. get_class($this));
                         $this->conn->exec($instrucao);
                         $lastInsertId = $this->conn->lastInsertId();
+                        unset( $_SESSION["Sys"]["addToThisData"] );
 
                         $modelsFilhos = array();
                         /**
@@ -384,6 +385,27 @@ class Model
     public function find($options = array(), $mode = "all"){
 
         /**
+         * ID especificado?
+         *
+         * Verifica se foi especificado um id e carrega este
+         */
+        if( !empty($this->id) AND empty($options["conditions"]) ){
+            $options["conditions"] = array(
+                get_class($this).".id" => $this->id
+            );
+        }
+
+        else if( !empty($options) AND !is_array($options) AND ((int) $options >= 0) ){
+
+            $currentId = $options;
+            unset($options);
+            $options["conditions"] = array(
+                get_class($this).".id" => $currentId
+            );
+
+        }
+
+        /**
          * CONFIGURAÇÕES DE RELACIONAMENTO
          */
         /**
@@ -406,7 +428,7 @@ class Model
          *
          * Gera SQL com SQLObject
          */
-        $querysGerados = $this->databaseAbstractor->find($options);
+        $querysGerados = $this->databaseAbstractor->find($options, $mode);
         return $querysGerados;
 
     }// fim find()

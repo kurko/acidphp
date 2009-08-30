@@ -22,7 +22,7 @@ class Usuario extends AppModel {
         ),
         "senha" => array(
             "rule" => "notEmpty",
-            "m" => "digite um email válido"
+            "m" => "digite uma senha"
         )
     );
 

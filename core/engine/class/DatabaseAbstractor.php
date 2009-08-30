@@ -78,8 +78,8 @@ class DatabaseAbstractor extends DataAbstractor
      *
      * @return array Resultado da base de dados no formato requisitado
      */
-    public function find($options){
-
+    public function find($options, $mode = "all"){
+        
         $findStartTime = microtime(true);
         /**
          * Configuração inicial
@@ -263,15 +263,8 @@ class DatabaseAbstractor extends DataAbstractor
         $loopProcessments = 0;
 
         foreach( $tempResult as $chave=>$index ){
-            /**
-             * ID principal do registro retornado do model principal
-             */
-            //if( !empty($index[ get_class($mainModel) ]["id"]) ){
-                //$mainId = $index[ get_class($mainModel) ]["id"];
-            //}
 
             $hasManyResult = array();
-
 
             foreach($index as $model=>$dados){
 
@@ -293,12 +286,16 @@ class DatabaseAbstractor extends DataAbstractor
                         $registro[ $hasManyResult[ $mainModel->hasMany[$model]["foreignKey"] ] ][$model][] = $hasManyResult;
                 }
                 /**
-                 * Senão é hasMany, simplesmente salva na array o resultado do model
+                 * Se for hasOne
                  */
                 else if( array_key_exists( $model , $mainModel->hasOne) ) {
                     if( !empty($dados[ $mainModel->hasOne[$model]["foreignKey"] ]) )
                         $registro[ $index[ get_class($mainModel) ]["id"] ][$model] = $dados;
-                } else {
+                }
+                /**
+                 * Não é hasMany nem hasOne, salvar normalmente
+                 */
+                else {
                     $registro[ $index[ get_class($mainModel) ]["id"] ][$model] = $dados;
                 }
                 $loopProcessments++;
@@ -316,6 +313,15 @@ class DatabaseAbstractor extends DataAbstractor
         Config::write("dataFormatted", $loopProcessments);
         Config::write("modelLoops", $loopEndTime - $loopStartTime);
         Config::add("findStartTime", array($findEndTime - $findStartTime) );
+
+        //pr( array_ $registro);
+
+        /**
+         * Modos
+         */
+        if( $mode == "first" ){
+            $registro = reset($registro);
+        }
 
         return $registro;
 

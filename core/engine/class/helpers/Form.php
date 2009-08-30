@@ -9,6 +9,13 @@
  * @author Alexandre de Oliveira <chavedomundo@gmail.com>
  * @since v0.1, 19/07/2009
  */
+/**
+ * SESSIONS
+ *
+ * A estrutura das sessions para reter informações de FormHelper segue o padrão:
+ *      $_SESSION["Sys"]["FormHelper"][$informacao] = $valor;
+ *
+ */
 class FormHelper extends Helper
 {
     /**
@@ -50,6 +57,7 @@ class FormHelper extends Helper
      */
     public function create($modelName, $options = ''){
         $conteudo = "";
+
 
         global $globalVars;
 
@@ -137,6 +145,11 @@ class FormHelper extends Helper
     }
 
     /**
+     * @todo - campos de models relacionados hasMany devem ter uma
+     * nomenclatura do tipo [model][0][campo1], [model][1][campo1], ectes
+     */
+
+    /**
      * Cria inputs de formulários HTML automaticamente, necessitando somente
      * indicar o nome do campo relacionado na base de dados.
      *
@@ -149,6 +162,25 @@ class FormHelper extends Helper
      * @return string Código HTML para o form input pedido.
      */
     public function input($fieldName, $options = ''){
+
+        /**
+         * ID
+         *
+         * Se um id foi especificado, vai no DB e busca o registro dele
+         */
+        if( $fieldName == "id" ){
+            $fieldValue = $options;
+            unset($options);
+
+            /**
+             * Carrega as informações sobre o determinado ID
+             */
+            $this->params["data"] = $this->models[$this->modelName]->find($fieldValue, "first");
+
+            $_SESSION["Sys"]["addToThisData"][$this->modelName]["id"] = $fieldValue;
+
+            return false;
+        }
 
         $argFieldName = $fieldName;
         
@@ -223,15 +255,6 @@ class FormHelper extends Helper
         // fim análise $options
         
 
-        /**
-         * PROPRIEDADES-PADRÃO
-         */
-        $standardAtrib = 'id="input-'.$fieldName.'" ';
-        $standardAtribValue = $fieldValue;
-        /**
-         * @todo - Escrever value digitado anteriormente quando envia formulário
-         * e retorna para ele de volta.
-         */
 
         /**
          * NOMES DO INPUTS
@@ -255,6 +278,25 @@ class FormHelper extends Helper
             $modelName = substr( $fieldName, 0, $dotPos );
             $fieldName = substr( $fieldName, $dotPos+1, 100 );
         }
+
+        /**
+         * VALOR AUTOMÁTICO
+         */
+        if( empty($fieldValue) ) {
+            if( !empty($this->params["data"][$modelName][$fieldName]) ){
+                $fieldValue = 'value="'. $this->params["data"][$modelName][$fieldName]. '"';
+            }
+        }
+
+        /**
+         * PROPRIEDADES-PADRÃO
+         */
+        $standardAtrib = 'id="input-'.$fieldName.'" ';
+        $standardAtribValue = $fieldValue;
+        /**
+         * @todo - Escrever value digitado anteriormente quando envia formulário
+         * e retorna para ele de volta.
+         */
 
         /**
          * Define o nome do input
@@ -356,7 +398,6 @@ class FormHelper extends Helper
                 $conteudo.= '</span>';
             }
         }
-
         /**
          * INPUTS
          *
@@ -374,7 +415,7 @@ class FormHelper extends Helper
              * Gera conteúdo para o formulário
              */
             $conteudo.= '<div class="input_field input_text">';
-            $conteudo.= '<input type="'.$inputType.'" name="'.$inputName.'" '.$standardAtrib.' />';
+            $conteudo.= '<input type="'.$inputType.'" name="'.$inputName.'" '.$standardAtrib.' '.$standardAtribValue.' />';
         }
         /**
          * CHECKBOX

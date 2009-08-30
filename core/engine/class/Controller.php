@@ -115,13 +115,32 @@ class Controller
         $this->params["args"] = $this->engine->arguments;
         $this->params["webroot"] = $this->engine->webroot;
         /**
-         * Ajusta $_POST
+         *
+         * $THIS->DATA
+         *
+         * Ajusta $_POST, inserindo os dados organizadamente em $this->data
          */
         if( !empty($_POST) ){
             $this->params["post"] = $_POST;
             if( !empty($_POST["data"]) ){
                 $this->data = $_POST["data"];
             }
+        }
+        /**
+         * Soma em $this->data os dados necessários
+         * 
+         * Os dados que estiverem na Session no seguinte endereço serão
+         * acrescentados em $this->data.
+         * 
+         * $_SESSION["Sys"]
+         *              ["addToThisData"]
+         *                  [$modelName]
+         *                      [$campo] = $valor;
+         */
+        if( !empty($this->data) AND !empty($_SESSION["Sys"]["addToThisData"]) ){
+            $this->data = array_merge_recursive($this->data, $_SESSION["Sys"]["addToThisData"] );
+        } else if( !empty($_SESSION["Sys"]["addToThisData"]) ) {
+            unset( $_SESSION["Sys"]["addToThisData"] );
         }
 
         $this->webroot = $this->engine->webroot;
@@ -184,6 +203,7 @@ class Controller
                 $helperParams = array(
                     "params" => $this->params,
                     "data" => $this->data,
+                    "models" => $this->usedModels,
                 );
                 $$valor = new $helperName($helperParams);
                 /**
