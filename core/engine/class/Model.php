@@ -208,7 +208,7 @@ class Model
      * @param array $options
      * @return bool Se salvou ou não
      */
-    public function saveAll($data, $options = array()){
+    public function saveAll(array $data, $options = array()){
         if( is_array($data) ){
             $data = Security::Sanitize($data);
 
@@ -388,7 +388,9 @@ class Model
              */
             else {
                 $_SESSION["Sys"]["addToThisData"] = $data;
-                $_SESSION["Sys"]["options"]["addToThisData"]["destLocation"] = $this->params["post"]["formUrl"];
+                if( !empty($this->params["post"]["formUrl"]) ){
+                    $_SESSION["Sys"]["options"]["addToThisData"]["destLocation"] = $this->params["post"]["formUrl"];
+                }
                 redirect($this->params["post"]["formUrl"]);
             }
         }
@@ -397,8 +399,169 @@ class Model
     } // FIM SAVEALL()
 
     /**
-     * @todo - updateAll()
+     * UPDATEALL()
+     *
+     * Executa a instrução UPDATE no banco de dados.
+     *
+     * @param array $toUpdate
+     * @param mixed $conditions ID do registro a ser atualizado ou array com
+     * valores, ex. array("campo"=>"valor")
+     * @return bool
      */
+    public function updateAll(array $toUpdate, $conditions){
+
+        if( !empty($toUpdate) ){
+
+            /**
+             * toUpdate
+             *
+             * Analisa o que deve ser atualizado e onde (análise de models
+             * relacionais).
+             */
+            foreach( $toUpdate as $campo=>$valor ){
+
+                /**
+                 * Define os models e campos a serem atualizados
+                 */
+                $underlinePos = strpos($campo, "." );
+                if( $underlinePos !== false ){
+                    /**
+                     * Model e Campo
+                     */
+                    $modelReturned = substr( $campo, 0, $underlinePos );
+                    $campoReturned = substr( $campo, $underlinePos+1, 100 );
+                } else {
+                    $modelReturned = get_class($this);
+                    $campoReturned = $campo;
+                }
+
+                $rule[$modelReturned][] = $modelReturned.".".$campoReturned."='".$valor."'";
+            }
+
+            /**
+             * conditions
+             *
+             * Ajusta as condições para se realizar update
+             */
+
+            if( !empty($conditions) ){
+
+                //echo $conditions["id"];
+
+                if( is_array($conditions) AND !empty($conditions["id"]) ){
+                    $idToUpdate = $conditions["id"];
+                }
+
+                else if( is_string($conditions) OR is_int($conditions) ){
+                    $idToUpdate = $conditions;
+                    if( !is_array($conditions) ){
+                        $conditions = array("id" => $conditions);
+                    } else {
+                    }
+
+                }
+
+
+
+                if( is_array($conditions) ){
+                    foreach( $conditions as $campo=>$valor ){
+                        /**
+                         * Define os models e campos como condições
+                         */
+                        $underlinePos = strpos($campo, "." );
+                        if( $underlinePos !== false ){
+                            /**
+                             * Model e Campo
+                             */
+                            $modelReturned = substr( $campo, 0, $underlinePos );
+                            $campoReturned = substr( $campo, $underlinePos+1, 100 );
+                        } else {
+                            $modelReturned = get_class($this);
+                            $campoReturned = $campo;
+                        }
+                        $where[$modelReturned][] = $modelReturned.".".$campoReturned."='".$valor."'";
+                    }
+                }
+
+
+            }
+            
+            /**
+             * Para update em models relacionados, idToUpdate precisa estar
+             * especificado
+             */
+            /**
+             * Cria SQLs
+             */
+            foreach( $rule as $model=>$valor ){
+
+                /**
+                 * Models relacionados?
+                 */
+                if( (
+                        (
+                            array_key_exists($model, $this->hasMany)
+                            OR array_key_exists($model, $this->hasOne)
+                        )
+                        AND !empty($idToUpdate)
+                    )
+                    OR ($model == get_class($this))
+
+                ){
+
+                    $has = array_merge($this->hasMany, $this->hasOne);
+
+                    if( $model == get_class($this) ){
+                        $modelUseTable = $this->useTable;
+                        $relation = "";
+                    } else {
+                        $modelUseTable = $this->{$model}->useTable;
+                        $relation = $model.".".$has[$model]["foreignKey"]."='".$idToUpdate."'";
+                    }
+
+                    $sqlWhere = "";
+                    if( !empty($where[$model]) ){
+                        $sqlWhere[] = implode(" AND ", $where[$model]);
+                    }
+
+                    if( !empty($relation) )
+                        $sqlWhere[] = $relation;
+
+                    if( !empty($sqlWhere) ){
+
+                        $sqlWhere = "WHERE ". implode(" AND ", $sqlWhere);
+                    }
+                    
+
+                    $sql[] =
+                        "UPDATE
+                            ".$modelUseTable." AS ".$model."
+                        SET
+                            ".implode(",", $valor)."
+                            ".$sqlWhere."
+                            ";
+
+                    unset($sqlWhere);
+
+                }
+            }
+
+            /**
+             * EXECUTA INSTRUÇÕES SQL
+             */
+            foreach( $sql as $instrucao ){
+                $this->query($instrucao);
+            }
+
+            return true;
+
+        }
+
+        else {
+            return false;
+        }
+
+    }
 
     /**
      * FIND()
@@ -659,12 +822,12 @@ class Model
      * Valida dados enviados em formulários automaticamente de acordo com regras
      * descritas nos respectivos Models.
      *
-     * @param mixed $mixed Contém os dados para validação
+     * @param mixed $data Contém os dados para validação
      * @param bool $sub Para verificar Models recursivamente, não deve ser usado
      * externamente.
      * @return bool Se validar, retorna verdadeiro
      */
-    public function validate($mixed, $sub = false){
+    public function validate($data, $sub = false){
 
         /**
          * Limpa Session
@@ -676,10 +839,10 @@ class Model
         $validationRules = $this->validation;
         $vE = array();
 
-        if( is_array($mixed) ){
+        if( is_array($data) ){
 
 
-            foreach($mixed as $model=>$campos){
+            foreach($data as $model=>$campos){
 
                 if( $model == get_class($this) ){
 

@@ -286,6 +286,12 @@ class FormHelper extends Helper
          * VALOR AUTOMÁTICO
          */
         if( empty($fieldValue) ) {
+
+            /**
+             * @todo - mostrar valores para outros campos fora input=text,
+             * como select, radio, etc.
+             */
+
             if( !empty($this->data[$modelName][$fieldName]) ){
                 $fieldValue = 'value="'. $this->data[$modelName][$fieldName]. '"';
             }

@@ -16,6 +16,7 @@ class SiteController extends AppController
     function index(){
         //pr($_SESSION);
         //pr($this->data);
+        
 
     }
 
@@ -46,8 +47,8 @@ class SiteController extends AppController
 
     function editar($id){
 
-        pr( $_SESSION);
-        pr( $this->params);
+        //pr( $_SESSION);
+        //pr( $this->params);
         //$this->Usuario->id = $id;
         //$usuario = $this->Usuario->find($id);
         //pr($usuario);
