@@ -1,6 +1,14 @@
 CHANGELOG
 
-v0.0.3 -------
+Versão atual: v0.0.3
+
+v0.0.4 (30/08/2009)
+
+Revision 45 (30/08/2009)
+    - Models: CRUD concluído. saveAll(), updateAll(), find(), delete(),
+      deleteAll(), query(), validate().
+    - FormHelper: edição de conteúdo pronto.
+    - FormHelper: amostragem de dados automaticamente após envio de form.
 Revision 38 (09/08/2009)
     - Novo nome Oficial: AcidPHP
     - Models: Model::query() criado
@@ -29,3 +37,6 @@ Revision 3 - Inicialização Pronta (análise de URL, carregamento CSS, criado
              HtmlHelper, controller/view funcionando) (19/07/09)
 Revision 2 - Estrutura MVC Inicializada
 Revision 1 - Commit inicial (15/07/2009)
+
+v0.0.3 (19/07/2009)
+
