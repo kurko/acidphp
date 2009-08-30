@@ -249,6 +249,7 @@ class Model
                         }
                     }
 
+                    $doUpdate = false;
                     if( $modelPai ){
 
                         if( in_array($tabela, $this->dbTables) ){
@@ -258,32 +259,60 @@ class Model
                             foreach( $campos as $campo=>$valor ){
 
                                 if( array_key_exists($campo, $this->tableDescribed) ){
-                                    $camposStr[] = $campo;
 
-                                    /**
-                                     * Checkbox? Tinyint?
-                                     *
-                                     * Verifica se o campo é do tipo checkbox.
-                                     */
-                                    $type = StrTreament::getNameSubStr($this->tableDescribed[ $campo ]["Type"], "(");
-                                    if( in_array($type, array("tinyint","bool") )){
-                                        if( !empty($valor) )
-                                            $valor = '1';
+                                    if( $campo == "id" ){
+                                        $doUpdate = true;
+                                        $campoId = $valor;
+                                    } else {
+
+                                        $camposStr[] = $campo;
+
+                                        /**
+                                         * Checkbox? Tinyint?
+                                         *
+                                         * Verifica se o campo é do tipo checkbox.
+                                         */
+                                        $type = StrTreament::getNameSubStr($this->tableDescribed[ $campo ]["Type"], "(");
+                                        if( in_array($type, array("tinyint","bool") )){
+                                            if( !empty($valor) )
+                                                $valor = '1';
+                                        }
+
+                                        $valorStr[] = $valor;
                                     }
-
-                                    $valorStr[] = $valor;
+                                    
                                 } else {
                                     showWarning("Campo inexistente configurado no formulário.");
                                 }
                             }
 
+
                             if( !empty($camposStr) ){
-                                $tempSql = "REPLACE INTO
-                                                ".$tabela."
-                                                    (".implode(",", $camposStr).")
-                                            VALUES
-                                                ('".implode("','", $valorStr)."')
-                                            ";
+                                /**
+                                 * @todo - comentar
+                                 */
+
+                                if( !$doUpdate ){
+                                    $tempSql = "INSERT INTO
+                                                    ".$tabela."
+                                                        (".implode(",", $camposStr).")
+                                                VALUES
+                                                    ('".implode("','", $valorStr)."')
+                                                ";
+                                } else {
+
+                                    for($i = 0; $i < count($camposStr); $i++){
+                                        $camposUpdate[] = $camposStr[$i]."='".$valorStr[$i]."'";
+                                    }
+
+                                    $tempSql = "UPDATE
+                                                    ".$tabela."
+                                                SET
+                                                    ".implode(",", $camposUpdate)."
+                                                WHERE
+                                                    id='".$campoId."'
+                                                ";
+                                }
                                 /**
                                  * SQL deste campo
                                  */
@@ -366,6 +395,10 @@ class Model
 
         return false;
     } // FIM SAVEALL()
+
+    /**
+     * @todo - updateAll()
+     */
 
     /**
      * FIND()

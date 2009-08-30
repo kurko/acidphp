@@ -58,7 +58,7 @@ class SiteController extends AppController
         $this->autoRender = false;
 
         if($this->data){
-            pr($this->data);
+            //pr($this->data);
             $this->Usuario->saveAll($this->data);
         }
 

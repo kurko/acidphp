@@ -177,7 +177,7 @@ class FormHelper extends Helper
             /**
              * Carrega as informações sobre o determinado ID
              */
-            $this->params["data"] = $this->models[$this->modelName]->find($fieldValue, "first");
+            $this->data = $this->models[$this->modelName]->find($fieldValue, "first");
 
             $_SESSION["Sys"]["addToThisData"][$this->modelName]["id"] = $fieldValue;
             $_SESSION["Sys"]["options"]["addToThisData"]["destLocation"] = $this->destionationUrl;
