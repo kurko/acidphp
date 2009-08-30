@@ -12,12 +12,20 @@ class Model
     /**
      * CONFIGURAÇÕES
      */
-    /**
-     * Contém a tabela a ser usada por este model
-     *
-     * @var string Tabela a ser usada
-     */
-    protected $useTable;
+        /**
+         * Contém a tabela a ser usada por este model
+         *
+         * @var string Tabela a ser usada
+         */
+         
+        protected $useTable;
+        /**
+         * Contém o id (ou mais de um em array) do campo objeto de ação.
+         *
+         * @var mixed
+         */
+        public $id;
+
 
     /**
      * RELACIONAMENTOS DE MODELS
@@ -62,6 +70,7 @@ class Model
         public $validation = array();
 
         protected $params;
+        
 
 
     /**
@@ -182,7 +191,7 @@ class Model
                 'conn' => $this->conn,
             )
         );
-    }
+    } // fim __construct()
 
     /**
      * MÉTODOS CRUD
@@ -307,8 +316,8 @@ class Model
                          * Salva dados na tabela deste Model
                          */
                         //pr($instrucao. get_class($this));
-                        //$this->conn->exec($instrucao);
-                        //$lastInsertId = $this->conn->lastInsertId();
+                        $this->conn->exec($instrucao);
+                        $lastInsertId = $this->conn->lastInsertId();
 
                         $modelsFilhos = array();
                         /**
@@ -401,6 +410,174 @@ class Model
         return $querysGerados;
 
     }// fim find()
+
+    /**
+     * DELETE()
+     *
+     * Exclui um registro da tabela com o id especificado
+     *
+     * @param mixed $idOrConditions Integer com id a ser excluído ou array com
+     *      vários ids.
+     * @param array $options
+     * @return bool
+     */
+    public function delete($idOrConditions = "", $options = array() ){
+        /**
+         * isDeleteAll?
+         */
+        $isDeleteAll = false;
+        if( in_array("deleteAll", $options) )
+            $isDeleteAll = true;
+
+        /**
+         * Se uma condição foi especificada
+         */
+        if( !empty($idOrConditions) ){
+            /**
+             * Se foi especificado um id
+             */
+            if( (is_int($idOrConditions) or is_string($idOrConditions)) and $idOrConditions > 0 ){
+                $sql[] = array( "id='".$idOrConditions."'" );
+
+                $currentId = $idOrConditions;
+                /**
+                 * deleteAll se necessário
+                 */
+                if( $isDeleteAll ){
+                    $hasRelations = array_merge($this->hasOne, $this->hasMany);
+
+                    if( !empty($hasRelations) ){
+                        foreach( $hasRelations as $model=>$has ){
+                            $this->{$model}->delete( array($has["foreignKey"] => $currentId), array("deleteAll") );
+                        }
+                    }
+                } // fim deleteAll()
+
+            }
+            /**
+             * Vários IDs em formato array
+             */
+            else if( is_array($idOrConditions)  ){
+
+                foreach( $idOrConditions as $chave=>$valor ){
+                    /**
+                     * Se há um id em meio aos valores da array
+                     */
+                    if( is_int($chave) AND (is_int($valor) or is_string($valor)) AND $valor > 0 ){
+                        $sql[] = array( "id='".$valor."'" );
+
+                        $currentId = $valor;
+                        /**
+                         * deleteAll se necessário
+                         */
+                        if( $isDeleteAll ){
+                            $hasRelations = array_merge($this->hasOne, $this->hasMany);
+
+                            if( !empty($hasRelations) ){
+                                foreach( $hasRelations as $model=>$has ){
+                                    $this->{$model}->delete( array($has["foreignKey"] => $currentId), array("deleteAll") );
+                                }
+                            }
+                        } // fim deleteAll()
+                    }
+                    /**
+                     * Outras condições
+                     */
+                    else {
+                        /**
+                         * @todo - para deleteAll()
+                         *
+                         * Quando o usuário for deletar sem usar o id (ex.
+                         * pais_id=50), é necessário fazer find() para descobrir
+                         * o id do usuário.
+                         */
+                        $sql[] = array( $chave."='".$valor."'" );
+                    }
+
+                } // fim foreach array $idOrConditions
+            }
+
+        }
+        /**
+         * Um id objeto de ação foi especificado
+         */
+        else if( !empty($this->id) ){
+
+            $sql[] = array( "id='".$this->id."'" );
+            
+        }
+        /**
+         * Nada foi especificado
+         */
+        else {
+            return false;
+        }
+
+        /**
+         * Executa todos os SQLs
+         */
+        if( !empty($sql) ){
+
+            $erro = false;
+            foreach( $sql as $instrucoes ){
+                if( !$this->query("DELETE FROM ".$this->useTable." WHERE ".implode(" AND ", $instrucoes) ) ){
+                    $erro = true;
+                }
+            }
+
+            if( $erro ){
+                return false;
+            } else {
+                unset($this->id);
+                return true;
+            }
+
+        }
+        /**
+         * Não há SQLs a serem rodados
+         */
+        else {
+            return false;
+        }
+
+    } // fim delete()
+
+    /**
+     * DELETEALL()
+     *
+     * Exclui um registro e todos os outros dados relacionados em outras
+     * tabelas.
+     *
+     * Para funcionamento correto, é necessário especificar o id do registro.
+     *
+     * @param mixed $idOrConditions
+     * @param array $options
+     * @return bool
+     */
+    public function deleteAll($idOrConditions, $options = array() ){
+
+        /**
+         * É necessário especificar o id do registro a ser excluído
+         */
+        if( !is_int($idOrConditions) and !is_string($idOrConditions) ){
+            
+            $hasId = false;
+            if( is_array($idOrConditions) ){
+
+                foreach( $idOrConditions as $chave=>$valor ){
+                    if( (is_int($valor) or is_string($valor)) and $valor > 0 ){
+                        $hasId = true;
+                    }
+                }
+            }
+            if( !$hasId )
+                return false;
+        }
+
+        array_push($options, "deleteAll");
+        return $this->delete($idOrConditions, $options);
+
+    }
 
     /**
      * QUERY()

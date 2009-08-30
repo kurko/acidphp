@@ -76,14 +76,14 @@ class Controller
      * CONFIGURAÇÃO DE AMBIENTE
      */
     protected $layout = "default";
-    protected $autoRender = true;
-    protected $isRendered = false;
 
     /**
+     * Se o sistema deve renderizar as views automaticamente.
      *
-     * @param <type> $param
+     * @var bool
      */
-    protected $actionCallback;
+    protected $autoRender = true;
+    protected $isRendered = false;
 
     /**
      * MÉTODOS
@@ -314,6 +314,8 @@ class Controller
              */
             if( !$this->isRendered AND $this->autoRender )
                 $this->render( $this->action );
+            else if( !$this->isRendered )
+                $this->render( false );
             /**
              * $this->afterFilter() é chamado sempre depois de qualquer ação
              */
@@ -326,7 +328,7 @@ class Controller
      *
      * @param string $path Indica qual o view deve ser carregado.
      */
-    protected function render($path, $includeType = ''){
+    protected function render($path = "", $includeType = ''){
 
         /**
          * DEFINE VARIÁVEIS PARA AS VIEWS
@@ -343,6 +345,7 @@ class Controller
              * neste método.
              */
         }
+        
         /**
          * Há arquivos padrães que podem substituir funcionalidades de um módulo
          * quando estes estão ausentes.
@@ -350,10 +353,14 @@ class Controller
          * Inclui a view correspondente deste action
          */
 
-        ob_start();
-        include(APP_VIEW_DIR."".$this->engine->callController."/".$path.".php");
-        $content_for_layout = ob_get_contents();
-        ob_end_clean();
+        $content_for_layout = "";
+
+        if( $path != false ){
+            ob_start();
+            include(APP_VIEW_DIR."".$this->engine->callController."/".$path.".php");
+            $content_for_layout = ob_get_contents();
+            ob_end_clean();
+        }
 
         if( is_file(APP_LAYOUT_DIR.$this->layout.".php") ){
             include(APP_LAYOUT_DIR.$this->layout.".php");

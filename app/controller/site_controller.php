@@ -29,6 +29,18 @@ class SiteController extends AppController
         $this->set("usuarios", $usuarios);
     }
 
+    function deletar($id){
+
+        //$this->Usuario->id = $id;
+        if( $this->Usuario->deleteAll( $id ) )
+            echo 'deu';
+        else
+            echo 'não deu';
+
+        $this->autoRender = false;
+        
+    }
+
 
 }
 ?>
