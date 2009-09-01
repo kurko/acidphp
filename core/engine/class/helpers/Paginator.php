@@ -24,7 +24,7 @@ class PaginatorHelper extends Helper
 
     }
 
-    public function navigation($pagClass = "", $options = array() ){
+    public function show($pagClass = "", $options = array() ){
 
         /**
          * Inicializa variáveis do ambiente
@@ -35,9 +35,11 @@ class PaginatorHelper extends Helper
             $urlGivenPage = $this->params["paginator"][$pagClass]["urlGivenPage"];
             $limit = $this->params["paginator"][$pagClass]["limit"];
 
-
             if( !isset($options["show"]) ){
                 $options["show"] = true;
+            }
+            if( !empty($options["format"]) ){
+                $format = $options["format"];
             }
             
         /**
@@ -103,7 +105,41 @@ class PaginatorHelper extends Helper
              * AMOSTRAGEM PERSONALIZADA
              */
             if( !empty($format) ){
-                
+            
+                /**
+                 * Formata páginas
+                 */
+                $first = false;
+                $conteudo = "";
+                foreach( $pag["pages"] as $pageN ){
+
+                    if( !$first ){
+                        if( $pag["first"] + 1 != $pageN AND $pag["first"] != $pageN ){
+                            $conteudo.= " ...";
+                        }
+                        $first = true;
+                    }
+
+                    if( $page == $pageN ){
+                        $conteudo.= '<span class="paginator_actualpage">';
+                        $conteudo.= " ".$pageN."";
+                        $conteudo.= "</span>";
+                    } else {
+                        $conteudo.= ' <span class="paginator_page">';
+                        $conteudo.= '<a href="'.substituteUrlTerm("/page:".$urlGivenPage, "/page:".$pageN, $this->params["url"]).'">';
+                        $conteudo.= " ".$pageN."";
+                        $conteudo.= '</a>';
+                        $conteudo.= "</span>";
+                    }
+
+                    $last = $pageN;
+                }
+
+                $toFormat = array("&page&","&total&" ,"&last&"    ,"&first&"    ,"&pages&");
+                $newFormat = array($page  ,$totalRows,$pag["last"],$pag["first"],$conteudo);
+
+                $conteudo = str_replace($toFormat, $newFormat, $format);
+
             }
             /**
              * AMOSTRAGEM PADRÃO
@@ -165,11 +201,11 @@ class PaginatorHelper extends Helper
                         $conteudo.= "...";
                     }
                     if( $page == $pag["last"] ){
-                        $conteudo.= '<span class="paginator_actualpage">';
+                        $conteudo.= ' <span class="paginator_actualpage">';
                         $conteudo.= "".$pag["last"]."";
                         $conteudo.= "</span>";
                     } else {
-                        $conteudo.= '<span class="paginator_page">';
+                        $conteudo.= ' <span class="paginator_page">';
                         $conteudo.= '<a href="'.substituteUrlTerm("/page:".$urlGivenPage, "/page:".$pag["last"], $this->params["url"]).'">';
                         $conteudo.= $pag["last"];
                         $conteudo.= '</a>';

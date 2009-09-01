@@ -98,20 +98,41 @@ function redirect($url=""){
     }
 }
 
+/**
+ * substituteUrlTerm()
+ *
+ * Toma uma URL (atual) e cria uma nova, substituindo valores desejados.
+ *
+ * @param string $oldTerm Termo a ser substituído
+ * @param string $newTerm Termo a ser inserido na URL
+ * @param string $url URL atual
+ * @return string Nova URL criada
+ */
 function substituteUrlTerm($oldTerm, $newTerm, $url){
 
+    /**
+     * Quebra a URL em uma array para substituição mais facil
+     */
     $urlSlices = explode("/", $url);
     $urlSlices = array_diff($urlSlices, array("") );
-    
 
+    $newTerm = str_replace("/", "", $newTerm);
+    $oldTerm = str_replace("/", "", $oldTerm);
+
+
+    /**
+     * Há page:n na url
+     */
     if( in_array($oldTerm, $urlSlices) ){
-        $newUrl = str_replace($oldTerm, $newTerm, $url);
+        $urlSlices = str_replace($oldTerm, $newTerm, $urlSlices);
+        $newUrl = implode("/", $urlSlices);
     } else {
         array_push($urlSlices, str_replace("/", "", $newTerm) );
         $newUrl = implode("/", $urlSlices);
     }
 
-    return $newUrl;
+
+    return "/".$newUrl;
 }
 
 ?>

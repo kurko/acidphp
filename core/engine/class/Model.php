@@ -632,8 +632,17 @@ class Model
 
     }// fim find()
 
-
-    public function paginate($options = array(), $model = "all"){
+    /**
+     * PAGINATE()
+     *
+     * Método para paginação de resultados. É um alias para o método find,
+     * exceto que com model::paginate() há um relacionamento
+     *
+     * @param array $options Opções de busca, igual ao método model::find()
+     * @param string $mode
+     * @return array
+     */
+    public function paginate(array $options = array(), $mode = "all"){
 
         if( empty($options["limit"]) )
             $options["limit"] = "50";
@@ -684,7 +693,7 @@ class Model
 
         $options["limit"] = $startLimit.",".$options["limit"];
 
-        return $this->find($options, $model) ;
+        return $this->find($options, $mode) ;
     }
     /**
      * DELETE()

@@ -1,0 +1,62 @@
+== PaginatorHelper ==
+
+O PaginatorHelper é um dos seus melhores amigos: ele cria a lista de paginação
+ao final de lista de resultados.
+
+Aquele trabalho chatíssimo que é criar paginação não vai mais existir. Basta
+usar este Helper e você ganhará valiosas horas de produtividade.
+
+=== Guia de Uso ===
+
+Em primeiro lugar, carrega o Paginator. No seu controller, descreva a
+propriedade 'var $helpers = array("Paginator");'. Pronto.
+
+Agora, onde você quiser usar o método model::find(), use model::paginate(). Os
+argumento têm a mesma sintaxe. Usando este novo método, o framework faz um
+relacionamento automático com o PaginatorHelper.
+
+Está pronto.
+
+Agora, onde você quer mostrar o menu de paginação na sua View, use o método:
+
+<?php
+Paginator::show(string $model, array $options);
+?>
+
+Este método tem as seguintes propriedades:
+
+* $models: qual o model que deve ser paginado. Isto serve para quando há mais de
+uma lista de resultados na mesma página.
+
+* $options: contém opções gerais.
+    ** "pages": quantas paginas aparecerão no menu de paginação. Iso serve
+                para limitar o número total. Imagine se você mostrasse 99999
+                páginas, seu site ficarão quebrado.
+    ** "show": padrão true. Mostra menu de paginação automaticamente, com
+                formatação própria. Se ["format"] estiver especificado, usa o
+                formato prescrito em ["format"]
+    ** "format": O formato do menu de paginação. Alguns termos reservados
+                são substituídos entre o texto. Por exemplo, se você digitar
+                "Número de resultados é &total&, você está na página &page&". A
+                Lista de termos está descrita a seguir:
+                    - "&total&" : total de resultados encontrados no DB;
+                    - "&page&"  : página atual;
+                    - "&pages&" : mostra a lista das páginas com link;
+                    - "&first&" : número da primeira página possível;
+                    - "&last&"  : número da última página possível;
+
+Veja o exemplo a seguir para compreender como fazer isto na prática.
+
+
+<?php
+/**
+ * listar.php
+ */
+
+echo $paginator->show("SeuModel", array(
+    "pages" => 10, // quantas páginas aparecerão no menu (imagine 99999 páginas)
+    "show" => true, // mostra o menu automaticamente. False retorna array.
+    "format" => "&total& resultados encontrados -> &pages&"
+));
+
+?>
