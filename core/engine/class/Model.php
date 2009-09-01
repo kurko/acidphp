@@ -663,7 +663,6 @@ class Model
         if( $options["page"] < 1 )
             $options["page"] = 1;
 
-            echo $options["page"];
 
         $totalRows = $this->countRows($options);
 
@@ -690,6 +689,7 @@ class Model
             "urlGivenPage" => $this->params["args"]["page"],
 
         );
+
 
         $options["limit"] = $startLimit.",".$options["limit"];
 

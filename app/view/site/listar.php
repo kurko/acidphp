@@ -30,13 +30,9 @@ if( !empty($usuarios) ){
 
     }
 
-
 }
 
-
-
 ?>
-
 </table>
 
 <?php

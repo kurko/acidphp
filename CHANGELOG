@@ -2,9 +2,16 @@ CHANGELOG
 
 Versão atual: v0.0.4
 
+-------------------------------------------------------------------------------
+
 v0.0.5 (xx/xx/xxxx)
 
-Revision 1: Nova versão
+Revision 6 (01/09/2009)
+    - PaginatorHelper: criada e pronta. Ver /core/docs/helper/PAGINATOR.
+    - HtmlHelper::metaTags(): método para metaTags criado
+    - pageTitle e siteTitle criados;
+
+-------------------------------------------------------------------------------
 
 v0.0.4 (30/08/2009)
 
@@ -41,6 +48,8 @@ Revision 3 - Inicialização Pronta (análise de URL, carregamento CSS, criado
              HtmlHelper, controller/view funcionando) (19/07/09)
 Revision 2 - Estrutura MVC Inicializada
 Revision 1 - Commit inicial (15/07/2009)
+
+-------------------------------------------------------------------------------
 
 v0.0.3 (19/07/2009)
 

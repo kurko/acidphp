@@ -24,7 +24,7 @@
 <body>
     <div id="global">
         <div id="cabecalho">
-            <h1>acphp</h1>
+            <h1><?php echo $siteTitle; ?></h1>
         </div>
         <div id="view">
             <div class="content">
