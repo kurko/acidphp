@@ -111,6 +111,7 @@ class PaginatorHelper extends Helper
                  */
                 $first = false;
                 $conteudo = "";
+                $conteudo = '<span class="paginator">';
                 foreach( $pag["pages"] as $pageN ){
 
                     if( !$first ){
@@ -140,12 +141,15 @@ class PaginatorHelper extends Helper
 
                 $conteudo = str_replace($toFormat, $newFormat, $format);
 
+                $conteudo = '</span>';
+
             }
             /**
              * AMOSTRAGEM PADRÃO
              */
             else {
                 $conteudo = "";
+                $conteudo = '<span class="paginator">';
 
                 /**
                  * Mostra a primeira página.
@@ -212,6 +216,8 @@ class PaginatorHelper extends Helper
                         $conteudo.= "</span>";
                     }
                 }
+
+                $conteudo = '</span>';
 
             } // fim amostragem padrão
             
