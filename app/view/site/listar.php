@@ -40,10 +40,10 @@ if( !empty($usuarios) ){
 </table>
 
 <?php
-echo( $paginator->navigation("Usuario", array(
+echo( $paginator->show("Usuario", array(
             "pages" => 10,
             "show" => true,
-            "format" => "&total& ocorrências encontradas,"
+//            "format" => "estamos na página &page&, &pages&"
         ))
 );
 
