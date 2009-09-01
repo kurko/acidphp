@@ -18,7 +18,14 @@ class SiteController extends AppController
         //pr($_SESSION);
         //pr($this->data);
         $this->pageTitle = "Página principal";
-        
+
+        $this->metaTags = array(
+            "author" => array(
+                "NAME" => "author",
+                "CONTENT" => "Alexandre de Oliveira",
+            ),
+        );
+
 
     }
 

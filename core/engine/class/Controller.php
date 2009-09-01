@@ -108,6 +108,9 @@ class Controller
          * @var string Título da página acessada
          */
         protected $pageTitle = "My Page (set controller:pageTitle)";
+
+
+        protected $metaTags = array();
         /**
          * Layout
          *
@@ -130,7 +133,11 @@ class Controller
     /**
      * CONFIGURAÇÃO DE AMBIENTE
      */
-
+        /**
+         *
+         * @var array Contém informações sobre o ambiente da aplicação
+         */
+        public $environment = array();
 
 
     /**
@@ -205,6 +212,13 @@ class Controller
         $this->webroot = $this->engine->webroot;
 
         /**
+         * VARIÁVEIS DE AMBIENTE
+         */
+        /**
+         * Variáveis de ambiente são ajustadas no método controller::trigger();
+         */
+
+        /**
          * MODELS
          *
          * Carrega models que estão descritos em $this->uses
@@ -249,28 +263,13 @@ class Controller
          * 
          * Cria helpers solicitados
          */
-        if( count($this->helpers) ){
             /**
-             * Loop por cada helper requisitado.
+             * Helpers são criados no método TRIGGER(), após os actions
+             * terem sido rodados.
              *
-             * Carrega classe do Helper, instancia e envia para o View
+             * Ver Controller::trigger()
              */
-            foreach($this->helpers as $valor){
-                include_once( CORE_HELPERS_DIR.$valor.".php" );
-                $helperName = $valor.HELPER_CLASSNAME_SUFFIX;
 
-                $helperParams = array(
-                    "params" => $this->params,
-                    "data" => $this->data,
-                    "models" => $this->usedModels,
-                );
-                $$valor = new $helperName($helperParams);
-                /**
-                 * Envia Helper para o view
-                 */
-                $this->set( strtolower($valor), $$valor);
-            }
-        }
         /**
          * COMPONENTS
          */
@@ -388,12 +387,50 @@ class Controller
              */
             call_user_func_array( array($this, $param['action'] ), $this->params["args"] );
 
+
+            /**
+             * VARIÁVEIS DE AMBIENTE
+             */
+                $this->environment["pageTitle"] = $this->pageTitle;
+                $this->environment["siteTitle"] = $this->siteTitle;
+                $this->environment["metaTags"] = $this->metaTags;
+
             /**
              * ENVIA DADOS PARA O VIEW
              */
                 $this->set("siteTitle", $this->siteTitle);
                 $this->set("pageTitle", $this->pageTitle);
-                
+
+            /**
+             * HELPERS
+             *
+             * Cria helpers solicitados
+             */
+                if( count($this->helpers) ){
+                    /**
+                     * Loop por cada helper requisitado.
+                     *
+                     * Carrega classe do Helper, instancia e envia para o View
+                     */
+                    foreach($this->helpers as $valor){
+                        include_once( CORE_HELPERS_DIR.$valor.".php" );
+                        $helperName = $valor.HELPER_CLASSNAME_SUFFIX;
+
+                        $helperParams = array(
+                            "params" => $this->params,
+                            "data" => $this->data,
+                            "models" => $this->usedModels,
+                            "environment" => $this->environment,
+                        );
+                        $$valor = new $helperName($helperParams);
+                        /**
+                         * Envia Helper para o view
+                         */
+                        $this->set( strtolower($valor), $$valor);
+                    }
+                }
+
+
             /**
              * Se não foi renderizado ainda, renderiza automaticamente
              */

@@ -14,6 +14,10 @@
 class HtmlHelper extends Helper
 {
 
+    function __construct($params = ""){
+        parent::__construct($params);
+    }
+
     public function link($linkText, $linkDestination, $options=array()){
 
         $inlineProperties = "";
@@ -32,7 +36,7 @@ class HtmlHelper extends Helper
             }
         }
 
-        echo '<a href="'.translateUrl($linkDestination).'" '.$inlineProperties.'>'.$linkText.'</a>';
+        return '<a href="'.translateUrl($linkDestination).'" '.$inlineProperties.'>'.$linkText.'</a>';
     }
 
     /**
@@ -46,6 +50,57 @@ class HtmlHelper extends Helper
         return $cssLink;
     }
 
+    public function metatags(){
+        
+        $conteudo = "";
+        $metas = $this->environment["metaTags"];
+
+        if( !empty($metas) ){
+
+            if( empty($type) ){
+
+                /**
+                 * Analisa se são várias metatags ou somente uma
+                 */
+                $chaves = array_keys($metas);
+
+                $multipleMetaTags = false;
+                foreach( $chaves as $chave ){
+                    //var_dump
+                    if( (is_int($chave) AND $chave >= 0) OR (is_array($chave)) )
+                        $multipleMetaTags = true;
+                }
+
+                /**
+                 * Múltiplas metatags
+                 */
+                if( $multipleMetaTags ){
+                    foreach( $metas as $meta ){
+                        $conteudo.= "<meta ";
+                        foreach($meta as $chave=>$valor){
+                            $conteudo.= " ".$chave.'="'.$valor.'"';
+                        }
+                        $conteudo.= " />";
+                    }
+                }
+                /**
+                 * É apenas uma metatag
+                 */
+                else {
+                    $conteudo.= "<meta ";
+                    foreach($metas as $chave=>$valor){
+                        $conteudo.= " ".$chave.'="'.$valor.'"';
+                    }
+                    $conteudo.= " />";
+                }
+
+            }
+        }
+        //pr($this->environment);
+        //$conteudo.= ;
+
+        return $conteudo;
+    }
 
 }
 

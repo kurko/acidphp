@@ -17,6 +17,8 @@
     <title><?php echo $siteTitle." - ".$pageTitle; ?></title>
     <?php
     echo $html->css("standard.style");
+
+    echo $html->metatags();
     ?>
 </head>
 <body>

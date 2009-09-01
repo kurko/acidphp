@@ -38,6 +38,12 @@ class Helper
     protected $data = array();
 
     /**
+     *
+     * @var array Contém informações sobre o ambiente da aplicação.
+     */
+    protected $environment = array();
+
+    /**
      * Cada classe contém um versão. Esta versão é descrita nesta variável.
      *
      * @var string Versão desta classe
@@ -61,8 +67,11 @@ class Helper
         /**
          * $this->data
          */
-        //pr($params["data"]);
         $this->data = ( empty($params["data"]) ) ? array() : $params["data"];
+        /**
+         * $this->environment
+         */
+        $this->environment = ( empty($params["environment"]) ) ? array() : $params["environment"];
     }
 
     /**
