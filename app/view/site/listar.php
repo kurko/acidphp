@@ -19,9 +19,9 @@ if( !empty($usuarios) ){
                 Tarefas: <?php if(!empty($usuario["Tarefa"])) echo count($usuario["Tarefa"]); else echo '0'; ?>
             </td>
             <td>
-                <?php $html->link( "Deletar", array("controller" => "site", "action" => "deletar", $usuario["Usuario"]["id"]) ); ?>
+                <?php echo $html->link( "Deletar", array("controller" => "site", "action" => "deletar", $usuario["Usuario"]["id"]) ); ?>
                 -
-                <?php $html->link( "Editar", array("controller" => "site", "action" => "editar", $usuario["Usuario"]["id"]) ); ?>
+                <?php echo $html->link( "Editar", array("controller" => "site", "action" => "editar", $usuario["Usuario"]["id"]) ); ?>
             </td>
         </tr>
 
@@ -38,3 +38,13 @@ if( !empty($usuarios) ){
 ?>
 
 </table>
+
+<?php
+echo( $paginator->navigation("Usuario", array(
+            "pages" => 10,
+            "show" => true,
+            "format" => "&total& ocorrências encontradas,"
+        ))
+);
+
+?>

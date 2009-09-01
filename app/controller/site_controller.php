@@ -19,13 +19,7 @@ class SiteController extends AppController
         //pr($this->data);
         $this->pageTitle = "Página principal";
 
-        $this->metaTags = array(
-            "author" => array(
-                "NAME" => "author",
-                "CONTENT" => "Alexandre de Oliveira",
-            ),
-        );
-
+        //pr( $this->params );
 
     }
 
@@ -35,9 +29,13 @@ class SiteController extends AppController
     }
 
     function listar(){
-        $usuarios = $this->Usuario->find(array(
-            "limit" => 10
+        $usuarios = $this->Usuario->paginate(array(
+            "fields" => array("Usuario.nome"),
+            "limit" => 20,
+            //"page" => $this->params["args"]["page"]
         ));
+
+        //pr($this->params);
 
         $this->set("usuarios", $usuarios);
     }

@@ -18,7 +18,17 @@ class HtmlHelper extends Helper
         parent::__construct($params);
     }
 
-    public function link($linkText, $linkDestination, $options=array()){
+    /**
+     * LINK()
+     *
+     * Cria uma âncora HTML automaticamente.
+     *
+     * @param string $linkText Texto a ser mostrado na tela.
+     * @param mixed $linkDestination Endereço de envio (string ou array).
+     * @param array $options Opções extras de amostragem e configuração.
+     * @return bool
+     */
+    public function link($linkText, $linkDestination, array $options = array() ){
 
         $inlineProperties = "";
 
@@ -50,13 +60,25 @@ class HtmlHelper extends Helper
         return $cssLink;
     }
 
+    /**
+     * METATAGS()
+     *
+     * Função que monta metatags automaticamente.
+     *
+     * @return string Retorna todas as metatags justapostas, sem espaço.
+     */
     public function metatags(){
         
         $conteudo = "";
+        /**
+         * $metas contém todas as metatags configuradas no controller
+         */
         $metas = $this->environment["metaTags"];
 
+        /**
+         * Se de fato há metatags
+         */
         if( !empty($metas) ){
-
             if( empty($type) ){
 
                 /**
@@ -96,11 +118,9 @@ class HtmlHelper extends Helper
 
             }
         }
-        //pr($this->environment);
-        //$conteudo.= ;
 
         return $conteudo;
-    }
+    } // fim metatag()
 
 }
 

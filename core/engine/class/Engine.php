@@ -171,10 +171,25 @@ class Engine
          * Verifica o resto da URL por argumentos $_GET
          */
         //echo '0'.implode("/", $url).'0';
-        $this->webroot = str_replace( implode("/", $url), "", $_SERVER["REQUEST_URI"]);
+        $this->webroot = str_replace( implode("/", $url), "", $_SERVER["REQUEST_URI"] );
         define("WEBROOT", $this->webroot);
         array_shift($url);
         array_shift($url);
+
+        /**
+         * URLS com argumentos com :
+         */
+            foreach( $url as $chave=>$valor ){
+                $tmpArg = explode(":", $valor);
+                if( count($tmpArg) > 1 ){
+                    $url[$tmpArg[0]] = $tmpArg[1];
+                    unset( $url[$chave] );
+                }
+            }
+
+        /**
+         * Finaliza tratamento de argumentos
+         */
         $this->arguments = $url;
 
     }

@@ -99,7 +99,7 @@ class Model
         /**
          * CONFIGURAÇÃO DE AMBIENTE
          */
-        $this->params = $params["params"];
+        $this->params = &$params["params"];
 
         /**
          * CONEXÃO
@@ -579,6 +579,10 @@ class Model
      */
     public function find($options = array(), $mode = "all"){
 
+        if( is_array($options) AND array_key_exists("page", $options) ){
+            if( empty($options["page"]) )
+                $options["page"] = 1;
+        }
         /**
          * ID especificado?
          *
@@ -628,6 +632,60 @@ class Model
 
     }// fim find()
 
+
+    public function paginate($options = array(), $model = "all"){
+
+        if( empty($options["limit"]) )
+            $options["limit"] = "50";
+
+        if( array_key_exists("page", $this->params["args"]) ){
+            /**
+             * Segurança contra URL injection
+             */
+            if( ($this->params["args"]["page"] * 1) > 0 ){
+                $options["page"] = $this->params["args"]["page"];
+            }
+        }
+
+        if( !array_key_exists("page", $options) ){
+            $options["page"] = 1;
+        }
+
+        if( $options["page"] < 1 )
+            $options["page"] = 1;
+
+            echo $options["page"];
+
+        $totalRows = $this->countRows($options);
+
+
+        $startLimit = $options["limit"] * ($options["page"] - 1);
+
+        /**
+         * Se a página for maior do que o possível de amostragem (segurança
+         * contra usuários).
+         */
+        if( $startLimit > $totalRows AND $totalRows > 0 ){
+            $startLimit = $totalRows - $options["limit"];
+        }
+
+        if( empty($this->params["args"]["page"]) )
+            $this->params["args"]["page"] = "";
+
+        $this->params["paginator"][get_class($this)] = array(
+            "class" => get_class($this),
+            "totalRows" => $totalRows,
+            "startLimit" => $startLimit,
+            "limit" => $options["limit"],
+            "page" => $options["page"],
+            "urlGivenPage" => $this->params["args"]["page"],
+
+        );
+
+        $options["limit"] = $startLimit.",".$options["limit"];
+
+        return $this->find($options, $model) ;
+    }
     /**
      * DELETE()
      *
@@ -811,7 +869,12 @@ class Model
             return $this->conn->crud($sql);
     }
 
+    public function countRows($options){
 
+        $count = $this->query("SELECT COUNT(*) as count FROM ".$this->useTable." AS ".get_class($this));
+        return $count[0]["count"];
+
+    }
 
     /**
      * MÉTODOS DE SUPORTE

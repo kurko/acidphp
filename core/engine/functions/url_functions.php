@@ -98,4 +98,20 @@ function redirect($url=""){
     }
 }
 
+function substituteUrlTerm($oldTerm, $newTerm, $url){
+
+    $urlSlices = explode("/", $url);
+    $urlSlices = array_diff($urlSlices, array("") );
+    
+
+    if( in_array($oldTerm, $urlSlices) ){
+        $newUrl = str_replace($oldTerm, $newTerm, $url);
+    } else {
+        array_push($urlSlices, str_replace("/", "", $newTerm) );
+        $newUrl = implode("/", $urlSlices);
+    }
+
+    return $newUrl;
+}
+
 ?>

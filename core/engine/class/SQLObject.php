@@ -143,6 +143,9 @@ class SQLObject {
          * Fields: Se algum campo foi indicado
          */
         else {
+
+            if( is_string($options["fields"]) )
+                $options["fields"] = array($options["fields"]);
             /**
              * Se fields == array
              */

@@ -169,7 +169,16 @@ class Controller
         $this->params["action"] = $this->engine->callAction;
         $this->params["args"] = $this->engine->arguments;
         $this->params["webroot"] = $this->engine->webroot;
-        $this->params["url"] = $this->engine->webroot.$this->params["controller"]."/".$this->params["action"]."/".implode("/", $this->params["args"]);
+
+        $args = array();
+        foreach( $this->params["args"] as $chave=>$valor ){
+            if( is_int($chave) )
+                $args[$chave] = $valor;
+            else
+                $args[$chave] = $chave.":".$valor;
+        }
+
+        $this->params["url"] = $this->engine->webroot.$this->params["controller"]."/".$this->params["action"]."/".implode("/", $args ) ;
         /**
          *
          * $THIS->DATA
@@ -241,7 +250,7 @@ class Controller
                     'dbTables' => $this->engine->dbTables,
                     'modelName' => $className,
                     'recursive' => $this->recursive,
-                    'params' => $this->params,
+                    'params' => &$this->params,
                 );
 
                 if( !class_exists($className) ){
@@ -417,7 +426,7 @@ class Controller
                         $helperName = $valor.HELPER_CLASSNAME_SUFFIX;
 
                         $helperParams = array(
-                            "params" => $this->params,
+                            "params" => &$this->params,
                             "data" => $this->data,
                             "models" => $this->usedModels,
                             "environment" => $this->environment,

@@ -168,9 +168,10 @@ class DatabaseAbstractor extends DataAbstractor
          * LIMIT desligado
          */
         else {
-
             $sql = $this->sqlObject->select($options);
         }
+
+        //pr($sql);
 
         $loopStartTime = microtime(true);
 
