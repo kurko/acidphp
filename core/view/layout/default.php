@@ -14,7 +14,7 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=<?php echo Config::read("charset") ?>">
-    <title>Página Default do acphp</title>
+    <title><?php echo $siteTitle." - ".$pageTitle; ?></title>
     <?php
     echo $html->css("standard.style");
     ?>

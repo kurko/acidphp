@@ -12,10 +12,12 @@ class SiteController extends AppController
 {
 
     var $uses = array("Usuario", "Tarefa", "Idade");
+    var $siteTitle = "AcidPHP";
 
     function index(){
         //pr($_SESSION);
         //pr($this->data);
+        $this->pageTitle = "Página principal";
         
 
     }

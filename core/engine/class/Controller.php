@@ -18,72 +18,120 @@ class Controller
     /**
      * VARIÁVEIS DE SISTEMA
      */
-    /**
-     *
-     * @var array Contém todos os parâmetros de ambiente do sistema, como
-     * variáveis $_POST e $_GET tratadas, bem como URL atual, controllers e
-     * actions
-     */
-    protected $params;
-    protected $data;
-    protected $webroot;
+        /**
+         *
+         * @var array Contém todos os parâmetros de ambiente do sistema, como
+         * variáveis $_POST e $_GET tratadas, bem como URL atual, controllers e
+         * actions
+         */
+        protected $params;
+        /**
+         *
+         * @var array Contém todos os dados organizados provenientes de forms
+         */
+        protected $data;
+        /**
+         *
+         * @var string Endereço do root da aplicação
+         */
+        protected $webroot;
     /**
      * HELPERS/COMPONENTS/BEHAVIORS
      */
-    /**
-     * HELPERS
-     *
-     * @var array Helpers são objetos que auxiliam em tarefas de View, como
-     * Formulários, Javascript, entre outros.
-     */
-    protected $helpers = array("Html");
-    /**
-     * COMPONENTS
-     *
-     * @var array Components são objetos que automatizam processos de nível de
-     * Controller, tais como autenticação e login
-     */
-    protected $components = array();
-    protected $loadedComponents = array();
+        /**
+         * HELPERS
+         */
+        /**
+         *
+         * @var array Helpers são objetos que auxiliam em tarefas de View, como
+         * Formulários, Javascript, entre outros.
+         */
+        protected $helpers = array("Html");
+        /**
+         * COMPONENTS
+         */
+        /**
+         *
+         * @var array Components são objetos que automatizam processos de nível
+         * de Controller, tais como autenticação e login
+         */
+        protected $components = array();
+        /**
+         *
+         * @var array Componentes já carregados (evita retrabalho)
+         */
+        protected $loadedComponents = array();
 
     /**
-     * USES (MODELS)
-     *
-     * Indica quais models devem ser carregados
-     *
-     * @var array Contém o nome dos models a serem usados
+     * MODELS
      */
-    protected $uses = array();
-    protected $usedModels = array();
+        /**
+         * USES
+         *
+         * Indica quais models devem ser carregados
+         *
+         * @var array Contém o nome dos models a serem usados
+         */
+        protected $uses = array();
+        /**
+         *
+         * @var array Models já usados (evita retrabalho)
+         */
+        protected $usedModels = array();
+        /**
+         *
+         * @var int Models que se interrelacionam precisam de um limite de
+         * carregamento recursivo. Por exemplo:
+         *
+         *      1) Usuario hasMany Tarefa;
+         *      2) Tarefa belongsTo Usuario;
+         *
+         * O usuário Model carregaria Usuario e então os Models filhos (Tarefa).
+         * Tendo carregado Tarefa, veria que ele pertence a Usuario, e carregaria
+         * Usuario dentro de Tarefa. Isto aconteceria infinitamente sem
+         * Model::recursive setado.
+         *
+         * O padrão é 1, mas pode-se setar recursividade na profundidade desejada.
+         */
+        public $recursive = 1;
+
     /**
-     *
-     * @var int Models que se interrelacionam precisam de um limite de
-     * carregamento recursivo. Por exemplo:
-     *
-     *      1) Usuario hasMany Tarefa;
-     *      2) Tarefa belongsTo Usuario;
-     *
-     * O usuário Model carregaria Usuario e então os Models filhos (Tarefa).
-     * Tendo carregado Tarefa, veria que ele pertence a Usuario, e carregaria
-     * Usuario dentro de Tarefa. Isto aconteceria infinitamente sem
-     * Model::recursive setado.
-     *
-     * O padrão é 1, mas pode-se setar recursividade na profundidade desejada.
+     * VIEW
      */
-    public $recursive = 1;
+        /**
+         *
+         * @var string Título do site
+         */
+        protected $siteTitle = "Site Title (set controller::siteTitle)";
+        /**
+         *
+         * @var string Título da página acessada
+         */
+        protected $pageTitle = "My Page (set controller:pageTitle)";
+        /**
+         * Layout
+         *
+         * @var string Indica qual é o layout usado
+         */
+        protected $layout = "default";
+
+        /**
+         * Se o sistema deve renderizar as views automaticamente.
+         *
+         * @var bool
+         */
+        protected $autoRender = true;
+        /**
+         *
+         * @var bool Indica se já houve renderização (evita retrabalho)
+         */
+        protected $isRendered = false;
 
     /**
      * CONFIGURAÇÃO DE AMBIENTE
      */
-    protected $layout = "default";
 
-    /**
-     * Se o sistema deve renderizar as views automaticamente.
-     *
-     * @var bool
-     */
-    protected $autoRender = true;
-    protected $isRendered = false;
+
 
     /**
      * MÉTODOS
@@ -340,6 +388,12 @@ class Controller
              */
             call_user_func_array( array($this, $param['action'] ), $this->params["args"] );
 
+            /**
+             * ENVIA DADOS PARA O VIEW
+             */
+                $this->set("siteTitle", $this->siteTitle);
+                $this->set("pageTitle", $this->pageTitle);
+                
             /**
              * Se não foi renderizado ainda, renderiza automaticamente
              */
