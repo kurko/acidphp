@@ -28,6 +28,7 @@ echo $form->create("Usuario", array(
 echo $form->input('nome', array( "label" => "Seu nome" ));
 echo $form->input('email');
 echo $form->input('senha');
+echo $form->input('Idade.titulo');
 
 echo $form->end("Enviar");
 

@@ -28,7 +28,7 @@ class Security
         /**
          * Strings
          */
-        if( is_string($data) ){
+        if( is_string($data) or is_int($data) ){
 
             // Barras antes de aspas
             $data = addslashes($data);
@@ -55,42 +55,17 @@ class Security
              * @param array $array Variável a ser tratada
              * @return array Todos os itens de uma array tratados com Sanitize()
              */
-            function checkLooper($array){
-                
-                foreach( $array as $chave=>$valor ){
-                    /**
-                     * Sendo o valor encontrado dentro da array outra array,
-                     * chama novamente checkLooper() (esta mesma função) para
-                     * seguir a varredura em subArrays.
-                     */
-                    if( is_array($valor) ){
-                        $result[$chave] = checkLooper($valor);
-                    }
-                    /**
-                     * O nó atual da array não é array, portanto basta tratá-la.
-                     */
-                    else {
-                        /**
-                         * Devido a $result[$chave] ser igual a
-                         * Sanitize($valor), não é necessário implementar esta
-                         * função cada vez que se necessitar alterar Sanitize().
-                         *
-                         * Basta alterar Sanitize() onde ocorre o tratamento de
-                         * strings.
-                         */
-                        $result[$chave] = Security::Sanitize($valor);
-                    }
-
-                }
-                
-                return $result;
-            }
             /**
              * Inicializa varredura
              */
-            $result = checkLooper($data);
+            $result = Security::checkLooper($data);
 
         } else {
+
+            return $data;
+            /**
+             * @todo - implementar
+             */
             trigger_error("Sanitize não totalmente implementado", E_USER_ERROR);
         }
         
@@ -99,5 +74,36 @@ class Security
          */
         return $result;
     } // fim Sanitize()
+
+    function checkLooper($array){
+
+        foreach( $array as $chave=>$valor ){
+            /**
+             * Sendo o valor encontrado dentro da array outra array,
+             * chama novamente checkLooper() (esta mesma função) para
+             * seguir a varredura em subArrays.
+             */
+            if( is_array($valor) ){
+                $result[$chave] = Security::checkLooper($valor);
+            }
+            /**
+             * O nó atual da array não é array, portanto basta tratá-la.
+             */
+            else {
+                /**
+                 * Devido a $result[$chave] ser igual a
+                 * Sanitize($valor), não é necessário implementar esta
+                 * função cada vez que se necessitar alterar Sanitize().
+                 *
+                 * Basta alterar Sanitize() onde ocorre o tratamento de
+                 * strings.
+                 */
+                $result[$chave] = Security::Sanitize($valor);
+            }
+
+        }
+
+        return $result;
+    }
 }
 ?>

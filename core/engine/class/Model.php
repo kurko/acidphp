@@ -220,7 +220,6 @@ class Model
                  * Loop por cada tabela dos valores enviados em $data
                  */
                 foreach($data as $model=>$campos){
-
                     /**
                      * Verifica se o Model requisitado é o próprio ou são filhos
                      */
@@ -347,7 +346,7 @@ class Model
                         $this->conn->exec($instrucao);
                         $lastInsertId = $this->conn->lastInsertId();
 
-                        $modelsFilhos = array();
+                        //$modelsFilhos = array();
                         /**
                          * Se houverem Models filhos relacionados,
                          * envia dados para serem salvos
@@ -373,7 +372,7 @@ class Model
                                  * Envia dados para Models relacionados salvarem
                                  */
                                 $dataTemp[$model][ $foreignKey ] = $lastInsertId;
-                                $this->$model->SaveAll( $dataTemp );
+                                $this->{$model}->SaveAll( $dataTemp );
 
                                 unset($dataTemp);
                             }
