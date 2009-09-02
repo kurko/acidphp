@@ -1,0 +1,106 @@
+== FORMHELPER ==
+
+O FormHelper cria para você os formulários HTML de forma fácil. Com ele, você
+pode também usar o método saveAll() do Model e inserir os dados enviados
+automaticamente, sem tocar em linhas SQL.
+
+O FormHelper é usado nas Views da sua aplicação. Você sempre (na maioria das
+vezes) deve usar 'echo $form->metodo()', onde método é aquilo que você quer
+fazer. Falaremos sobre isto mais abaixo.
+
+=== Criando um formulário ===
+
+O primeiro passo para criar um formulário, é inicializá-lo com o método
+create(). Você faz isto com o seguinte código na sua View (obviamente,
+formulários só podem ser mostrados nas Views):
+
+<source lang="php">
+<?php
+echo $form->create( "MeuModel",
+                    array("controller"=>"meucontroller", "action"=>"save")
+                );
+
+?>
+</source>
+
+Pronto! Seu formulário foi criado.
+
+FormHelper::create() recebe dois argumentos, o a) Model principal do cadastro e
+b) opções do formulário. No caso acima, chamaremos o controller "meucontroller"
+e o action "save" após o submit.
+
+Os próximos passos são criar os campos e finalizar o formulário (criar o botão
+submit).
+
+=== Criando campos no formulário ===
+
+Esta etapa é simples. Basicamente, você quer o campo 'nome', digite abaixo de
+create():
+
+<source lang="php">
+echo $form->input('nome');
+</source>
+
+O método input() do FormHelper sempre deve receber como primeiro argumento o
+nome do campo da tabela do banco de dados que você quer salvar este dado. Se na
+sua tabela você tem o campo 'titulo', então você deve nomear seu campo 'titulo'.
+
+Por que? Porque desta forma, quando o formulário for enviado, o Model principal
+se encarrega de inserir os dados no banco de dados automaticamente. Nada de
+tocar em SQLs.
+
+O método input() aceita um segundo argumento array, com opções de configuração.
+Até a presente versão, os principais argumentos são as descritas abaixo, com
+exemplo a seguir:
+
+* "label"
+* "select"
+* "value"
+* "before"
+* "after"
+* "between"
+
+Exemplo de uso:
+
+<source lang="php">
+    echo $form->input('nome', array(
+                                    'label' => 'Seu nome',
+                                    'value' => 'João da Silva',
+                                    'after' => 'Preencha seu nome inteiro
+                                    ));
+</source>
+
+O exemplo acima, mostra o campo 'nome' com o label (rótulo) 'Seu nome', com
+valor 'João da Silva', e após o campo, a frase descrita em 'after'.
+
+O código HTML gerado é com divs e spans corretamente nomeados, com classes que
+facilitará a edição de formatação CSS.
+
+=== Finalizando o formulário ===
+
+Você deve, sempre (sempre) fechar seu formulário com o método end(), como a
+seguir:
+
+<source lang="php">
+echo $form->end("Nome do Botão de Submit");
+</source>
+
+Auto-explicativo. O argumento de end() é o irá escrito no botao de submit.
+
+=== Formulários para edição ===
+
+O AcidPHP faz isto automaticamente, basta criar um campo no formulário com o
+nome de 'id'. Ele não mostrará o campo 'id' na tela, mas carregará as
+informações sobre aquele id no banco de dados e preencherá automaticamente
+os campos do formulário para você.
+
+O segundo argumento de input() no nosso exemplo anterior era uma array,
+lembra-se? Quando você especifica o campo id, neste campo você indica o id em
+si, como a seguir:
+
+<source lang="php">
+echo $form->input('id', 7);
+</source>
+
+Isto carregará as informações do registro com id=7 na tabela do Model
+relacionado. Simples assim.
