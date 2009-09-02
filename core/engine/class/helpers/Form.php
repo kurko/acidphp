@@ -67,10 +67,14 @@ class FormHelper extends Helper
          *
          * Se há um login estipulado, sobrescreve <form action> atual
          */
+        /**
+         * @todo - Usuário logado precisa que o action do formulário seja
+         * realmente sobrescrito?
+         */
         if( !empty($globalVars["defaultLoginPage"]) ){
-            if( !empty($globalVars["defaultLoginPage"]["controller"]) )
+            if( !empty($globalVars["defaultLoginPage"]["controller"]) AND empty($options["controller"]) )
                 $options["controller"] = $globalVars["defaultLoginPage"]["controller"];
-            if( !empty($globalVars["defaultLoginPage"]["action"]) )
+            if( !empty($globalVars["defaultLoginPage"]["action"]) AND empty($options["action"]) )
                 $options["action"] = $globalVars["defaultLoginPage"]["action"];
         }
 
