@@ -316,7 +316,8 @@ class Model
                                  */
                                 if( $doUpdate ){
 
-                                    if( $this->countRows($campoId) == 0 )
+                                    //pr($campoId);
+                                    if( $this->countRows( array("conditions" => array( get_class($this).".".$updateConditionField => $campoId) ) ) == 0 )
                                         $doUpdate = false;
                                 }
 
@@ -687,7 +688,7 @@ class Model
          *
          * Gera SQL com SQLObject
          */
-         //pr($options["limit"]);
+         //pr($options);
         $querysGerados = $this->databaseAbstractor->find($options, $mode);
         return $querysGerados;
 
@@ -948,7 +949,7 @@ class Model
      * @return int
      */
     public function countRows( $options = array() ){
-
+        //pr($options);
         /**
          * Retorna a quantidade total de registros do Model
          */
@@ -975,9 +976,33 @@ class Model
         /**
          * @todo - implementar
          */
-        else {
-            $options["fields"] = array("COUNT(*) AS count");
-            $count = $this->find($options);
+        else if( is_array($options) ) {
+
+            if( !empty($options["conditions"] ) ){
+
+                if( is_array($options["conditions"]) ){
+                    foreach( $options["conditions"] as $chave=>$valor ){
+                        $condition[] = $chave."='".$valor."'";
+                    }
+                    $where = implode('AND', $condition);
+                }
+
+                $count = $this->query(  "SELECT COUNT(*) as count ".
+                                        "FROM ".$this->useTable." AS ".get_class($this)." ".
+                                        "WHERE ".$where
+                                    );
+                                    pr($count);
+                return $count[0]["count"];
+            }
+            /**
+             * @todo - implementar
+             */
+            else {
+                $options["fields"] = array("COUNT(*) AS count");
+                pr($options);
+                $count = $this->find($options);
+            }
+            
         }
     }
 

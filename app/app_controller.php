@@ -8,11 +8,10 @@ class AppController extends Controller
 
         $this->auth->allow(array(
             "site" => array(
-                "*"
+                "index", "save"
             )
 
         ));
-
         // Após login com sucesso, para onde o usuário deve ser redirecionado
         $this->auth->redirectTo( array("controller" => "site", "action" => "index") );
 

@@ -75,11 +75,15 @@ class FormHelper extends Helper
          * @todo - Usuário logado precisa que o action do formulário seja
          * realmente sobrescrito?
          */
-        if( !empty($globalVars["defaultLoginPage"]) AND $modelName == "login" ){
-            if( !empty($globalVars["defaultLoginPage"]["controller"]) AND empty($options["controller"]) )
+        if( !empty($globalVars["defaultLoginPage"]) AND $options == "login" ){
+            $options = array();
+            if( !empty($globalVars["defaultLoginPage"]["controller"]) ){
                 $options["controller"] = $globalVars["defaultLoginPage"]["controller"];
-            if( !empty($globalVars["defaultLoginPage"]["action"]) AND empty($options["action"]) )
+            }
+                //echo "Oij".$globalVars["defaultLoginPage"]["action"];
+            if( !empty($globalVars["defaultLoginPage"]["action"]) )
                 $options["action"] = $globalVars["defaultLoginPage"]["action"];
+
         }
 
         /**
@@ -197,7 +201,6 @@ class FormHelper extends Helper
      * @return string Código HTML para o form input pedido.
      */
     public function input($fieldName, $options = ''){
-
         /**
          * ID
          *
@@ -223,8 +226,7 @@ class FormHelper extends Helper
 
                     $_SESSION["Sys"]["addToThisData"][$this->formId][$this->modelName]["id"] = $fieldValue;
                     $_SESSION["Sys"]["options"]["addToThisData"][$this->formId]["destLocation"] = $this->destionationUrl;
-
-                    if( !empty($options["show"]) AND $options["show"] == true ){
+                    if( !empty($options["show"]) AND is_array($options) AND $options["show"] == true ){
                     } else {
                         unset($options);
                         return false;
