@@ -3,7 +3,7 @@
 <table>
 <?php
 
-//pr($usuarios);
+
 if( !empty($usuarios) ){
 
     foreach( $usuarios as $usuario ){
@@ -24,7 +24,7 @@ if( !empty($usuarios) ){
                 <?php echo $html->link( "Editar", array("controller" => "site", "action" => "editar", $usuario["Usuario"]["id"]) ); ?>
             </td>
         </tr>
-        <?
+        <?php
     }
 }
 ?>

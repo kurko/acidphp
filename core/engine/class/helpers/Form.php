@@ -38,6 +38,10 @@ class FormHelper extends Helper
 
     protected $destionationUrl;
 
+    protected $formId;
+
+    protected $editable;
+
     function __construct($params=""){
         parent::__construct($params);
         
@@ -71,7 +75,7 @@ class FormHelper extends Helper
          * @todo - Usuário logado precisa que o action do formulário seja
          * realmente sobrescrito?
          */
-        if( !empty($globalVars["defaultLoginPage"]) ){
+        if( !empty($globalVars["defaultLoginPage"]) AND $modelName == "login" ){
             if( !empty($globalVars["defaultLoginPage"]["controller"]) AND empty($options["controller"]) )
                 $options["controller"] = $globalVars["defaultLoginPage"]["controller"];
             if( !empty($globalVars["defaultLoginPage"]["action"]) AND empty($options["action"]) )
@@ -127,6 +131,26 @@ class FormHelper extends Helper
         }
 
         /**
+         * formId
+         *
+         * Dá um ID único para cada formulário
+         */
+        if( empty($options["formId"]) )
+            $this->formId = sha1( rand(1, 99999) );
+        else
+            $this->formId = $options["formId"];
+
+        /**
+         * formId
+         *
+         * Dá um ID único para cada formulário
+         */
+        if( isset($options["edit"]) AND $options["edit"] == false ){
+            $this->editable = false;
+        } else
+            $this->editable = true;
+
+        /**
          * MODEL PRINCIPAL
          */
         if( !empty($modelName) ){
@@ -136,6 +160,11 @@ class FormHelper extends Helper
          * Indica que é formulário de um FormHelper
          */
         $conteudo.= '<input type="hidden" name="sender" value="formHelper" />';
+
+        /**
+         * Indica que é formulário de um FormHelper
+         */
+        $conteudo.= '<input type="hidden" name="formId" value="'.$this->formId.'" />';
 
         /**
          * Qual o endereço do formulário
@@ -175,18 +204,33 @@ class FormHelper extends Helper
          * Se um id foi especificado, vai no DB e busca o registro dele
          */
         if( $fieldName == "id" ){
-            $fieldValue = $options;
-            unset($options);
 
-            /**
-             * Carrega as informações sobre o determinado ID
-             */
-            $this->data = $this->models[$this->modelName]->find($fieldValue, "first");
 
-            $_SESSION["Sys"]["addToThisData"][$this->modelName]["id"] = $fieldValue;
-            $_SESSION["Sys"]["options"]["addToThisData"]["destLocation"] = $this->destionationUrl;
+                if( is_int($options) OR is_string($options) )
+                    $fieldValue = $options;
+                else if( !empty($options["value"]) )
+                    $fieldValue = $options["value"];
 
-            return false;
+                /**
+                 * Se e editavel
+                 */
+                if($this->editable == true){
+
+                    /**
+                     * Carrega as informações sobre o determinado ID
+                     */
+                    $this->data = $this->models[$this->modelName]->find($fieldValue, "first");
+
+                    $_SESSION["Sys"]["addToThisData"][$this->formId][$this->modelName]["id"] = $fieldValue;
+                    $_SESSION["Sys"]["options"]["addToThisData"][$this->formId]["destLocation"] = $this->destionationUrl;
+
+                    if( !empty($options["show"]) AND $options["show"] == true ){
+                    } else {
+                        unset($options);
+                        return false;
+                    }
+                }
+            
         }
 
         $argFieldName = $fieldName;

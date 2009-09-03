@@ -104,3 +104,12 @@ echo $form->input('id', 7);
 
 Isto carregará as informações do registro com id=7 na tabela do Model
 relacionado. Simples assim.
+
+=== Formulário de login ===
+
+Para criar um formulário de login, crie um com o primeiro argumento com o nome
+de "login", como a seguir:
+
+<source lang="php">
+echo $form->create("login");
+</source>

@@ -28,7 +28,7 @@ echo $form->create("Usuario", array(
 echo $form->input('nome', array( "label" => "Seu nome" ));
 echo $form->input('email');
 echo $form->input('senha');
-echo $form->input('Idade.titulo');
+//echo $form->input('Idade.titulo');
 
 echo $form->end("Enviar");
 
@@ -38,10 +38,13 @@ echo $form->end("Enviar");
 
 echo $form->create("Usuario", array(
         "controller" => "site",
+        "class" => "teste",
+        "edit" => true
     )
 );
 
-echo $form->input('id', 21858);
+echo $form->input('id', array("value" => 2, "show" => true) );
+echo $form->input('nome');
 echo $form->input('Idade.titulo');
 
 echo $form->end("Enviar");
@@ -50,11 +53,7 @@ echo $form->end("Enviar");
 
 <h2>Login</h2>
 <?php
-echo $form->create("Tarefa", array(
-        "controller" => "site",
-        "action" => "savetarefa"
-    )
-);
+echo $form->create("login");
 echo $form->input('Usuario.id', array(
         "value" => 11,
     )

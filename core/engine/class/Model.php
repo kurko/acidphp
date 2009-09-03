@@ -214,6 +214,9 @@ class Model
 
             $updateInstruction = false;
 
+            $doUpdate = ( empty($options["doUpdate"]) ) ? false : $options["doUpdate"];
+
+
             /**
              * VALIDATE
              */
@@ -226,6 +229,7 @@ class Model
                      * Verifica se o Model requisitado é o próprio ou são filhos
                      */
                     if( get_class($this) == $model ){
+                        
                         $tabela = $this->useTable;
                         $modelPai = true;
 
@@ -250,8 +254,17 @@ class Model
                         }
                     }
 
-                    $doUpdate = false;
                     if( $modelPai ){
+                        /**
+                         * subModel
+                         *
+                         * Se esta e uma chamada a um subModel, ve qual o
+                         * registro deve ser modificado.
+                         */
+                        if( $doUpdate AND !empty($options["foreignKey"]) ){
+                            $campoId = $options["foreignKey"]["id"];
+                            $updateConditionField = $options["foreignKey"]["field"];
+                        }
 
                         if( in_array($tabela, $this->dbTables) ){
                             /**
@@ -261,9 +274,14 @@ class Model
 
                                 if( array_key_exists($campo, $this->tableDescribed) ){
 
+                                    /**
+                                     * Atualizando subModel (model filho)
+                                     */
+                                    
                                     if( $campo == "id" ){
                                         $doUpdate = true;
                                         $campoId = $valor;
+                                        $updateConditionField = "id";
                                     } else {
 
                                         $camposStr[] = $campo;
@@ -287,11 +305,20 @@ class Model
                                 }
                             }
 
-
                             if( !empty($camposStr) ){
                                 /**
                                  * @todo - comentar
                                  */
+
+                                /**
+                                 * com $doUpdate=true, verifica se realmente
+                                 * deve ser feito um update, ou um insert
+                                 */
+                                if( $doUpdate ){
+
+                                    if( $this->countRows($campoId) == 0 )
+                                        $doUpdate = false;
+                                }
 
                                 if( !$doUpdate ){
                                     $tempSql = "INSERT INTO
@@ -316,7 +343,7 @@ class Model
                                                 SET
                                                     ".implode(",", $camposUpdate)."
                                                 WHERE
-                                                    id='".$campoId."'
+                                                    ".$updateConditionField."='".$campoId."'
                                                 ";
                                 }
                                 /**
@@ -336,6 +363,7 @@ class Model
                     } // fim modelFather==true
 
                 }
+                //pr($sql);
                 //return $sql;
 
                 /**
@@ -352,7 +380,10 @@ class Model
                         $this->conn->exec($instrucao);
 
                         if( $updateInstruction ){
-                            $lastInsertId = $data[get_class($this)]["id"];
+                            if( !empty($data[get_class($this)]["id"]) )
+                                $lastInsertId = $data[get_class($this)]["id"];
+                            else
+                                $lastInsertId = $data[get_class($this)][$updateConditionField];
                         } else {
                             $lastInsertId = $this->conn->lastInsertId();
                         }
@@ -388,7 +419,18 @@ class Model
                          * Envia dados para Models relacionados salvarem
                          */
                         $dataTemp[$model][ $foreignKey ] = $lastInsertId;
-                        $this->$model->save( $dataTemp );
+
+                        /**
+                         * Chama os models filhos
+                         */
+                        $this->{$model}->save( $dataTemp, array(
+                                "doUpdate" => $doUpdate,
+                                "foreignKey" => array(
+                                    "field" => $foreignKey,
+                                    "id" => $lastInsertId,
+                                )
+                            )
+                        );
 
                         unset($dataTemp);
                     }
@@ -594,8 +636,8 @@ class Model
         /**
          * Quando nenhum limit especificado (por questões de segurança)
          */
-        if( empty($options["limit"]) )
-            $options["limit"] = Config::read("modelAutoLimit");
+        if( is_array($options) AND empty($options["limit"]) )
+            $options["limit"] = "50";// Config::read("modelAutoLimit");
 
 
         if( is_array($options) AND array_key_exists("page", $options) ){
@@ -645,6 +687,7 @@ class Model
          *
          * Gera SQL com SQLObject
          */
+         //pr($options["limit"]);
         $querysGerados = $this->databaseAbstractor->find($options, $mode);
         return $querysGerados;
 
@@ -665,8 +708,8 @@ class Model
         /**
          * Quando nenhum limit especificado (por questões de segurança)
          */
-        if( empty($options["limit"]) )
-            $options["limit"] = 50;//Config::read("modelAutoLimit");
+        if( is_array($options) AND empty($options["limit"]) )
+            $options["limit"] = Config::read("modelAutoLimit");
 
         if( array_key_exists("page", $this->params["args"]) ){
             /**
@@ -712,7 +755,7 @@ class Model
 
         $options["limit"] = $startLimit.",".$options["limit"];
 
-        return $this->find($options, $mode) ;
+        return $this->find($options, $mode);
     }
     /**
      * DELETE()
@@ -904,7 +947,7 @@ class Model
      * @param array $options
      * @return int
      */
-    public function countRows( array $options = array() ){
+    public function countRows( $options = array() ){
 
         /**
          * Retorna a quantidade total de registros do Model
@@ -914,12 +957,27 @@ class Model
             return $count[0]["count"];
         }
         /**
+         * Se $options for INT, significa que e o id de um registro e serve
+         * basicamente para saber se ele existe no DB
+         */
+        else if( is_int($options) OR is_string($options) ){
+            if( is_int($options) )
+                $where = "id='".$options."'";
+            else if( is_string($options) )
+                $where = $options;
+
+            $count = $this->query(  "SELECT COUNT(*) as count ".
+                                    "FROM ".$this->useTable." ".
+                                    "WHERE ".$where
+                                );
+            return $count[0]["count"];
+        }
+        /**
          * @todo - implementar
          */
         else {
             $options["fields"] = array("COUNT(*) AS count");
             $count = $this->find($options);
-            pr($count);
         }
     }
 

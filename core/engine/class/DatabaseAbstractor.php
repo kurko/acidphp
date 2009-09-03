@@ -121,7 +121,7 @@ class DatabaseAbstractor extends DataAbstractor
             $query = array();
             if( is_array($sql) ){
                 foreach( $sql as $sqlAtual ){
-                    $result = $this->conn->query( $sqlAtual, 'ASSOC' );
+                    $result = $this->conn->query( $sqlAtual );
                     $query = array_merge( $query, $result );
                 }
             }
@@ -171,7 +171,6 @@ class DatabaseAbstractor extends DataAbstractor
             $sql = $this->sqlObject->select($options);
         }
 
-        //pr($sql);
 
         $loopStartTime = microtime(true);
 

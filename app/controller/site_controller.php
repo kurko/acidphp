@@ -17,25 +17,28 @@ class SiteController extends AppController
     function index(){
         $this->pageTitle = "Página principal";
 
-        $this->Usuario->update( array("email"=>"123@123.com"), "1" );
+        //$this->Usuario->update( array("email"=>"123@123.com"), "1" );
 
         //pr( $this->params );
 
     }
 
     function save(){
+        //pr( $this->data );
+
         pr( $this->Usuario->save( $this->data ) );
-        pr( $this->data );
-        pr( $this->Usuario->countRows() );
+        //pr( $this->Usuario->countRows() );
     }
 
     function listar(){
         
-        $usuarios = $this->Usuario->paginate(array(
+        $usuarios = $this->Usuario->find(array(
             "fields" => array("Usuario.nome"),
-            "limit" => 2,
+            //"limit" => 6,
             //"page" => $this->params["args"]["page"]
         ));
+
+        //pr($usuarios);
         $this->set("usuarios", $usuarios);
     }
 
