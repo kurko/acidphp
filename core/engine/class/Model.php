@@ -197,7 +197,7 @@ class Model
      * MÉTODOS CRUD
      */
     /**
-     * SAVEALL()
+     * SAVE()
      *
      * $data deve ter o seguinte formato:
      *      [model]=>array([campo]=>valor), [modelFilho]=>array([campo]=>valor)
@@ -208,7 +208,7 @@ class Model
      * @param array $options
      * @return bool Se salvou ou não
      */
-    public function saveAll(array $data, $options = array()){
+    public function save(array $data, $options = array()){
         if( is_array($data) ){
             $data = Security::Sanitize($data);
 
@@ -373,7 +373,7 @@ class Model
                                  * Envia dados para Models relacionados salvarem
                                  */
                                 $dataTemp[$model][ $foreignKey ] = $lastInsertId;
-                                $this->$model->SaveAll( $dataTemp );
+                                $this->$model->save( $dataTemp );
 
                                 unset($dataTemp);
                             }
@@ -396,10 +396,10 @@ class Model
         }
 
         return false;
-    } // FIM SAVEALL()
+    } // FIM SAVE()
 
     /**
-     * UPDATEALL()
+     * UPDATE()
      *
      * Executa a instrução UPDATE no banco de dados.
      *
@@ -408,7 +408,7 @@ class Model
      * valores, ex. array("campo"=>"valor")
      * @return bool
      */
-    public function updateAll(array $toUpdate, $conditions){
+    public function update(array $toUpdate, $conditions){
 
         if( !empty($toUpdate) ){
 
@@ -579,6 +579,13 @@ class Model
      */
     public function find($options = array(), $mode = "all"){
 
+        /**
+         * Quando nenhum limit especificado (por questões de segurança)
+         */
+        if( empty($options["limit"]) )
+            $options["limit"] = Config::read("modelAutoLimit");
+
+
         if( is_array($options) AND array_key_exists("page", $options) ){
             if( empty($options["page"]) )
                 $options["page"] = 1;
@@ -611,7 +618,6 @@ class Model
          * Informações sobre tabelas dos models
          */
         $options["tableAlias"] = $this->tableAlias;
-        //pr($options["tableAlias"]);
         foreach( $options["tableAlias"] as $model=>$valor ){
             if( get_class($this) != $model ){
                 $options["models"][$model] = $this->{$model};
@@ -644,8 +650,11 @@ class Model
      */
     public function paginate(array $options = array(), $mode = "all"){
 
+        /**
+         * Quando nenhum limit especificado (por questões de segurança)
+         */
         if( empty($options["limit"]) )
-            $options["limit"] = "50";
+            $options["limit"] = 50;//Config::read("modelAutoLimit");
 
         if( array_key_exists("page", $this->params["args"]) ){
             /**
@@ -663,9 +672,7 @@ class Model
         if( $options["page"] < 1 )
             $options["page"] = 1;
 
-            echo $options["page"];
-
-        $totalRows = $this->countRows($options);
+        $totalRows = $this->countRows();
 
 
         $startLimit = $options["limit"] * ($options["page"] - 1);
@@ -873,16 +880,35 @@ class Model
      * @return array Resultado formatado com PDO::fetchAll()
      */
     public function query($sql = "", $options = array()){
-
         if( is_string($sql) )
             return $this->conn->crud($sql);
     }
 
-    public function countRows($options){
+    /**
+     * COUNTROWS()
+     *
+     * Retorna a quantidade de registros de um model
+     *
+     * @param array $options
+     * @return int
+     */
+    public function countRows( array $options = array() ){
 
-        $count = $this->query("SELECT COUNT(*) as count FROM ".$this->useTable." AS ".get_class($this));
-        return $count[0]["count"];
-
+        /**
+         * Retorna a quantidade total de registros do Model
+         */
+        if( empty($options) ){
+            $count = $this->query("SELECT COUNT(*) as count FROM ".$this->useTable." AS ".get_class($this));
+            return $count[0]["count"];
+        }
+        /**
+         * @todo - implementar
+         */
+        else {
+            $options["fields"] = array("COUNT(*) AS count");
+            $count = $this->find($options);
+            pr($count);
+        }
     }
 
     /**
@@ -913,7 +939,6 @@ class Model
 
         if( is_array($data) ){
 
-
             foreach($data as $model=>$campos){
 
                 if( $model == get_class($this) ){
@@ -927,7 +952,6 @@ class Model
                              */
                             if( array_key_exists($campo, $validationRules ) ){
 
-                                //echo $model.'.'.$campo.$validationRules[$campo]["rule"];
                                 /**
                                  * VALIDAÇÃO
                                  */
@@ -1054,9 +1078,10 @@ class Model
     }
 
     /**
+     * 
      * MÉTODOS INTERNOS (PRIVATE)
+     *
      */
-
     /**
      * Descreve as tabelas
      *

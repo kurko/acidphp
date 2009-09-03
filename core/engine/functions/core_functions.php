@@ -89,7 +89,7 @@ function debugSQLs($sql){
         "SELECT", "UPDATE", "DELETE", "INSERT", "REPLACE",
         "FROM", "ASC", "WHERE", "ORDER BY", "LIMIT", "TABLES",
         "LEFT JOIN", "DISTINCT", "COUNT", "ON", "DESCRIBE", "SHOW",
-        "INTO", "VALUES",
+        "INTO", "VALUES", "SET",
         "IN", "NOT IN", "OR", "AND", "AS", "DESC"
     );
     $boldSqlCommands = array();

@@ -24,27 +24,13 @@ if( !empty($usuarios) ){
                 <?php echo $html->link( "Editar", array("controller" => "site", "action" => "editar", $usuario["Usuario"]["id"]) ); ?>
             </td>
         </tr>
-
-
         <?
-
     }
-
-
 }
-
-
-
 ?>
 
 </table>
-
 <?php
-echo( $paginator->show("Usuario", array(
-            "pages" => 10,
-            "show" => true,
-//            "format" => "estamos na página &page&, &pages&"
-        ))
-);
+//echo $paginator->show("Usuario", array( ));
 
 ?>

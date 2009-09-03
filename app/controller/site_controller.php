@@ -19,19 +19,23 @@ class SiteController extends AppController
         //pr($this->data);
         $this->pageTitle = "Página principal";
 
+        $this->Usuario->update( array("email"=>"123@123.com"), "1" );
+
         //pr( $this->params );
 
     }
 
     function save(){
-        pr( $this->Usuario->saveAll( $this->data ) );
-        pr($this->data);
+        pr( $this->Usuario->save( $this->data ) );
+        pr( $this->data );
+        pr( $this->Usuario->countRows() );
     }
 
     function listar(){
+        
         $usuarios = $this->Usuario->paginate(array(
             "fields" => array("Usuario.nome"),
-            "limit" => 20,
+            "limit" => 2,
             //"page" => $this->params["args"]["page"]
         ));
 
@@ -66,8 +70,8 @@ class SiteController extends AppController
         $this->autoRender = false;
 
         if($this->data){
-            //pr($this->data);
-            $this->Usuario->saveAll($this->data);
+            pr($this->data);
+            $this->Usuario->save($this->data);
         }
 
     }
