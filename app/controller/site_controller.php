@@ -15,8 +15,6 @@ class SiteController extends AppController
     var $siteTitle = "AcidPHP";
 
     function index(){
-        //pr($_SESSION);
-        //pr($this->data);
         $this->pageTitle = "Página principal";
 
         $this->Usuario->update( array("email"=>"123@123.com"), "1" );
@@ -38,15 +36,11 @@ class SiteController extends AppController
             "limit" => 2,
             //"page" => $this->params["args"]["page"]
         ));
-
-        //pr($this->params);
-
         $this->set("usuarios", $usuarios);
     }
 
     function deletar($id){
 
-        //$this->Usuario->id = $id;
         if( $this->Usuario->deleteAll( $id ) )
             echo 'deu';
         else
@@ -56,19 +50,22 @@ class SiteController extends AppController
         
     }
 
+    /**
+     * Para edição de usuário num formulário, basta criar um campo no formHelper
+     * chamado id. Simples assim. Não precisa dar find() nem nada. O Helper
+     * faz tudo sozinho.
+     */
     function editar($id){
-
-        //pr( $_SESSION);
-        //pr( $this->params);
-        //$this->Usuario->id = $id;
-        //$usuario = $this->Usuario->find($id);
-        //pr($usuario);
         $this->set("id", $id);
     }
+
 
     function edit(){
         $this->autoRender = false;
 
+        /**
+         * Se o id já existe, atualiza automaticamente.
+         */
         if($this->data){
             pr($this->data);
             $this->Usuario->save($this->data);

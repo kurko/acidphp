@@ -1,10 +1,10 @@
 <?php
 /**
- * Configura��es de acesso ao Banco de Dados
+ * Configurações de acesso ao Banco de Dados
  *
  */
 /**
- * Conexão local de acesso ao DB com conte�dos
+ * Conexão local de acesso ao DB com conteúdos
  */
     $dbConn = array(
         'server' => 'localhost',

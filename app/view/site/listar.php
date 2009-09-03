@@ -28,7 +28,6 @@ if( !empty($usuarios) ){
     }
 }
 ?>
-
 </table>
 <?php
 //echo $paginator->show("Usuario", array( ));

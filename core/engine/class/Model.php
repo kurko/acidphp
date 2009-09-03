@@ -212,6 +212,8 @@ class Model
         if( is_array($data) ){
             $data = Security::Sanitize($data);
 
+            $updateInstruction = false;
+
             /**
              * VALIDATE
              */
@@ -220,7 +222,6 @@ class Model
                  * Loop por cada tabela dos valores enviados em $data
                  */
                 foreach($data as $model=>$campos){
-
                     /**
                      * Verifica se o Model requisitado é o próprio ou são filhos
                      */
@@ -305,6 +306,11 @@ class Model
                                         $camposUpdate[] = $camposStr[$i]."='".$valorStr[$i]."'";
                                     }
 
+                                    /**
+                                     * Instrução de atualização.
+                                     */
+                                    $updateInstruction = true;
+
                                     $tempSql = "UPDATE
                                                     ".$tabela."
                                                 SET
@@ -338,50 +344,56 @@ class Model
                  * Se houverem dados de tabelas relacionadas, envia dados para seus
                  * respectivos Models para serem salvas
                  */
-                if( count($sql) > 0 ){
+                if( !empty($sql) AND count($sql) > 0 ){
                     foreach( $sql as $instrucao ){
                         /**
                          * Salva dados na tabela deste Model
                          */
-                        //pr($instrucao. get_class($this));
                         $this->conn->exec($instrucao);
-                        $lastInsertId = $this->conn->lastInsertId();
 
-                        $modelsFilhos = array();
-                        /**
-                         * Se houverem Models filhos relacionados,
-                         * envia dados para serem salvos
-                         */
-                        if( !empty($modelsFilhos) ){
-                            foreach($modelsFilhos as $model=>$campos){
-                                $dataTemp[$model] = $campos;
-
-                                /**
-                                 * Pega o ForeignKey
-                                 */
-                                if( array_key_exists($model, $this->hasOne) ){
-                                    $foreignKey = $this->hasOne[$model]["foreignKey"];
-                                } else if( array_key_exists($model, $this->hasMany) ){
-                                    $foreignKey = $this->hasMany[$model]["foreignKey"];
-                                } else if( array_key_exists($model, $this->belongsTo) ){
-                                    $foreignKey = $this->belongsTo[$model]["foreignKey"];
-                                } else if( array_key_exists($model, $this->hasAndBelongsToMany) ){
-                                    $foreignKey = $this->hasAndBelongsToMany[$model]["foreignKey"];
-                                }
-
-                                /**
-                                 * Envia dados para Models relacionados salvarem
-                                 */
-                                $dataTemp[$model][ $foreignKey ] = $lastInsertId;
-                                $this->$model->save( $dataTemp );
-
-                                unset($dataTemp);
-                            }
+                        if( $updateInstruction ){
+                            $lastInsertId = $data[get_class($this)]["id"];
+                        } else {
+                            $lastInsertId = $this->conn->lastInsertId();
                         }
-                    }
 
-                    return true;
+                        //$modelsFilhos = array();
+                    }
+                } else {
+                    $lastInsertId = $data[get_class($this)]["id"];
                 }
+
+                /**
+                 * Se houverem Models filhos relacionados,
+                 * envia dados para serem salvos
+                 */
+                if( !empty($modelsFilhos) AND !empty($lastInsertId) ){
+                    foreach($modelsFilhos as $model=>$campos){
+                        $dataTemp[$model] = $campos;
+
+                        /**
+                         * Pega o ForeignKey
+                         */
+                        if( array_key_exists($model, $this->hasOne) ){
+                            $foreignKey = $this->hasOne[$model]["foreignKey"];
+                        } else if( array_key_exists($model, $this->hasMany) ){
+                            $foreignKey = $this->hasMany[$model]["foreignKey"];
+                        } else if( array_key_exists($model, $this->belongsTo) ){
+                            $foreignKey = $this->belongsTo[$model]["foreignKey"];
+                        } else if( array_key_exists($model, $this->hasAndBelongsToMany) ){
+                            $foreignKey = $this->hasAndBelongsToMany[$model]["foreignKey"];
+                        }
+
+                        /**
+                         * Envia dados para Models relacionados salvarem
+                         */
+                        $dataTemp[$model][ $foreignKey ] = $lastInsertId;
+                        $this->$model->save( $dataTemp );
+
+                        unset($dataTemp);
+                    }
+                }
+                return true;
             }
             /**
              * Não validou
@@ -674,7 +686,6 @@ class Model
 
         $totalRows = $this->countRows();
 
-
         $startLimit = $options["limit"] * ($options["page"] - 1);
 
         /**
@@ -697,6 +708,7 @@ class Model
             "urlGivenPage" => $this->params["args"]["page"],
 
         );
+
 
         $options["limit"] = $startLimit.",".$options["limit"];
 

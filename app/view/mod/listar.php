@@ -1,4 +1,0 @@
-<?php
-?>
-
-VIEW LISTAR.PHP
