@@ -206,6 +206,7 @@ class Controller
          * Cada form tem um id. Se foi enviado um $_POST[formId], vai adiante
          * para inserir dados em $this->data.
          */
+        //pr($this->params);
         if( !empty($this->params["post"]["formId"]) ){
 
             /**
@@ -232,6 +233,37 @@ class Controller
                 }
 
             }
+        }
+        /**
+         * Redirecionamentos sem post, mas com uso de $_SESSION
+         */
+        else {
+
+            if( !empty($_SESSION["Sys"]["addToThisData"]) )
+                $toAdd = $_SESSION["Sys"]["addToThisData"];
+
+            /**
+             * Se $this->data existe e ha algo a ser inserido
+             */
+            if( !empty($this->data) AND !empty($toAdd) ){
+                $this->data = array_merge_recursive_distinct($toAdd, $this->data );
+            }
+            /**
+             * Nao ha $this->data, mas ha algo a ser inserido
+             */
+            else if( !empty($toAdd) ) {
+                //echo $this->params["post"]["formId"]."";
+                /*
+                if( $this->params["url"] !== $_SESSION["Sys"]["options"]["addToThisData"]["destLocation"] ){
+                    unset( $_SESSION["Sys"]["addToThisData"] );
+                } else {
+                    $this->data = $toAdd;
+                }
+                 * 
+                 */
+
+            }
+
         }
 
         $this->webroot = $this->engine->webroot;

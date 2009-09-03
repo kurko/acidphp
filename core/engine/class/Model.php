@@ -380,6 +380,9 @@ class Model
                          */
                         $this->conn->exec($instrucao);
 
+                        unset( $_SESSION["Sys"]["addToThisData"] );
+                        unset( $_SESSION["Sys"]["options"]["addToThisData"] );
+
                         if( $updateInstruction ){
                             if( !empty($data[get_class($this)]["id"]) )
                                 $lastInsertId = $data[get_class($this)]["id"];
@@ -442,10 +445,11 @@ class Model
              * Não validou
              */
             else {
-                $_SESSION["Sys"]["addToThisData"] = $data;
+                $_SESSION["Sys"]["addToThisData"][ $this->params["post"]["formId"] ] = $data;
                 if( !empty($this->params["post"]["formUrl"]) ){
-                    $_SESSION["Sys"]["options"]["addToThisData"]["destLocation"] = $this->params["post"]["formUrl"];
+                    $_SESSION["Sys"]["options"]["addToThisData"][ $this->params["post"]["formId"] ]["destLocation"] = $this->params["post"]["formUrl"];
                 }
+                //echo 'oij222';
                 redirect($this->params["post"]["formUrl"]);
             }
         }

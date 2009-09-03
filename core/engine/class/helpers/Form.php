@@ -38,7 +38,7 @@ class FormHelper extends Helper
 
     protected $destionationUrl;
 
-    protected $formId;
+    protected $formId = 0;
 
     protected $editable;
 
@@ -65,6 +65,23 @@ class FormHelper extends Helper
         $conteudo = "";
 
 
+        /**
+         * formId
+         *
+         * Dá um ID único para cada formulário
+         */
+        if( empty($options["formId"]) ){
+            $this->formId = $this->formId+1;//;sha1( rand(1, 99999) );
+            unset($this->data);
+        } else
+            $this->formId = $options["formId"];
+
+        //$_SESSION = array();
+
+        if( isset($_SESSION["Sys"]["addToThisData"][$this->formId]) ){
+            $this->data = $_SESSION["Sys"]["addToThisData"][$this->formId];
+        }
+        //pr($_SESSION);
         global $globalVars;
         /**
          * Login
@@ -134,15 +151,6 @@ class FormHelper extends Helper
             }
         }
 
-        /**
-         * formId
-         *
-         * Dá um ID único para cada formulário
-         */
-        if( empty($options["formId"]) )
-            $this->formId = sha1( rand(1, 99999) );
-        else
-            $this->formId = $options["formId"];
 
         /**
          * formId

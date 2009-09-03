@@ -20,12 +20,12 @@ class SiteController extends AppController
         //$this->Usuario->update( array("email"=>"123@123.com"), "1" );
 
         //pr( $this->params );
+        pr( $this->data );
 
     }
 
     function save(){
         //pr( $this->data );
-
         pr( $this->Usuario->save( $this->data ) );
         //pr( $this->Usuario->countRows() );
     }
