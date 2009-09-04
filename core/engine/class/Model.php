@@ -222,6 +222,8 @@ class Model
 
             $doUpdate = ( empty($options["doUpdate"]) ) ? false : $options["doUpdate"];
 
+            unset( $_SESSION["Sys"]["FormHelper"]["notValidated"] );
+
 //pr($data);
             /**
              * VALIDATE
@@ -598,7 +600,7 @@ class Model
                 if( !empty($this->params["post"]["formUrl"]) ){
                     $_SESSION["Sys"]["options"]["addToThisData"][ $this->params["post"]["formId"] ]["destLocation"] = $this->params["post"]["formUrl"];
                 }
-                //echo 'oij222';
+
                 redirect($this->params["post"]["formUrl"]);
             }
         }
@@ -951,7 +953,6 @@ class Model
 
         );
 
-
         $options["limit"] = $startLimit.",".$options["limit"];
 
         return $this->find($options, $mode);
@@ -1228,7 +1229,9 @@ class Model
         if( !$sub )
             unset($_SESSION["Sys"]["FormHelper"]["notValidated"]);
 
-
+        /**
+         * Inicializa variáveis
+         */
         $validationRules = $this->validation;
         $vE = array();
 
@@ -1236,112 +1239,116 @@ class Model
 
             foreach($data as $model=>$campos){
 
-                if( $model == get_class($this) ){
+                if( $model == get_class($this)
+                    AND !empty($validationRules) )
+                {
 
-                    if( !empty($validationRules) ){
+                    /**
+                     * Campos de um formulário enviado
+                     */
+                    foreach( $campos as $campo=>$valor ){
 
-                        foreach( $campos as $campo=>$valor ){
+                        /**
+                         * Se o campo possui regras de validação
+                         */
+                        if( array_key_exists($campo, $validationRules ) ){
 
                             /**
-                             * Se o campo possui regras de validação
+                             * VALIDAÇÃO
                              */
-                            if( array_key_exists($campo, $validationRules ) ){
+                            $vR = $validationRules[$campo];
 
-                                /**
-                                 * VALIDAÇÃO
-                                 */
-                                $vR = $validationRules[$campo];
-                                /**
-                                 * Cada campo pode ter mais de uma validação
-                                 */
-                                /**
-                                 * O campo tem somente uma validação
-                                 */
-                                if( array_key_exists("rule", $vR) ){
+                            if( array_key_exists("rule", $vR) ){
+                                $allRules[] = $vR;
+                            } else if( is_array($vR) ) {
 
+                                foreach( $vR as $subRule ){
+                                    if( array_key_exists("rule", $subRule) ){
+                                        $allRules[] = $subRule;
+                                    }
+                                }
+
+                            }
+
+                            $paramsToValidate = array(
+                                "valor" => $valor,
+                                "model" => $this,
+                                "campo" => $campo,
+                                "vR"    => $vR,
+                            );
+
+                            /**
+                             * Com todas as regras, faz loop validando
+                             */
+                            if( !empty($allRules) AND is_array($allRules) ){
+                                foreach( $allRules as $rule ){
+
+                                    /**
+                                     * VALIDA DE FATO
+                                     */
+                                    /**
+                                     * Função de validação pré-existente
+                                     */
+                                    if( method_exists("Validation", $rule["rule"]) ){
+                                        $result = call_user_func("Validation::".$rule["rule"], $valor);
+                                    }
                                     /**
                                      * REGRA PERSONALIZADA
                                      *
                                      * Se a regra está configurada no Model
                                      */
-                                    if( method_exists($this, $vR["rule"]) ){
-
-                                        /**
-                                         * Se não validou
-                                         */
-                                        if( !$this->{$vR["rule"]}($valor) ){
-
-                                            /**
-                                             * Caso seja um model-filho no
-                                             * relacionamento de models
-                                             */
-                                            if( $sub )
-                                                $vE[$campo] = '1';
-                                            else
-                                                $vE[$model][$campo] = '1';
-
-                                            /**
-                                             * Session para formHelper
-                                             */
-                                            if( !empty($vR["message"]) )
-                                                $message = $vR["message"];
-                                            else if( !empty($vR["m"]) )
-                                                $message = $vR["m"];
-                                            else {
-                                                if( isDebugMode() )
-                                                    showWarning("Mensagem de validação do campo ".$campo." não especificada");
-                                                $message = "Not validated!";
-                                            }
-                                                
-                                            $_SESSION["Sys"]["FormHelper"]["notValidated"][$model][$campo]["message"] = $message;
-                                        }
+                                    elseif( method_exists($this, $rule["rule"]) ) {
+                                        $result = $this->{$rule["rule"]}($valor);
                                     }
                                     /**
                                      * Se o usuário não configurou uma função com
                                      * uma regra, verifica regras de validação
                                      * do sistema
                                      */
-                                    else if( method_exists("Validation", $vR["rule"]) ) {
+                                    else {
+                                        showError("Regra de validação <em>".$vR["rule"]."</em> do model <em>".get_class($this)."</em> inexistente");
+                                    }
 
-                                        /**
-                                         * Se não validou
+                                    /**
+                                     * [Não validou]
+                                     */
+                                    if( !$result ){
+
+                                        /*
+                                         * Session para formHelper
                                          */
-                                        if( !call_user_func("Validation::notEmpty", $valor) ){
-
-                                            /**
-                                             * Caso seja um model-filho no
-                                             * relacionamento de models
-                                             */
-                                            if( $sub )
-                                                $vE[$campo] = '1';
-                                            else
-                                                $vE[$model][$campo] = '1';
-
-                                            /**
-                                             * Session para formHelper
-                                             */
-                                            if( !empty($vR["message"]) )
-                                                $message = $vR["message"];
-                                            else if( !empty($vR["m"]) )
-                                                $message = $vR["m"];
-                                            else {
-                                                if( isDebugMode() )
-                                                    showWarning("Mensagem de validação do campo ".$campo." não especificada");
-                                                $message = "Not validated!";
-                                            }
-
-                                            $_SESSION["Sys"]["FormHelper"]["notValidated"][$model][$campo]["message"] = $message;
-
+                                        /*
+                                         * Pega mensagem
+                                         */
+                                        if( !empty($rule["message"]) )
+                                           $message = $rule["message"];
+                                        else if( !empty($rule["m"]) )
+                                            $message = $rule["m"];
+                                        else {
+                                            if( isDebugMode() )
+                                                showWarning("Mensagem de validação do campo ".$campo." não especificada");
+                                            $message = "Not validated!";
                                         }
 
-                                    } else {
-                                        showError("Regra de validação ".$vR["rule"]." inexistente");
-                                    }
-                                }
+                                        /**
+                                        * Caso seja um model-filho no
+                                        * relacionamento de models
+                                        */
+                                        if( $sub )
+                                            $vE[$campo] = '1';
+                                        else
+                                            $vE[$model][$campo] = '1';
 
+                                        $_SESSION["Sys"]["FormHelper"]["notValidated"][$model][$campo]["message"] = $message;
+                                    } // fim [não validou]
+
+                                }
                             }
-                        } // fim foreach($campos)
-                    }
+
+                            unset($allRules);
+                        }
+                    } // fim foreach($campos)
+
                 } // fim é o model atual
                 /**
                  * Validação Model-Relacional
@@ -1351,12 +1358,8 @@ class Model
                     if( !$this->{$model}->validate( array($model=> $campos), true ) ){
                         $vE[$model] = 0;
                     }
-
                 }
-                
-
             }
-            
         }
 
         /**

@@ -20,32 +20,11 @@ class SiteController extends AppController
         //$this->Usuario->update( array("email"=>"123@123.com"), "1" );
 
         //pr( $this->params );
-        pr( $this->data );
+        //pr( $this->data );
 
     }
 
     function save(){
-        //pr($this->Idade->hasMany);
-        $this->data = array(
-            "Usuario" => array(
-                "id" => 2,
-                "nome" => "sei lá"
-            ),
-            "Idade" => array( // hasOne
-                "id" => "24",
-                "titulo" => "teste",
-            ),
-            "Tarefa" => array( // hasMany
-                0 => array(
-                    "id" => "24",
-                    "nome" => "tarefa1",
-                ),
-                1 => array(
-                    "nome" => "tarefa2",
-                ),
-            ),
-
-        );
 
         //pr( $this->data );
 

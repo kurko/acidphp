@@ -352,6 +352,8 @@ class FormHelper extends Helper
 
             if( !empty($this->data[$modelName][$fieldName]) ){
                 $fieldValue = 'value="'. $this->data[$modelName][$fieldName]. '"';
+            } else {
+                $fieldValue = 'value=""';
             }
         }
 
@@ -558,6 +560,7 @@ class FormHelper extends Helper
          *
          * Mostra mensagens de erro de validação
          */
+         //pr($_SESSION);
         if( !empty($_SESSION["Sys"]["FormHelper"]["notValidated"][$modelName][$fieldName] ) ){
             $conteudo.= '<div class="input_validation_error">';
             $conteudo.= $_SESSION["Sys"]["FormHelper"]["notValidated"][$modelName][$fieldName]["message"];
