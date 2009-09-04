@@ -121,7 +121,7 @@ class DatabaseAbstractor extends DataAbstractor
             $query = array();
             if( is_array($sql) ){
                 foreach( $sql as $sqlAtual ){
-                    $result = $this->conn->query( $sqlAtual, 'ASSOC' );
+                    $result = $this->conn->query( $sqlAtual );
                     $query = array_merge( $query, $result );
                 }
             }
@@ -139,6 +139,8 @@ class DatabaseAbstractor extends DataAbstractor
                 $mainIds[] = $campos[ get_class($mainModel).".id" ];
             }
 
+            $mainModel->hasMany = $hasManyTemp;
+
             /**
              * Se há dados no banco de dados
              */
@@ -149,7 +151,6 @@ class DatabaseAbstractor extends DataAbstractor
                 /**
                  * Recupera dados de relacionamento
                  */
-                $mainModel->hasMany = $hasManyTemp;
                 foreach( $mainModel->hasMany as $model=>$properties ){
                     $subOptions["mainModel"] = $mainModel->{$model};
                     $subOptions["conditions"] = array(
@@ -171,7 +172,6 @@ class DatabaseAbstractor extends DataAbstractor
             $sql = $this->sqlObject->select($options);
         }
 
-        //pr($sql);
 
         $loopStartTime = microtime(true);
 

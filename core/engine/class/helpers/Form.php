@@ -38,6 +38,10 @@ class FormHelper extends Helper
 
     protected $destionationUrl;
 
+    protected $formId = 0;
+
+    protected $editable;
+
     function __construct($params=""){
         parent::__construct($params);
         
@@ -61,6 +65,23 @@ class FormHelper extends Helper
         $conteudo = "";
 
 
+        /**
+         * formId
+         *
+         * Dá um ID único para cada formulário
+         */
+        if( empty($options["formId"]) ){
+            $this->formId = $this->formId+1;//;sha1( rand(1, 99999) );
+            unset($this->data);
+        } else
+            $this->formId = $options["formId"];
+
+        //$_SESSION = array();
+
+        if( isset($_SESSION["Sys"]["addToThisData"][$this->formId]) ){
+            $this->data = $_SESSION["Sys"]["addToThisData"][$this->formId];
+        }
+        //pr($_SESSION);
         global $globalVars;
         /**
          * Login
@@ -71,11 +92,15 @@ class FormHelper extends Helper
          * @todo - Usuário logado precisa que o action do formulário seja
          * realmente sobrescrito?
          */
-        if( !empty($globalVars["defaultLoginPage"]) ){
-            if( !empty($globalVars["defaultLoginPage"]["controller"]) AND empty($options["controller"]) )
+        if( !empty($globalVars["defaultLoginPage"]) AND $options == "login" ){
+            $options = array();
+            if( !empty($globalVars["defaultLoginPage"]["controller"]) ){
                 $options["controller"] = $globalVars["defaultLoginPage"]["controller"];
-            if( !empty($globalVars["defaultLoginPage"]["action"]) AND empty($options["action"]) )
+            }
+                //echo "Oij".$globalVars["defaultLoginPage"]["action"];
+            if( !empty($globalVars["defaultLoginPage"]["action"]) )
                 $options["action"] = $globalVars["defaultLoginPage"]["action"];
+
         }
 
         /**
@@ -126,6 +151,17 @@ class FormHelper extends Helper
             }
         }
 
+
+        /**
+         * formId
+         *
+         * Dá um ID único para cada formulário
+         */
+        if( isset($options["edit"]) AND $options["edit"] == false ){
+            $this->editable = false;
+        } else
+            $this->editable = true;
+
         /**
          * MODEL PRINCIPAL
          */
@@ -136,6 +172,11 @@ class FormHelper extends Helper
          * Indica que é formulário de um FormHelper
          */
         $conteudo.= '<input type="hidden" name="sender" value="formHelper" />';
+
+        /**
+         * Indica que é formulário de um FormHelper
+         */
+        $conteudo.= '<input type="hidden" name="formId" value="'.$this->formId.'" />';
 
         /**
          * Qual o endereço do formulário
@@ -168,25 +209,38 @@ class FormHelper extends Helper
      * @return string Código HTML para o form input pedido.
      */
     public function input($fieldName, $options = ''){
-
         /**
          * ID
          *
          * Se um id foi especificado, vai no DB e busca o registro dele
          */
         if( $fieldName == "id" ){
-            $fieldValue = $options;
-            unset($options);
 
-            /**
-             * Carrega as informações sobre o determinado ID
-             */
-            $this->data = $this->models[$this->modelName]->find($fieldValue, "first");
 
-            $_SESSION["Sys"]["addToThisData"][$this->modelName]["id"] = $fieldValue;
-            $_SESSION["Sys"]["options"]["addToThisData"]["destLocation"] = $this->destionationUrl;
+                if( is_int($options) OR is_string($options) )
+                    $fieldValue = $options;
+                else if( !empty($options["value"]) )
+                    $fieldValue = $options["value"];
 
-            return false;
+                /**
+                 * Se e editavel
+                 */
+                if($this->editable == true){
+
+                    /**
+                     * Carrega as informações sobre o determinado ID
+                     */
+                    $this->data = $this->models[$this->modelName]->find($fieldValue, "first");
+
+                    $_SESSION["Sys"]["addToThisData"][$this->formId][$this->modelName]["id"] = $fieldValue;
+                    $_SESSION["Sys"]["options"]["addToThisData"][$this->formId]["destLocation"] = $this->destionationUrl;
+                    if( !empty($options["show"]) AND is_array($options) AND $options["show"] == true ){
+                    } else {
+                        unset($options);
+                        return false;
+                    }
+                }
+            
         }
 
         $argFieldName = $fieldName;
@@ -298,6 +352,8 @@ class FormHelper extends Helper
 
             if( !empty($this->data[$modelName][$fieldName]) ){
                 $fieldValue = 'value="'. $this->data[$modelName][$fieldName]. '"';
+            } else {
+                $fieldValue = 'value=""';
             }
         }
 
@@ -504,6 +560,7 @@ class FormHelper extends Helper
          *
          * Mostra mensagens de erro de validação
          */
+         //pr($_SESSION);
         if( !empty($_SESSION["Sys"]["FormHelper"]["notValidated"][$modelName][$fieldName] ) ){
             $conteudo.= '<div class="input_validation_error">';
             $conteudo.= $_SESSION["Sys"]["FormHelper"]["notValidated"][$modelName][$fieldName]["message"];

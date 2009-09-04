@@ -4,7 +4,7 @@
 ?>
 <h2>Login</h2>
 <?php
-echo $form->create("Usuario");
+echo $form->create("Usuario", "login");
 
 echo $form->statusMessage();
 

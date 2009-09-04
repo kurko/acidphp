@@ -203,19 +203,67 @@ class Controller
          *                      [$campo] = $valor;
          */
         /**
-         * Tem $this->data E tem addToThisData
+         * Cada form tem um id. Se foi enviado um $_POST[formId], vai adiante
+         * para inserir dados em $this->data.
          */
-        if( !empty($this->data) AND !empty($_SESSION["Sys"]["addToThisData"]) ){
-            $this->data = array_merge_recursive_distinct($_SESSION["Sys"]["addToThisData"], $this->data );
-        } else if( !empty($_SESSION["Sys"]["addToThisData"]) ) {
+        //pr($this->params);
+        if( !empty($this->params["post"]["formId"]) ){
 
-            
-            if( $this->params["url"] !== $_SESSION["Sys"]["options"]["addToThisData"]["destLocation"] ){
-                unset( $_SESSION["Sys"]["addToThisData"] );
-            } else {
-                $this->data = $_SESSION["Sys"]["addToThisData"];
+            /**
+             * Pega o valor a ser incrementado em $this->data e guarda em $toAdd
+             */
+            if( !empty($_SESSION["Sys"]["addToThisData"][ $this->params["post"]["formId"] ]) )
+                $toAdd = $_SESSION["Sys"]["addToThisData"][ $this->params["post"]["formId"] ];
+
+            /**
+             * Se $this->data existe e ha algo a ser inserido
+             */
+            if( !empty($this->data) AND !empty($toAdd) ){
+                $this->data = array_merge_recursive_distinct($toAdd, $this->data );
             }
-            
+            /**
+             * Nao ha $this->data, mas ha algo a ser inserido
+             */
+            else if( !empty($toAdd) ) {
+
+                if( $this->params["url"] !== $_SESSION["Sys"]["options"]["addToThisData"][ $this->params["post"]["formId"] ]["destLocation"] ){
+                    unset( $_SESSION["Sys"]["addToThisData"][ $this->params["post"]["formId"] ] );
+                } else {
+                    $this->data = $toAdd;
+                }
+
+            }
+        }
+        /**
+         * Redirecionamentos sem post, mas com uso de $_SESSION
+         */
+        else {
+
+            if( !empty($_SESSION["Sys"]["addToThisData"]) )
+                $toAdd = $_SESSION["Sys"]["addToThisData"];
+
+            /**
+             * Se $this->data existe e ha algo a ser inserido
+             */
+            if( !empty($this->data) AND !empty($toAdd) ){
+                $this->data = array_merge_recursive_distinct($toAdd, $this->data );
+            }
+            /**
+             * Nao ha $this->data, mas ha algo a ser inserido
+             */
+            else if( !empty($toAdd) ) {
+                //echo $this->params["post"]["formId"]."";
+                /*
+                if( $this->params["url"] !== $_SESSION["Sys"]["options"]["addToThisData"]["destLocation"] ){
+                    unset( $_SESSION["Sys"]["addToThisData"] );
+                } else {
+                    $this->data = $toAdd;
+                }
+                 * 
+                 */
+
+            }
+
         }
 
         $this->webroot = $this->engine->webroot;

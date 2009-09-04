@@ -16,4 +16,11 @@ Config::write("modelPasswordFields", array(
     "password", "passw", "passwd", // in english
     "senha" // in portuguese
 ));
+
+/**
+ * SQL LIMIT AUTOMÁTICO
+ *
+ * Se nenhum limit for especificado, limit é igual ao número a seguir.
+ */
+Config::write("modelAutoLimit", 50);
 ?>

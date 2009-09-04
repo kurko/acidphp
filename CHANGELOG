@@ -1,11 +1,16 @@
 CHANGELOG
 
-Versão atual: v0.0.4
+Versão atual: v0.0.5
 
 -------------------------------------------------------------------------------
 
-v0.0.5 (xx/xx/xxxx)
+v0.0.5 reached (04/09/2009)
 
+Revision 14 (04/09/2009)
+    - Validation: criadas as principais validações -  notEmpty(), email(),
+        alphaNumeric(), numeric(), alpha(), max(), min(), cpf(), cnpj()
+    - Bugfixes gerais
+    - Models: relacionamento hasMany para model::save() funcionando.
 Revision 6 (01/09/2009)
     - PaginatorHelper: criada e pronta. Ver /core/docs/helper/PAGINATOR.
     - HtmlHelper::metaTags(): método para metaTags criado
@@ -13,7 +18,7 @@ Revision 6 (01/09/2009)
 
 -------------------------------------------------------------------------------
 
-v0.0.4 (30/08/2009)
+v0.0.4 reached (30/08/2009)
 
 Revision 45 (30/08/2009)
     - Models: CRUD concluído. saveAll(), updateAll(), find(), delete(),
@@ -51,5 +56,5 @@ Revision 1 - Commit inicial (15/07/2009)
 
 -------------------------------------------------------------------------------
 
-v0.0.3 (19/07/2009)
+v0.0.3 reached (19/07/2009)
 

@@ -20,15 +20,19 @@ class SiteController extends AppController
     }
 
     function save(){
-        $this->Usuario->saveAll( $this->data );
+        $this->Usuario->save( $this->data );
+
     }
 
     function listar(){
+        
         $usuarios = $this->Usuario->paginate(array(
             "fields" => array("Usuario.nome"),
-            "limit" => 20,
+            "limit" => 2,
             //"page" => $this->params["args"]["page"]
         ));
+
+        //pr($usuarios);
         $this->set("usuarios", $usuarios);
     }
 
@@ -60,7 +64,8 @@ class SiteController extends AppController
          * Se o id já existe, atualiza automaticamente.
          */
         if($this->data){
-            $this->Usuario->saveAll($this->data);
+            pr($this->data);
+            $this->Usuario->save($this->data);
         }
 
     }

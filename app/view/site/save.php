@@ -8,3 +8,8 @@
 ?>
 
 SAVE
+
+<?php
+echo $html->link( "Principal", array("controller" => "site", "action" => "index", "") );
+?>
+

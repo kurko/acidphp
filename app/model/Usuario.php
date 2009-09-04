@@ -8,21 +8,30 @@ class Usuario extends AppModel {
     var $validation = array(
         "nome" => array(
             "rule" => "notEmpty",
-            "message" => "Este campo não pode ser vazio",
+            "message" => "nome:Este campo não pode ser vazio",
         ),
+
         "email" => array(
             array(
                 "rule" => "notEmpty",
-                "m" => "Email não pode ser vazio"
+                "m" => "email:Email não pode ser vazio"
             ),
             array(
-                "rule" => "email",
-                "m" => "digite um email válido"
+                "rule" => array(
+                    "max" => "50",
+                ),
+                "m" => "email:max 50"
+            ),
+            array(
+                "rule" => array(
+                    "min" => "1",
+                ),
+                "m" => "email:min 1"
             ),
         ),
         "senha" => array(
-            "rule" => "notEmpty",
-            "m" => "digite uma senha"
+            "rule" => "cpf",
+            "m" => "senha:cpf"
         )
     );
 
