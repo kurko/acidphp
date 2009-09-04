@@ -1258,13 +1258,29 @@ class Model
                              */
                             $vR = $validationRules[$campo];
 
+                            /**
+                             * Uma regra somente
+                             */
                             if( array_key_exists("rule", $vR) ){
-                                $allRules[] = $vR;
-                            } else if( is_array($vR) ) {
+
+                                //if( is_string($vR["rule"]) )
+                                    $allRules[] = $vR;
+                                //elseif( is_array($vR["rule"]) ){
+
+                                    //foreach( $vR["rule"] as $argRule=>$argValue ){
+                                        //$allRules[]["rule"] = $argRule;
+                                    //}
+                                //}
+                            }
+                            /**
+                             * Mais de uma regra
+                             */
+                            else if( is_array($vR) ) {
 
                                 foreach( $vR as $subRule ){
                                     if( array_key_exists("rule", $subRule) ){
-                                        $allRules[] = $subRule;
+                                        //if( is_string($subRule) )
+                                            $allRules[] = $subRule;
                                     }
                                 }
 
@@ -1285,20 +1301,38 @@ class Model
 
                                     /**
                                      * VALIDA DE FATO
+                                     *
+                                     * Verifica se funções de validação existem
                                      */
                                     /**
                                      * Função de validação pré-existente
                                      */
-                                    if( method_exists("Validation", $rule["rule"]) ){
+                                    if( is_string($rule["rule"])
+                                        AND method_exists("Validation", $rule["rule"]) )
+                                    {
                                         $result = call_user_func("Validation::".$rule["rule"], $valor);
                                     }
                                     /**
-                                     * REGRA PERSONALIZADA
+                                     * REGRA PERSONALIZADA (sem argumentos)
                                      *
                                      * Se a regra está configurada no Model
                                      */
-                                    elseif( method_exists($this, $rule["rule"]) ) {
+                                    elseif( is_string($rule["rule"])
+                                            AND method_exists($this, $rule["rule"]) )
+                                    {
                                         $result = $this->{$rule["rule"]}($valor);
+                                    }
+
+                                    elseif( is_array($rule["rule"])
+                                            AND method_exists("Validation", reset(array_keys($rule["rule"])) ) )
+                                    {
+                                        $result = call_user_func("Validation::".reset(array_keys($rule["rule"])), $valor, reset(array_values($rule["rule"])) );
+                                    }
+
+                                    elseif( is_array($rule["rule"])
+                                            AND method_exists($this, reset(array_keys($rule["rule"]))) )
+                                    {
+                                        $result = $this->{reset(array_keys($rule["rule"]))}( $valor, reset(array_values($rule["rule"])) );
                                     }
                                     /**
                                      * Se o usuário não configurou uma função com
@@ -1306,7 +1340,12 @@ class Model
                                      * do sistema
                                      */
                                     else {
-                                        showError("Regra de validação <em>".$vR["rule"]."</em> do model <em>".get_class($this)."</em> inexistente");
+                                        if( is_array($rule["rule"]) )
+                                            $inexistentRule = reset(array_keys($rule["rule"]));
+                                        elseif( is_string($rule["rule"]) )
+                                            $inexistentRule = $rule["rule"];
+
+                                        showError("Regra de validação <em>".$inexistentRule."</em> do model <em>".get_class($this)."</em> inexistente");
                                     }
 
                                     /**
