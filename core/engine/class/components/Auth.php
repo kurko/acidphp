@@ -232,7 +232,7 @@ class AuthComponent extends Component
          * Verifica se dados enviados estão corretos para Login
          */
         if( !$this->logged AND !empty($this->data) ){
-
+            
             /**
              * Assegura os dados passados pelo usuário
              */
@@ -242,20 +242,23 @@ class AuthComponent extends Component
              * Se um model foi especificado
              */
             if( !empty($this->model) ){
+
                 /**
                  * Se os dados enviados correspondem ao model do Auth
                  */
                 if( array_key_exists($this->model(), $data)){
+                    
 
                     /**
                      * Carrega o $model verdadeiro relacionado ao Login
                      */
                     $model = $this->models[ $this->model() ];
-
                     $dataFields = $data[ $this->model() ];
                     /**
                      * Cria conditions
                      */
+
+
                     foreach( $dataFields as $campo=>$valor ){
                         $conditions[$this->model().'.'.$campo] = $valor;
                     }

@@ -43,7 +43,7 @@ echo $form->create("Usuario", array(
     )
 );
 
-echo $form->input('id', array("value" => 2, "show" => true) );
+echo $form->input('id', array("value" => 3) );
 echo $form->input('nome');
 echo $form->input('Idade.titulo');
 

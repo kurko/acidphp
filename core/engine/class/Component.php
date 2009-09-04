@@ -51,6 +51,7 @@ class Component
          * $this->models
          */
         $this->models = ( empty($params["models"]) ) ? array() : $params["models"];
+        //$this->models = array();
     }
 
     /**

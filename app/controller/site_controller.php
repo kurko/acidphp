@@ -25,16 +25,43 @@ class SiteController extends AppController
     }
 
     function save(){
+        //pr($this->Idade->hasMany);
+        $this->data = array(
+            "Usuario" => array(
+                "id" => 2,
+                "nome" => "sei lá"
+            ),
+            "Idade" => array( // hasOne
+                "id" => "24",
+                "titulo" => "teste",
+            ),
+            "Tarefa" => array( // hasMany
+                0 => array(
+                    "id" => "24",
+                    "nome" => "tarefa1",
+                ),
+                1 => array(
+                    "nome" => "tarefa2",
+                ),
+            ),
+
+        );
+
         //pr( $this->data );
-        pr( $this->Usuario->save( $this->data ) );
+
+        //pr( $this->Usuario->save( $this->data ) );
+        
+        //echo '<br>------->Salva a seguir:----<br>';
+        $this->Usuario->save( $this->data );
+        //$this->Usuario->update( array("Usuario.nome"=>"HELLOOO", "Idade.titulo"=>"táitou"), "2" );
         //pr( $this->Usuario->countRows() );
     }
 
     function listar(){
         
-        $usuarios = $this->Usuario->find(array(
+        $usuarios = $this->Usuario->paginate(array(
             "fields" => array("Usuario.nome"),
-            //"limit" => 6,
+            "limit" => 2,
             //"page" => $this->params["args"]["page"]
         ));
 

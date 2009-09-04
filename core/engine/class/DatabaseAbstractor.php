@@ -139,6 +139,8 @@ class DatabaseAbstractor extends DataAbstractor
                 $mainIds[] = $campos[ get_class($mainModel).".id" ];
             }
 
+            $mainModel->hasMany = $hasManyTemp;
+
             /**
              * Se há dados no banco de dados
              */
@@ -149,7 +151,6 @@ class DatabaseAbstractor extends DataAbstractor
                 /**
                  * Recupera dados de relacionamento
                  */
-                $mainModel->hasMany = $hasManyTemp;
                 foreach( $mainModel->hasMany as $model=>$properties ){
                     $subOptions["mainModel"] = $mainModel->{$model};
                     $subOptions["conditions"] = array(

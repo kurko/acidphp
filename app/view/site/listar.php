@@ -30,6 +30,6 @@ if( !empty($usuarios) ){
 ?>
 </table>
 <?php
-//echo $paginator->show("Usuario", array( ));
+echo $paginator->show("Usuario", array( "pages" => "15" ));
 
 ?>

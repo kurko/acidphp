@@ -55,6 +55,12 @@ class PaginatorHelper extends Helper
             $urlGivenPage = $this->params["paginator"][$pagClass]["urlGivenPage"];
             $limit = $this->params["paginator"][$pagClass]["limit"];
 
+            /**
+             * Ajusta "limit" se não especificado
+             */
+            if( $limit > $totalRows )
+                $limit = $totalRows;
+
             if( !isset($options["show"]) ){
                 $options["show"] = true;
             }

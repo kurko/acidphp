@@ -94,7 +94,6 @@ class Model
             $this->currentRecursive = $params["currentRecursive"];
         }
 
-        //echo "<strong>". get_class($this) . " - " . $currentRecursive . "</strong><br />";
 
         /**
          * CONFIGURAÇÃO DE AMBIENTE
@@ -150,6 +149,7 @@ class Model
         /**
          * hasMany
          */
+         //pr($this->hasMany);
         if( !empty($this->hasMany) ){
             foreach( $this->hasMany as $model=>$propriedades ){
                 if( $params["currentRecursive"] <= $params["recursive"] ){
@@ -191,6 +191,7 @@ class Model
                 'conn' => $this->conn,
             )
         );
+
     } // fim __construct()
 
     /**
@@ -209,24 +210,41 @@ class Model
      * @return bool Se salvou ou não
      */
     public function save(array $data, $options = array()){
+
         if( is_array($data) ){
+
+            /**
+             * Sanitize os dados
+             */
             $data = Security::Sanitize($data);
 
             $updateInstruction = false;
 
             $doUpdate = ( empty($options["doUpdate"]) ) ? false : $options["doUpdate"];
 
-
+//pr($data);
             /**
              * VALIDATE
              */
             if( $this->validate($data) ){
                 /**
-                 * Loop por cada tabela dos valores enviados em $data
+                 * LOOP EM $DATA
+                 *
+                 * Loop por cada model dos valores enviados em $data. O formato
+                 * padrão é
+                 *
+                 *      array(
+                 *          [model] => array(
+                 *              [campo] => valor
+                 *          )
+                 *      )
+                 *
                  */
                 foreach($data as $model=>$campos){
+
                     /**
-                     * Verifica se o Model requisitado é o próprio ou são filhos
+                     * Verifica possíveis relacionamentos entre o model $this
+                     * atual e o model atual de $data
                      */
                     if( get_class($this) == $model ){
                         
@@ -237,9 +255,9 @@ class Model
                          * Verifica se este Model pertence a outro
                          */
                         if( !empty($this->belongsTo) ){
-                            foreach( $this->belongsTo as $model=>$propriedades ){
-                                if( array_key_exists($model, $data) ){
-                                    $campos[ $propriedades["foreignKey"] ] = $data[$model]["id"];
+                            foreach( $this->belongsTo as $relationalModel=>$propriedades ){
+                                if( array_key_exists($relationalModel, $data) ){
+                                    $campos[ $propriedades["foreignKey"] ] = $data[$relationalModel]["id"];
                                 }
                             }
                         }
@@ -254,30 +272,78 @@ class Model
                         }
                     }
 
+                    /**
+                     * MODEL PAI
+                     *
+                     * $data[model] == model objeto atual ?
+                     *
+                     * Verifica se o Model atual da array $data (está dentro de
+                     * um foreach) é o mesmo que get_class($this) ou se é um
+                     * model filho.
+                     *
+                     * [Se for o próprio Model pai]
+                     *      Gera SQL para INSERT ou UPDATE posteriormente no
+                     *      código
+                     *
+                     */
                     if( $modelPai ){
+
                         /**
                          * subModel
                          *
-                         * Se esta e uma chamada a um subModel, ve qual o
+                         * Se esta é uma chamada a um subModel, ve qual o
                          * registro deve ser modificado.
                          */
                         if( $doUpdate AND !empty($options["foreignKey"]) ){
                             $campoId = $options["foreignKey"]["id"];
-                            $updateConditionField = $options["foreignKey"]["field"];
+
+
+                            /**
+                             * Se o tipo de relação é hasMany, o campo
+                             * foreignKey não deve ser a referência.
+                             */
+                            if( !empty($options["relationType"]) AND $options["relationType"] !== "hasMany" ){
+                                $updateConditionField = $options["foreignKey"]["field"];
+                            }
+                            /**
+                             * Se esta é uma chamada a um model:
+                             *
+                             * -> parent hasMany $this
+                             */
+                            else if( !empty($options["relationType"]) AND $options["relationType"] == "hasMany" ){
+
+                                /**
+                                 * VERIFICA FORMATO $DATA PARA HASMANY
+                                 */
+                                $dataItems = array_keys( $data[ get_class($this) ]);
+
+                                //foreach( $dataItems as $chave ){
+                                    //if( is_int($chave) ){
+
+                                        
+                                    //}
+                                //}
+
+                            }
+                            
+                            else {
+
+                            }
                         }
 
                         if( in_array($tabela, $this->dbTables) ){
                             /**
-                             * Loop por cada campo e seus valores
+                             * Loop por cada campo e seus valores para gerar uma
+                             * string com os campos a serem incluidos.
                              */
                             foreach( $campos as $campo=>$valor ){
-
-                                if( array_key_exists($campo, $this->tableDescribed) ){
+                                
+                                if( array_key_exists($campo, $this->tableDescribed) )
+                                {
 
                                     /**
                                      * Atualizando subModel (model filho)
                                      */
-                                    
                                     if( $campo == "id" ){
                                         $doUpdate = true;
                                         $campoId = $valor;
@@ -305,6 +371,8 @@ class Model
                                 }
                             }
 
+                            //pr($camposStr);
+
                             if( !empty($camposStr) ){
                                 /**
                                  * @todo - comentar
@@ -314,14 +382,27 @@ class Model
                                  * com $doUpdate=true, verifica se realmente
                                  * deve ser feito um update, ou um insert
                                  */
-                                if( $doUpdate ){
+                                if( $doUpdate
+                                    AND !empty($updateConditionField) )
+                                {
 
                                     //pr($campoId);
                                     if( $this->countRows( array("conditions" => array( get_class($this).".".$updateConditionField => $campoId) ) ) == 0 )
                                         $doUpdate = false;
                                 }
+                                
+                                else if( empty($updateConditionField) ){
+                                    $doUpdate = false;
+                                }
+
+                                /*
+                                 * Flag que indica se é insert ou update
+                                 */
+                                $insertInstruction = false;
+                                $updateInstruction = false;
 
                                 if( !$doUpdate ){
+                                    $insertInstruction = true;
                                     $tempSql = "INSERT INTO
                                                     ".$tabela."
                                                         (".implode(",", $camposStr).")
@@ -363,15 +444,14 @@ class Model
                         }
                     } // fim modelFather==true
 
-                }
-                //pr($sql);
-                //return $sql;
+                } // fim criação de SQLs
 
                 /**
                  * SALVA SQL CRIADO
                  *
-                 * Se houverem dados de tabelas relacionadas, envia dados para seus
-                 * respectivos Models para serem salvas
+                 * Executa o SQL do model principal
+                 *
+                 * Gera lastInsertId ao final
                  */
                 if( !empty($sql) AND count($sql) > 0 ){
                     foreach( $sql as $instrucao ){
@@ -399,47 +479,116 @@ class Model
                 }
 
                 /**
-                 * Se houverem Models filhos relacionados,
-                 * envia dados para serem salvos
+                 * Se há dados de models filhas (relacionais), envia dados para
+                 * seus respectivos objetos ($model) para serem salvos
+                 *
+                 * [Se há models filhos com dados && lastInsertId existe]
+                 *
                  */
                 if( !empty($modelsFilhos) AND !empty($lastInsertId) ){
+
+                    /**
+                     * Loop por models filhos
+                     */
                     foreach($modelsFilhos as $model=>$campos){
                         $dataTemp[$model] = $campos;
 
                         /**
-                         * Pega o ForeignKey
+                         * FOREIGNKEY
+                         *
+                         * Pega as chaves estrangeiras (foreignKey) dos models
+                         * relacionados.
                          */
                         if( array_key_exists($model, $this->hasOne) ){
                             $foreignKey = $this->hasOne[$model]["foreignKey"];
+                            $relationType = "hasOne";
                         } else if( array_key_exists($model, $this->hasMany) ){
                             $foreignKey = $this->hasMany[$model]["foreignKey"];
+                            $relationType = "hasMany";
                         } else if( array_key_exists($model, $this->belongsTo) ){
                             $foreignKey = $this->belongsTo[$model]["foreignKey"];
+                            $relationType = "hasBelongsTo";
                         } else if( array_key_exists($model, $this->hasAndBelongsToMany) ){
                             $foreignKey = $this->hasAndBelongsToMany[$model]["foreignKey"];
+                            $relationType = "hasAndBelongsToMany";
                         }
 
-                        /**
-                         * Envia dados para Models relacionados salvarem
+                        /*
+                         * CHAMA MODEL::SAVE() FILHOS
                          */
-                        $dataTemp[$model][ $foreignKey ] = $lastInsertId;
+                        /*
+                         * hasMany
+                         *
+                         */
+                        if( $relationType == "hasMany" ){
 
+                            foreach( $dataTemp[$model] as $chave=>$valor ){
+                                if( is_int($chave) ){
+
+                                    $dataForHasMany[$model] = $valor;
+                                    $dataForHasMany[$model][ $foreignKey ] = $lastInsertId;
+
+                                    if( $insertInstruction
+                                        AND !empty($dataForHasMany[$model]["id"]) )
+                                    {
+                                        unset($dataForHasMany[$model]["id"]);
+                                    }
+
+
+                                    /**
+                                     * Chama os models filhos - save()
+                                     *
+                                     * Envia dados para Models relacionados salvarem. É
+                                     * passado [foreignKey] para que o model filho saiba
+                                     * qual é o registro que deve ser mexido, e qual
+                                     * o relacionamento existe.
+                                     *
+                                     */
+                                    $this->{$model}->save( $dataForHasMany, array(
+                                            "doUpdate" => $doUpdate,
+                                            "relationType" => $relationType,
+                                            "foreignKey" => array(
+                                                "field" => $foreignKey,
+                                                "id" => $lastInsertId,
+                                            )
+                                        )
+                                    );
+                                    
+                                }
+                            }
+                            
+                        }
                         /**
-                         * Chama os models filhos
+                         * Chama filhos normalmente (não hasMany)
                          */
-                        $this->{$model}->save( $dataTemp, array(
-                                "doUpdate" => $doUpdate,
-                                "foreignKey" => array(
-                                    "field" => $foreignKey,
-                                    "id" => $lastInsertId,
+                        else {
+                            $dataTemp[$model][ $foreignKey ] = $lastInsertId;
+                            /**
+                             * Chama os models filhos - save()
+                             *
+                             * Envia dados para Models relacionados salvarem. É
+                             * passado [foreignKey] para que o model filho saiba
+                             * qual é o registro que deve ser mexido, e qual
+                             * o relacionamento existe.
+                             *
+                             */
+                            $this->{$model}->save( $dataTemp, array(
+                                    "doUpdate" => $doUpdate,
+                                    "relationType" => $relationType,
+                                    "foreignKey" => array(
+                                        "field" => $foreignKey,
+                                        "id" => $lastInsertId,
+                                    )
                                 )
-                            )
-                        );
+                            );
+                        }
+
 
                         unset($dataTemp);
                     }
                 }
                 return true;
+                
             }
             /**
              * Não validou
@@ -470,6 +619,50 @@ class Model
     public function update(array $toUpdate, $conditions){
 
         if( !empty($toUpdate) ){
+
+
+            /**
+             * Formato $this->data passado
+             */
+
+            if( is_array($toUpdate) ){
+
+                $has = array_merge($this->hasOne, $this->hasMany, array( get_class($this)=>"" ) );
+                $updateAll = false;
+                
+                foreach( $toUpdate as $chave=>$campos ){
+
+                    /**
+                     * $this->data?
+                     * 
+                     * Verifica o formato
+                     */
+                    if( array_key_exists($chave, $has) ){
+
+                        /**
+                         * Percorre os campos
+                         */
+                        foreach( $campos as $campo=>$valor ){
+                            $updateAllData[ $chave.".".$campo ] = $valor;
+                        }
+
+                        $updateAll = true;
+
+                        /**
+                         * @todo - Implementar
+                         *
+                         * este método deve conseguir atualizar usando
+                         * $this->data.
+                         *
+                         * Se o dado é $this->data agora, simplesmente
+                         * retorna false
+                         */
+                         return false;
+                    }
+                }
+                
+                //echo "é";
+            }
 
             /**
              * toUpdate
@@ -676,6 +869,7 @@ class Model
         /**
          * Informações sobre tabelas dos models
          */
+
         $options["tableAlias"] = $this->tableAlias;
         foreach( $options["tableAlias"] as $model=>$valor ){
             if( get_class($this) != $model ){
@@ -716,16 +910,16 @@ class Model
         if( is_array($options) AND empty($options["limit"]) )
             $options["limit"] = Config::read("modelAutoLimit");
 
-        if( array_key_exists("page", $this->params["args"]) ){
-            /**
-             * Segurança contra URL injection
-             */
-            if( ($this->params["args"]["page"] * 1) > 0 ){
+        if( array_key_exists("page", $this->params["args"]) ) {
+        /**
+         * Segurança contra URL injection
+         */
+            if( ($this->params["args"]["page"] * 1) > 0 ) {
                 $options["page"] = $this->params["args"]["page"];
             }
         }
 
-        if( !array_key_exists("page", $options) ){
+        if( !array_key_exists("page", $options) ) {
             $options["page"] = 1;
         }
 
@@ -740,7 +934,7 @@ class Model
          * Se a página for maior do que o possível de amostragem (segurança
          * contra usuários).
          */
-        if( $startLimit > $totalRows AND $totalRows > 0 ){
+        if( $startLimit > $totalRows AND $totalRows > 0 ) {
             $startLimit = $totalRows - $options["limit"];
         }
 
@@ -761,7 +955,9 @@ class Model
         $options["limit"] = $startLimit.",".$options["limit"];
 
         return $this->find($options, $mode);
+
     }
+
     /**
      * DELETE()
      *
@@ -773,6 +969,7 @@ class Model
      * @return bool
      */
     public function delete($idOrConditions = "", $options = array() ){
+
         /**
          * isDeleteAll?
          */
@@ -995,7 +1192,6 @@ class Model
                                         "FROM ".$this->useTable." AS ".get_class($this)." ".
                                         "WHERE ".$where
                                     );
-                                    pr($count);
                 return $count[0]["count"];
             }
             /**
@@ -1003,7 +1199,7 @@ class Model
              */
             else {
                 $options["fields"] = array("COUNT(*) AS count");
-                pr($options);
+                //pr($options);
                 $count = $this->find($options);
             }
             
