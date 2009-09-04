@@ -17,23 +17,11 @@ class SiteController extends AppController
     function index(){
         $this->pageTitle = "Página principal";
 
-        //$this->Usuario->update( array("email"=>"123@123.com"), "1" );
-
-        //pr( $this->params );
-        //pr( $this->data );
-
     }
 
     function save(){
 
-        //pr( $this->data );
-
-        //pr( $this->Usuario->save( $this->data ) );
-        
-        //echo '<br>------->Salva a seguir:----<br>';
         $this->Usuario->save( $this->data );
-        //$this->Usuario->update( array("Usuario.nome"=>"HELLOOO", "Idade.titulo"=>"táitou"), "2" );
-        //pr( $this->Usuario->countRows() );
     }
 
     function listar(){
