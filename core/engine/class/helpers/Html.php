@@ -61,6 +61,22 @@ class HtmlHelper extends Helper
     }
 
     /**
+     * javascript()
+     *
+     * Retorna a linha HTML para carregar um arquivo javascript.
+     *
+     * @param string $path
+     * @return string
+     */
+    public function javascript($path){
+        /**
+         * @todo - verificar se o arquivo existe no core do AcidPHP (core/)
+         */
+        $jsLink = '<script language="Javascript" src="'. WEBROOT.APP_JS_DIR.$path .'.js"></script>';
+        return $jsLink;
+    }
+
+    /**
      * METATAGS()
      *
      * Função que monta metatags automaticamente.
