@@ -2,6 +2,12 @@ CHANGELOG
 
 Versão atual: v0.0.5
 
+
+Revision 5 (09/09/2009)
+    - AjaxHelper: criado com funcionalidades linkToRemote() com .update e
+        .complete funcionando.
+    - .htaccess aprimorado contra 6 exploits comuns contra URLs
+
 -------------------------------------------------------------------------------
 
 v0.0.5 reached (04/09/2009)

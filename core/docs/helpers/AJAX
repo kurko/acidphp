@@ -1,0 +1,73 @@
+== AJAXHELPER ==
+
+O AjaxHelper é uma das funcionalidades mais interessantes do AcidPHP. Com ele,
+usando apenas uma linha de código, você gera funcionalidades Ajax no seu site
+automaticamente, atualiza DIVs, entre outras.
+
+Para começar a usá-lo, o primeiro passo é dizer ao seu controller para carregar
+o AjaxHelper, como a seguir:
+
+<source lang="php">
+class UsuariosController extends AppController {
+    // vamos carregar o AjaxHelper
+    var $helpers = array("Ajax");
+
+    // ... suas actions vão aqui ...
+
+}
+</source>
+
+Feito. Agora é só ir até sua View e usar o Helper, como explicarei a seguir.
+
+
+=== Usando o AjaxHelper ===
+
+Você tem à sua disposição basicamente um comando:
+
+* $ajax->linkToRemote( string $texto_do_link, array $opções  )
+
+Este método cria um link <a></a> na tela, com a opção "onclick" gerada de forma
+a executar uma ação desejada e especificada em $opções.
+
+
+=== Exemplo de uso ===
+
+Digamos que você quer quando um link seja clicado, seja feita uma
+requisição ao servidor e o que for retornado de lá seja preenchido em um
+div qualquer.
+
+Suponhamos que este div tenha o atributo class="atualizar" e o arquivo no
+servidor a ser chamado (que na verdade é um controller um action) seja
+"/site/ajaxremoto" (site é o controller e ajaxremoto é o action). Assim vamos
+digitar no View, onde queremos nosso link:
+
+<source lang="php">
+<?php
+echo $ajax->linkToRemote(
+        "Meu link", // primeiro argumento
+        array( // segundo argumento, opções, formato array
+            "url" => WEBROOT."site/ajaxremoto", // url é o local no servidor
+            "update" => "div.atualizar" // classe do nosso div
+        )
+);
+?>
+</source>
+
+Terminado. Ao clicar no link, o Javascript chamará a url especificada e o que
+retornar (o que você mandou escrever na action ajaxremoto) aparecerá
+automaticamente no div com classe "atualizar".
+
+Note a sintaxe que usamos para dizer qual div iríamos atualizar. Usamos o mesmo
+padrão que usaríamos para o css, com o ponto indicando classe. Se fosse um id,
+você usaria #, e assim sucessivamente.
+
+Confira a seguir a lista de parâmetros de opções que você pode usar.
+
+* "url": o endereço do arqiuvo no servidor a ser requisitado;
+* "update": se você deseja que algum elemento seja atualizado automaticamente,
+            preencha este argumento com o nome do elemento (ex: div#meu_div).
+* "complete": ação a ser executada após concluir o processo Ajax. Deve ser usada
+              uma função Javascript válida
+              (ex: alert('funcionou: '+response.responseText); ).
+              response.responseText é igual ao que retornou do servidor.
+
