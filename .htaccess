@@ -26,5 +26,6 @@
     ########### Fim - Rewrite rules para bloquear alguns exploits comuns
 
     RewriteRule ^app/core/(.*)$ app/core/$1 [L]
+    RewriteRule ^core/support/script/(.*)$ core/support/script/$1 [L]
     RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
 </IfModule>

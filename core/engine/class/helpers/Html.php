@@ -61,6 +61,33 @@ class HtmlHelper extends Helper
     }
 
     /**
+     * javascript()
+     *
+     * Retorna a linha HTML para carregar um arquivo javascript.
+     *
+     * @param string $path
+     * @return string
+     */
+    public function javascript($path){
+        /*
+         * Verifica se o arquivo existe em app/ ou no core/
+         */
+        if( file_exists(APP_JS_DIR.$path .'.js') ){
+            $jsLink = '<script language="Javascript" src="'. WEBROOT.APP_JS_DIR.$path .'.js"></script>';
+            return $jsLink;
+        }
+        /*
+         * Verifica se a biblioteca já está no core do AcidPHP
+         */
+        else if( file_exists(CORE_JS_DIR.$path .'.js') ){
+            $jsLink = '<script language="Javascript" src="'. WEBROOT.CORE_JS_DIR.$path .'.js"></script>';
+            return $jsLink;
+        }
+
+        return false;
+    }
+
+    /**
      * METATAGS()
      *
      * Função que monta metatags automaticamente.

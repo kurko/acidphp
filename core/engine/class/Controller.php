@@ -381,7 +381,7 @@ class Controller
     }
 
     /**
-     * MÉTODOS DE SUPORTE
+     * MÉTODOS INTERNOS DE SUPORTE
      *
      * Todos os métodos que dão suporte ao funcionamento do sistema.
      *      ex.: render, set, redirect, beforeFilter, afterFilter, trigger, ect
@@ -399,7 +399,7 @@ class Controller
      * @param array $param
      *      'ation': qual método deve ser chamado
      */
-    protected function trigger($param){
+    private function trigger($param){
         /**
          * Se não há um action especificado, então assume-se index()
          */
@@ -502,6 +502,9 @@ class Controller
         }
     }
 
+    /*
+     * MÉTODOS EXTERNOS DE SUPORTE
+     */
     /**
      * Renderiza a view
      *
@@ -539,13 +542,15 @@ class Controller
             include(APP_VIEW_DIR."".$this->engine->callController."/".$path.".php");
             $content_for_layout = ob_get_contents();
             ob_end_clean();
+
+            if( is_file(APP_LAYOUT_DIR.$this->layout.".php") ){
+                include(APP_LAYOUT_DIR.$this->layout.".php");
+            } else {
+                include(CORE_LAYOUT_DIR.$this->layout.".php");
+            }
+
         }
 
-        if( is_file(APP_LAYOUT_DIR.$this->layout.".php") ){
-            include(APP_LAYOUT_DIR.$this->layout.".php");
-        } else {
-            include(CORE_LAYOUT_DIR.$this->layout.".php");
-        }
         /**
          * Confirma que renderização foi feita para que não haja duplicação
          * da view
@@ -611,6 +616,27 @@ class Controller
         //pr($args);
 
     }
+
+
+    /*
+     * MÉTODOS DE SUPORTE DE AMBIENTE
+     */
+
+    /**
+     * isAjax()
+     *
+     * Verifica se este é um acesso HTTP via Ajax
+     *
+     * @return bool
+     */
+    public function isAjax(){
+        return ( isset( $_SERVER["HTTP_X_REQUESTED_WITH"] )
+            AND strtolower($_SERVER["HTTP_X_REQUESTED_WITH"]) == "xmlhttprequest" );
+        
+        return false;
+    }
+
+    
 }
 
 ?>
