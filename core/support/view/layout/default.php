@@ -18,6 +18,11 @@
     <?php
     echo $html->css("standard.style");
 
+    /*
+     * Uncomment the line below to use AjaxHelper
+     */
+    //echo $html->javascript("jquery");
+    
     echo $html->metatags();
     ?>
 </head>

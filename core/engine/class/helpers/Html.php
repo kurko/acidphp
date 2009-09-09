@@ -69,11 +69,22 @@ class HtmlHelper extends Helper
      * @return string
      */
     public function javascript($path){
-        /**
-         * @todo - verificar se o arquivo existe no core do AcidPHP (core/)
+        /*
+         * Verifica se o arquivo existe em app/ ou no core/
          */
-        $jsLink = '<script language="Javascript" src="'. WEBROOT.APP_JS_DIR.$path .'.js"></script>';
-        return $jsLink;
+        if( file_exists(APP_JS_DIR.$path .'.js') ){
+            $jsLink = '<script language="Javascript" src="'. WEBROOT.APP_JS_DIR.$path .'.js"></script>';
+            return $jsLink;
+        }
+        /*
+         * Verifica se a biblioteca já está no core do AcidPHP
+         */
+        else if( file_exists(CORE_JS_DIR.$path .'.js') ){
+            $jsLink = '<script language="Javascript" src="'. WEBROOT.CORE_JS_DIR.$path .'.js"></script>';
+            return $jsLink;
+        }
+
+        return false;
     }
 
     /**
