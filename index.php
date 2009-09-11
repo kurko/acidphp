@@ -11,11 +11,13 @@
 
 
 //define("CORE_DIR", "core/");
+/*
 define("CORE_DIR", "core/");
 define("CORE_CONFIG_VARIABLES", CORE_DIR."config/variables.php");
 
 include(CORE_CONFIG_VARIABLES);
 include(CORE_LOADER);
 include(ENGINE_START);
+*/
 
 ?>

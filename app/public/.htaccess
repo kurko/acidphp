@@ -30,11 +30,11 @@
 
     #RewriteRule ^app/core/(.*)$ app/core/$1 [L]
 
-    # Verifica se
-    RewriteCond %{REQUEST_FILENAME} !-d [OR]
-    RewriteCond %{REQUEST_FILENAME} !-f
+    # Verifica se é requisitado um arquivo público, como flash, img, css, js
+    RewriteCond %{REQUEST_FILENAME} -d [OR]
+    RewriteCond %{REQUEST_FILENAME} -f
     RewriteRule ^(.*)$ $1 [L]
 
-    RewriteRule ^core/support/script/(.*)$ ../../core/support/script/$1 [L]
+    #RewriteRule ^core/support/script/(.*)$ ../../core/support/script/$1 [L]
     RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
 </IfModule>
