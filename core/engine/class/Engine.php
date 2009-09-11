@@ -49,6 +49,8 @@ class Engine
          * Carrega os routes do sistema
          */
         $this->routes = Config::read("routes");
+                //pr( $this->routes );
+
         /**
          * URL
          *
@@ -78,7 +80,9 @@ class Engine
     private function translateUrl(){
         
         if( !empty($_GET["url"]) ){
+            //pr($_GET);
             $url = explode("/", $_GET["url"]);
+
 
             $this->defineRoutes($url);
         }
@@ -99,8 +103,9 @@ class Engine
                 /**
                  * Ajusta Controllers e Actions a serem carregados
                  */
-                $url[0] = (empty($this->routes["/"]["controller"])) ? "site" : $this->routes["/"]["controller"];
-                $url[1] = (empty($this->routes["/"]["action"])) ? "index" : $this->routes["/"]["action"];
+                //if( empty() )
+                $url[0] = ( empty($this->routes["/"]["controller"])) ? "site" : $this->routes["/"]["controller"];
+                $url[1] = ( empty($this->routes["/"]["action"])) ? "index222" : $this->routes["/"]["action"];
 
                 if( !empty($url[0]) AND !empty($url[1]) ){
                     $this->defineRoutes($url);
@@ -145,8 +150,9 @@ class Engine
      * @param array $url URL atual para definir qual controller carregar
      */
     private function defineRoutes($url){
+
         /**
-         * Controller
+         * APP_DIR e Controller
          */
         if( !empty($url[0]) ){
             $this->callController = $url[0];
@@ -172,7 +178,16 @@ class Engine
          */
         //echo '0'.implode("/", $url).'0';
         $this->webroot = str_replace( implode("/", $url), "", $_SERVER["REQUEST_URI"] );
-        define("WEBROOT", $this->webroot);
+        if( !defined( "WEBROOT"))
+            define("WEBROOT", $this->webroot);
+
+        /*
+         * ANÁLISE DE APP_DIR
+         *
+         * Verifica qual aplicação está sendo requisitada.
+         */
+        $webRoot = array_reverse( array_values(array_filter( explode("/", WEBROOT) )) );
+
         array_shift($url);
         array_shift($url);
 

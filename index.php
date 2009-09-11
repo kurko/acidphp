@@ -9,6 +9,8 @@
  * @since v0.1 15/07/2009
  */
 
+
+//define("CORE_DIR", "core/");
 define("CORE_DIR", "core/");
 define("CORE_CONFIG_VARIABLES", CORE_DIR."config/variables.php");
 

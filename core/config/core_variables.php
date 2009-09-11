@@ -8,9 +8,19 @@
  * @since v0.1 17/7/2009
  */
 
-if (!defined('CORE_DIR')) {
-    define("CORE_DIR", "core/");
+
+/*
+ * Define o caminho até o diretório raiz
+ */
+if (!defined('THIS_PATH_TO_ROOT')) {
+    define('THIS_PATH_TO_ROOT', '');
 }
+
+if (!defined('CORE_DIR')) {
+    define("CORE_DIR", THIS_PATH_TO_ROOT."core/");
+}
+
+
 
 /**
  * ENGINE START
@@ -63,40 +73,6 @@ define("CORE_COMPONENTS_DIR", CORE_CLASS_DIR."components/");
 
 
 /**
- * APP
- */
-if (!defined('APP_DIR')) {
-    define("APP_DIR", "app/");
-}
-define("APP_CONTROLLER_DIR", APP_DIR."controller/");
-define("APP_MODEL_DIR", APP_DIR."model/");
-define("APP_VIEW_DIR", APP_DIR.VIEW_DIR);
-
-/**
- * Principais caminhos dentro de app/
- */
-/**
- * APP CONFIG
- */
-define("APP_CONFIG_DIR", APP_DIR."config/");
-define("APP_CONFIG_ROUTES", APP_CONFIG_DIR."routes.php");
-define("APP_CONFIG_CORE", APP_CONFIG_DIR."core.php");
-define("APP_CONFIG_DATABASE", APP_CONFIG_DIR."database.php");
-
-/**
- * View paths
- */
-define("APP_LAYOUT_DIR", APP_VIEW_DIR.LAYOUT_DIR);
-
-/**
- * APP CORE
- */
-define("APP_CORE_DIR", APP_DIR."core/");
-define("APP_CSS_DIR", APP_CORE_DIR."css/");
-define("APP_JS_DIR", APP_CORE_DIR."js/");
-define("APP_FLASH_DIR", APP_CORE_DIR."flash/");
-
-/**
  * APP SUPPORT FILES
  */
 /**
@@ -104,17 +80,9 @@ define("APP_FLASH_DIR", APP_CORE_DIR."flash/");
  */
 define("CORE_APP_CONTROLLER_DEFAULT", CORE_CLASS_DIR."AppController.php");
 /**
- * AppController criado pelo usuário na aplicação
- */
-define("APP_CONTROLLER_DEFAULT", APP_DIR."app_controller.php");
-/**
  * AppModel do Core
  */
 define("CORE_APP_MODEL_DEFAULT", CORE_CLASS_DIR."AppModel.php");
-/**
- * AppModel criado pelo usuário na aplicação
- */
-define("APP_MODEL_DEFAULT", APP_DIR."app_model.php");
 
 
 

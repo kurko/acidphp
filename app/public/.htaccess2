@@ -1,0 +1,31 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^$ index.php?url= [L]
+
+    ##########
+    # DIRETIVAS DE SEGURANÇA
+
+    ########## Começa - Reescreve as regras para bloquear alguns exploits comuns
+    ## Se voce tiver problemas com seu site bloqueie as operaçoes listadas a
+    ## seguir (o que nao devera ser necessario).
+    ## Esta e uma tentativa de bloquear os tipos mais comuns de exploits
+
+    # Bloqueia qualquer script tentando setar um valor mosConfig por uma URL
+    RewriteCond %{QUERY_STRING} mosConfig_[a-zA-Z_]{1,21}(=|\%3D) [OR]
+    # Bloqueia qualquer script tentando um base64_encode pela URL
+    RewriteCond %{QUERY_STRING} base64_encode.*\(.*\) [OR]
+    # Bloqueia qualquer script que inclua <script> ou sequer < numa URL
+    RewriteCond %{REQUEST_URI} (\<|%3C).*script.*(\>|%3E) [NC,OR]
+    RewriteCond %{REQUEST_URI} (\<|%3C).* [NC,OR]
+    # Bloqueia qualquer script tentando setar GLOBALS no PHP via URL
+    RewriteCond %{QUERY_STRING} GLOBALS(=|\[|\%[0-9A-Z]{0,2}) [OR]
+    # Bloqueia qualquer script tentando modificar uma variavel _REQUEST via URL
+    RewriteCond %{QUERY_STRING} _REQUEST(=|\[|\%[0-9A-Z]{0,2})
+    # Envia todas as requisiçoes bloqueadas para a pagina inicial com Forbidden!
+    RewriteRule ^(.*)$ index.php [F,L]
+    ########### Fim - Rewrite rules para bloquear alguns exploits comuns
+
+    RewriteRule ^app/core/(.*)$ app/core/$1 [L]
+    RewriteRule ^core/support/script/(.*)$ core/support/script/$1 [L]
+    RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
+</IfModule>
