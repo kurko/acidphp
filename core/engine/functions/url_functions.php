@@ -16,7 +16,7 @@
  * @param mixed $mixed Configuração de Url para criação de string final
  * @return string Retorna um endereço Url válido
  */
-function translateUrl($mixed){
+function translateUrl($mixed, $isFile = false){
 
     global $engine;
     /**
@@ -38,12 +38,15 @@ function translateUrl($mixed){
      */
     else if( is_string($mixed) ){
 
+        /*
+         * A URL é uma string mas nenhum dos termos a seguir.
+         */
         if( !in_array(  StrTreament::getNameSubStr($mixed, ":"),
                         array("http","ftp","ssh","git","https") )
+            AND (!$isFile)
         ){
 
             $url = explode("/", $mixed);
-
             $args = array();
             $i = 0;
             foreach( $url as $chave=>$valor ){
@@ -59,9 +62,17 @@ function translateUrl($mixed){
                     }
                     $i++;
                 }
-
             }
+
             $url = $engine->webroot.$controller."/".$action."/".implode("/", $args);
+        }
+        /*
+         * A URL é para um arquivo (css, js, imagem, etc)
+         */
+        else if( $isFile ){
+
+            $url = $engine->webroot.$mixed;
+
         } else {
             $url = $mixed;
         }

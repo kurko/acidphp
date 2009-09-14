@@ -50,6 +50,48 @@ class HtmlHelper extends Helper
     }
 
     /**
+     * IMAGE()
+     *
+     * @param string $url Endereço da imagem
+     * @param array $options
+     * @return string HTML
+     */
+    public function image($url, array $options = array() ){
+
+        /*
+         * OPÇÕES RESERVADAS
+         */
+        $reservedWords = array(
+            ""
+        );
+
+        if( !empty($url) ){
+
+            $conteudo = "";
+
+            $inlineProperties = "";
+
+            if( is_array($options) ){
+                foreach( $options as $chave=>$valor ){
+                    /*
+                     * Somente palavras não reservadas
+                     */
+                    if( !in_array($chave, $reservedWords) )
+                        $inlineProperties.= " ".$chave.'="'.$valor.'"';
+                }
+            }
+
+            $conteudo.= '<img src="'.translateUrl($url, true).'" '.$inlineProperties.' />';
+
+            return $conteudo;
+        } else {
+            /*
+             * @todo - retornar erro
+             */
+            showError("Não foi especificado o endereço da imagem para HtmlHelper::imagem()");
+        }
+    }
+    /**
      * Cria e retorna o código HTML para carregar um arquivo CSS
      *
      * @param string $path Caminho para o arquivo CSS
