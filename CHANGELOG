@@ -1,6 +1,14 @@
 CHANGELOG
 
-Versão atual: v0.0.5
+Versão atual: v0.0.6
+
+-------------------------------------------------------------------------------
+
+v0.0.6 reached (18/09/2009)
+
+Revision 11 (18/09/2009)
+    - AuthComponent: expireTime completo
+    - AuthComponent: autoRedirect para última página acessada pós-login completo
 
 Revision 9
     - Mais de uma aplicação possível (ex. app/, app2/, etc)
