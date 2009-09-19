@@ -9,7 +9,10 @@
  */
 
 /**
+ *
  * DEBUG
+ * --------------------------------------------------------------------------
+ *
  */
 /**
  * Modo de Debugging
@@ -26,6 +29,12 @@ Config::write("debug", 2);
  */
 Config::write("debugSQLStyle", true);
 
+/*
+ *
+ * VIEWING
+ * --------------------------------------------------------------------------
+ *
+ */
 /**
  * CHARSET
  *
@@ -37,10 +46,22 @@ Config::write("debugSQLStyle", true);
  */
 Config::write("charset", "UTF-8");
 
+/*
+ *
+ * SEGURANÇA
+ * --------------------------------------------------------------------------
+ *
+ */
 /**
  * CHAVE DE SEGURANÇA
  */
-
 Config::write("securityKey", "woeviwp9g7W9G6wovinvo8wHBWEIBH");
+/**
+ * AUTH
+ *
+ * Quantidade de minutos em que a session de Auth expirará. Usuários logados
+ * serão desligados.
+ */
+Config::write("authExpireTime", ""); // in minutes
 
 ?>

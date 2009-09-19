@@ -111,6 +111,16 @@ class AuthComponent extends Component
         protected $defaultLoginAction = "login";
         /**
          *
+         * @var bool Redirecionamento após login para última página acessada
+         */
+        protected $autoRedirect = true;
+        /**
+         *
+         * @var string Quantos minutos até a sessão expirar
+         */
+        protected $expireTime = "";
+        /**
+         *
          * @var array Endereço para onde deve ser redirecionado o usuário após login
          */
         public $redirectTo;
@@ -157,13 +167,37 @@ class AuthComponent extends Component
      * @author Alexandre de Oliveira <chavedomundo@gmail.com>
      */
     public function afterBeforeFilter(){
-        
+
+        $actionCommand = "";
+
+        /*
+         * EXPIRE TIME
+         */
+        if( !empty($this->expireTime) ){
+
+            if( !empty($_SESSION["Sys"]["Auth"]["startMicrotime"]) ){
+
+                $expireTimeInSec = $this->expireTime * 60;
+                $elapsedTime = microtime(true) - $_SESSION["Sys"]["Auth"]["startMicrotime"];
+
+                if( $elapsedTime > $expireTimeInSec ){
+                    $actionCommand = "logout";
+                }
+            }
+
+            /*
+             * Update actual microtime
+             */
+            $_SESSION["Sys"]["Auth"]["startMicrotime"] = microtime(true);
+
+        }
+
         /**
          * LOGOUT
          *
          * Redireciona para $this->loginPage
          */
-        if( $this->params["action"] == "logout" ){
+        if( $this->params["action"] == "logout" or $actionCommand == "logout" ){
             unset($_SESSION["Sys"]["Auth"]);
             unset($_SESSION["Sys"]["FormHelper"]["statusMessage"]);
             $this->checkLogin();
@@ -275,12 +309,36 @@ class AuthComponent extends Component
                     /**
                      * Usuário existe
                      */
-                    if( !empty($result) AND count($result) == 1 ){
+                    if( !empty($result) AND count($result) > 0 ){
                         $this->logged = true;
 
                         $_SESSION["Sys"]["Auth"]["logged"] = true;
-                        $_SESSION["Sys"]["Auth"][$this->model()] = $result[$tempResult[0]][$this->model()];
-                        header("Location: ". translateUrl( $this->redirectTo() ) );
+                        $_SESSION["Sys"]["Auth"]["startMicrotime"] = microtime(true);
+                        $_SESSION["Sys"]["Auth"][$this->model()] =
+                            $result[$tempResult[0]][$this->model()];
+                        
+                        /*
+                         * Verifica se deve-se fazer redirecionamento automático
+                         */
+                        if( !empty($_SESSION["Sys"]["Auth"]["autoRedirect"])
+                            AND $this->autoRedirect() == true )
+                        {
+                            $newUrl = $_SESSION["Sys"]["Auth"]["autoRedirect"];
+                            /*
+                             * A limpeza de:
+                             *
+                             *      $_SESSION["Sys"]["Auth"]["autoRedirect"]);
+                             *
+                             * é feita após o usuário estar logado
+                             */
+                            /*
+                             * Redireciona para a última página acessada
+                             */
+                            header("Location: ". translateUrl( $newUrl ) );
+                        } else {
+                            header("Location: ". translateUrl( $this->redirectTo() ) );
+                        }
+                        
                     }
                     /**
                      * Usuário inexistente
@@ -297,7 +355,7 @@ class AuthComponent extends Component
         
 
         /**
-         * Usuário Não Logado
+         * NÃO LOGADO
          *
          * Verifica controllers/actions proibidos
          */
@@ -410,6 +468,15 @@ class AuthComponent extends Component
             }
 
         }
+        /**
+         * LOGADO
+         */
+        else {
+            
+            if( !empty($_SESSION["Sys"]["Auth"]["autoRedirect"]) )
+                unset($_SESSION["Sys"]["Auth"]["autoRedirect"]);
+
+        }
 
         /**
          * ACESSO NEGADO
@@ -453,6 +520,8 @@ class AuthComponent extends Component
                 "class" => "denied",
                 "message" => $this->deniedAccessMessage
             );
+
+            $_SESSION["Sys"]["Auth"]["autoRedirect"] = $this->params["url"];
             redirect($newUrl);
         } else {
             return true;
@@ -573,6 +642,38 @@ class AuthComponent extends Component
             $this->deniedAccessMessage = $message;
         } else {
             return $this->deniedAccessMessage;
+        }
+    }
+
+    /**
+     * autoRedirect()
+     *
+     * Indica se o sistema deve ter o redirecionamento automático.
+     *
+     * @param bool $bool
+     * @author Alexandre de Oliveira <chavedomundo@gmail.com>
+     */
+    public function autoRedirect($bool = ""){
+        if( is_bool($bool) ){
+            $this->autoRedirect = $bool;
+        } else {
+            return $this->autoRedirect;
+        }
+    }
+
+    /**
+     * expireTime()
+     *
+     * Quanto tempo de inatividade é permitida.
+     *
+     * @param string $time Em minutos, quanto tempo é permitida a inatividad
+     * @author Alexandre de Oliveira <chavedomundo@gmail.com>
+     */
+    public function expireTime($time = ""){
+        if( !empty($time) ){
+            $this->expireTime = $time;
+        } else {
+            return $this->expireTime;
         }
     }
 

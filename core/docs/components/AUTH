@@ -63,9 +63,16 @@ class AppController extends Controller
                     "index"
                 ),
             ));
-            
+
+        // Use a linha abaixo somente se você deseja deslogar o usuário após
+        // x minutos de inatividade. Não use este comando para permitir inatividade
+        // $this->auth->expireTime("10"); // tempo em minutos
+
         // Após login com sucesso, para onde o usuário deve ser redirecionado
         $this->auth->redirectTo( array("controller" => "site", "action" => "index") );
+
+        // Redirecionamento automático para última página acessada (opcional)
+        $this->auth->autoRedirect(true);
 
         // Qual é a página de login
         $this->auth->loginPage( array("controller" => "site", "action" => "login") );
