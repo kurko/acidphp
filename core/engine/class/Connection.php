@@ -17,9 +17,14 @@
 class Conexao {
     /**
      *
+     * @var bool Conectado?
+     */
+    public $connected = false;
+    /**
+     *
      * @var bool Se a base de dados existe. Serve para verificação simples.
      */
-	public $DBExiste;
+    public $DBExiste;
     /**
      *
      * @var Resource Possui a conexão com o DB
@@ -45,26 +50,28 @@ class Conexao {
      *
      * @param array $conexao Contém parâmetros de conexão ao DB
      */
-	function __construct($dbConfig){
+    function __construct($dbConfig){
             
         $this->dbConfig = $dbConfig;
 
-        /**
-         * Se a extensão PDO, usada para conexão com vários tipos de bases de dados
-         */
-        if($this->PdoExtension()){
-            $this->PdoInit($dbConfig);
-            if($this->debugLevel == 1){
-                $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+        if( !empty($dbConfig) ){
+            /**
+             * Se a extensão PDO, usada para conexão com vários tipos de bases de dados
+             */
+            if($this->PdoExtension()){
+                $this->PdoInit($dbConfig);
+                if($this->debugLevel == 1){
+                    $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+                }
+            }
+            /**
+             * conexão comum
+             */
+            else {
+                $this->DbConnect($dbConfig);
             }
         }
-        /**
-         * conexão comum
-         */
-        else {
-            $this->DbConnect($dbConfig);
-        }
-	}
+    }
 
     /**
      * Efetua conexão via PDO.
@@ -83,14 +90,23 @@ class Conexao {
         $dbConfig['driver'] = (empty($dbConfig['driver'])) ? 'mysql' : $dbonfig['driver'];
         $charset = ( empty($dbConfig["encoding"])) ? "" : ";charset=".$dbConfig["encoding"];
 
-        $this->conn = new PDO(
-                        $dbConfig['driver'].':host='.$dbConfig['server'].';'
-                        .   'dbname='.$dbConfig['database']
-                        .   $charset,
-                        
-                        $dbConfig['username'], $dbConfig['password'],
-                        array(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true)
-                            );
+        try {
+            $this->conn = new PDO(
+                            $dbConfig['driver'].':host='.$dbConfig['server'].';'
+                            .   'dbname='.$dbConfig['database']
+                            .   $charset,
+
+                            $dbConfig['username'], $dbConfig['password'],
+                            array(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true)
+                                );
+        } catch (Exception $e){
+            if( isDebugMode() ){
+                echo $e->getMessage();
+            }
+            exit ();
+        }
+
+        $this->connected = true;
 
         /**
          * Ajusta charset no Banco de dados
@@ -125,6 +141,7 @@ class Conexao {
             $this->DBExiste = TRUE;
             $this->db = $db;
             $this->conn = $conn;
+            $this->connected = true;
         } else {
             $this->DBExiste = FALSE;
         }
@@ -219,6 +236,7 @@ class Conexao {
             /**
              * Se o resultado deve ser num formato diferente
              */
+
             $query = $this->conn->prepare($sql);
 
             /**

@@ -49,7 +49,9 @@ class DatabaseAbstractor extends DataAbstractor
         /**
          * Instancia sqlObject;
          */
-        $this->sqlObject = new SQLObject();
+        if( !empty($this->conn) ){
+            $this->sqlObject = new SQLObject();
+        }
     }
 
     /**

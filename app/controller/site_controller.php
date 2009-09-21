@@ -11,7 +11,7 @@
 class SiteController extends AppController
 {
 
-    var $uses = array("Usuario", "Tarefa", "Idade");
+    var $uses = array("Usuario");
     var $siteTitle = "AcidPHP";
 
     function index(){

@@ -29,7 +29,13 @@ session_start();
  *
  * Conexão principal com o banco de dados
  */
-$conn = new Conexao($dbConn);
+//$conn = "";
+if( !$useDB ){
+    $dbConn = array();
+    $conn = false;
+} else {
+    $conn = new Conexao($dbConn);
+}
 
 /**
  * NEW ENGINE

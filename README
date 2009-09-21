@@ -16,6 +16,9 @@ O próposito do AcidPHP é justamente ser a ferramenta que tira você do
 cenário acima e o coloca em um ambiente onde você especifica o que
 quer e o framework executa todo o trabalho operacional para você.
 
+Um dos propósitos do framework é dar funcionalidades de geração automática de
+código através do console. 
+
 
 -----------------
 Versões de testes

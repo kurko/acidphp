@@ -85,48 +85,51 @@ function showLoadingTime($totalTime){
  */
 function debugSQLs($sql){
 
-    $sqlCommands = array(
-        "SELECT", "UPDATE", "DELETE", "INSERT", "REPLACE",
-        "FROM", "ASC", "WHERE", "ORDER BY", "LIMIT", "TABLES",
-        "LEFT JOIN", "DISTINCT", "COUNT", "ON", "DESCRIBE", "SHOW",
-        "INTO", "VALUES", "SET",
-        "IN", "NOT IN", "OR", "AND", "AS", "DESC"
-    );
-    $boldSqlCommands = array();
-    foreach( $sqlCommands as $valor ){
-        $boldSqlCommands[] = "<strong>".$valor."</strong>";
-    }
+    if( is_array($sql) ){
 
-    echo '<table width="100%" style="background: white; padding: 10px;">';
-    echo '<tr>';
-    echo '<td style="font-size: 12px;">';
-    echo "<strong>Instruções SQL</strong>";
-    echo '</td>';
-    echo '<td style="font-size: 12px;">';
-    echo "<strong>Tempo</strong>";
-    echo '</td>';
-    echo '</tr>';
+        $sqlCommands = array(
+            "SELECT", "UPDATE", "DELETE", "INSERT", "REPLACE",
+            "FROM", "ASC", "WHERE", "ORDER BY", "LIMIT", "TABLES",
+            "LEFT JOIN", "DISTINCT", "COUNT", "ON", "DESCRIBE", "SHOW",
+            "INTO", "VALUES", "SET",
+            "IN", "NOT IN", "OR", "AND", "AS", "DESC"
+        );
+        $boldSqlCommands = array();
+        foreach( $sqlCommands as $valor ){
+            $boldSqlCommands[] = "<strong>".$valor."</strong>";
+        }
 
-    foreach($sql as $chave=>$valor){
+        echo '<table width="100%" style="background: white; padding: 10px;">';
         echo '<tr>';
-            echo '<td style="font-size: 12px;">';
-            if( Config::read("debugSQLStyle") ){
-                $sql = $valor["sql"];
-                $sql = str_replace($sqlCommands, $boldSqlCommands, $sql );
-                echo $sql;
-            } else {
-                echo $valor["sql"];
-            }
-            echo '</td>';
-            echo '<td style="font-size: 12px;">';
-            echo showLoadingTime( $valor["time"] );
-            echo '</td>';
+        echo '<td style="font-size: 12px;">';
+        echo "<strong>Instruções SQL</strong>";
+        echo '</td>';
+        echo '<td style="font-size: 12px;">';
+        echo "<strong>Tempo</strong>";
+        echo '</td>';
         echo '</tr>';
 
-        echo '<tr><td colspan="2" style="font-size: 0; background: silver;"></td></tr>';
+        foreach($sql as $chave=>$valor){
+            echo '<tr>';
+                echo '<td style="font-size: 12px;">';
+                if( Config::read("debugSQLStyle") ){
+                    $sql = $valor["sql"];
+                    $sql = str_replace($sqlCommands, $boldSqlCommands, $sql );
+                    echo $sql;
+                } else {
+                    echo $valor["sql"];
+                }
+                echo '</td>';
+                echo '<td style="font-size: 12px;">';
+                echo showLoadingTime( $valor["time"] );
+                echo '</td>';
+            echo '</tr>';
 
+            echo '<tr><td colspan="2" style="font-size: 0; background: silver;"></td></tr>';
+
+        }
+        echo '</table>';
     }
-    echo '</table>';
 }
 
 ?>

@@ -214,32 +214,33 @@ class FormHelper extends Helper
          *
          * Se um id foi especificado, vai no DB e busca o registro dele
          */
-        if( $fieldName == "id" ){
 
+        global $describedTables;
+        if( $fieldName == "id"  AND isset($describedTables[$this->modelName]) ){
 
-                if( is_int($options) OR is_string($options) )
-                    $fieldValue = $options;
-                else if( !empty($options["value"]) )
-                    $fieldValue = $options["value"];
+            if( is_int($options) OR is_string($options) )
+                $fieldValue = $options;
+            else if( !empty($options["value"]) )
+                $fieldValue = $options["value"];
+
+            /**
+             * Se é editavel
+             */
+            if($this->editable == true){
 
                 /**
-                 * Se e editavel
+                 * Carrega as informações sobre o determinado ID
                  */
-                if($this->editable == true){
+                $this->data = $this->models[$this->modelName]->find($fieldValue, "first");
 
-                    /**
-                     * Carrega as informações sobre o determinado ID
-                     */
-                    $this->data = $this->models[$this->modelName]->find($fieldValue, "first");
-
-                    $_SESSION["Sys"]["addToThisData"][$this->formId][$this->modelName]["id"] = $fieldValue;
-                    $_SESSION["Sys"]["options"]["addToThisData"][$this->formId]["destLocation"] = $this->destionationUrl;
-                    if( !empty($options["show"]) AND is_array($options) AND $options["show"] == true ){
-                    } else {
-                        unset($options);
-                        return false;
-                    }
+                $_SESSION["Sys"]["addToThisData"][$this->formId][$this->modelName]["id"] = $fieldValue;
+                $_SESSION["Sys"]["options"]["addToThisData"][$this->formId]["destLocation"] = $this->destionationUrl;
+                if( !empty($options["show"]) AND is_array($options) AND $options["show"] == true ){
+                } else {
+                    unset($options);
+                    return false;
                 }
+            }
             
         }
 
@@ -389,7 +390,7 @@ class FormHelper extends Helper
          * Se não há tipos especificados na configuração do $form, verifica qual
          * o tipo de campo na tabela e mostra o campo <input> de acordo
          */
-        if( empty($inputType) ){
+        if( empty($inputType) AND !empty($this->modelProperties["describedTables"][$modelName]) ){
             /**
              * Verifica global $describedTables que já está carregado e salvo
              * em $this->modelProperties[$modelName]["describedTables"]
@@ -440,6 +441,8 @@ class FormHelper extends Helper
                  case "time"        : $inputType = "text"; break;
                  default            : $inputType = "text"; break;
              }
+        } else if( empty($inputType) ) {
+            $inputType = "text";
         }
         
         /**

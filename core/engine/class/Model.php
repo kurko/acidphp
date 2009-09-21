@@ -187,10 +187,12 @@ class Model
          *
          * Responsável pela abstração de bancos de dados.
          */
-        $this->databaseAbstractor = new DatabaseAbstractor(array(
-                'conn' => $this->conn,
-            )
-        );
+         if( $this->conn){
+            $this->databaseAbstractor = new DatabaseAbstractor(array(
+                    'conn' => $this->conn,
+                )
+            );
+         }
 
     } // fim __construct()
 
@@ -886,9 +888,11 @@ class Model
          *
          * Gera SQL com SQLObject
          */
-         //pr($options);
-        $querysGerados = $this->databaseAbstractor->find($options, $mode);
-        return $querysGerados;
+
+        if( !empty($this->conn) ){
+            $querysGerados = $this->databaseAbstractor->find($options, $mode);
+            return $querysGerados;
+        }
 
     }// fim find()
 
@@ -1426,16 +1430,18 @@ class Model
      */
     private function describeTable($params = ""){
         $conn = ( empty($params["conn"]) ) ? $this->conn : $params["conn"];
+        
+        if( !empty($conn->connected) ){
+            global $describedTables;
+            /**
+             * Retorna todos os campos das tabelas
+             */
+            $describeSql = 'DESCRIBE '.$this->useTable;
 
-        global $describedTables;
-        /**
-         * Retorna todos os campos das tabelas
-         */
-        $describeSql = 'DESCRIBE '.$this->useTable;
-
-        foreach($conn->query($describeSql, "ASSOC") as $tabela=>$info){
-            $this->tableDescribed[$info['Field']] = $info;
-            $describedTables[ get_class($this) ][$info['Field']] = $info;
+            foreach($conn->query($describeSql, "ASSOC") as $tabela=>$info){
+                $this->tableDescribed[$info['Field']] = $info;
+                $describedTables[ get_class($this) ][$info['Field']] = $info;
+            }
         }
     }
 }

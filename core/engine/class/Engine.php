@@ -67,10 +67,13 @@ class Engine
         /**
          * Verifica tabelas
          */
-        $this->checkTables( array(
-                'conn' => $this->conn
-            )
-        );
+        if( $this->conn ){
+            $this->checkTables( array(
+                    'conn' => $this->conn
+                )
+            );
+        }
+        
     }
 
     /**
