@@ -5,34 +5,56 @@
     Description:
         Padrão do framework
 */
+* {
+    margin: 0;
+    padding: 0;
+}
+
 body {
-    background: orange;
+    background: url(../images/layout/background.png) #dddddd repeat-x;
     text-align: center; /* For IE */
     font-size: 76%;
-    font-family: Arial, "Lucida Sans";
+    font-family: "Lucida Grande", "Lucida Sans", Helvetica, Arial;
 }
 
 /**
  * FORMATAÇÃO DE TIPOGRAFIA E PADRONIZAÇÃO
  */
-p { line-height: 18px; }
+h1,h2,h3,h4,h5,h6 { margin-top: 15px; }
+
+h1 { font-size: 4em; margin: 0 }
+h2 { font-size: 2.4em; }
+h3 { font-size: 1.4em; }
+
+p { line-height: 22px; font-size: 1.15em; margin-top: 15px; }
+
+div.nota { margin: 20px; background: #f3f3f3; border: 1px solid #dddddd; color: #333333 }
+div.nota p { margin: 10px; line-height: 22px; font-size: 1.15em; font-style: italic;  }
+div.dica { margin: 20px; background: #a6e9ad; border: 1px solid #dddddd; color: black }
+div.alerta { margin: 20px; background: red; border: 1px solid #dddddd; color: white }
+
+ul { padding: 15px 20px 0; line-height: 20px; }
+ul span.black { color: black; }
+
+
 /**
  * LAYOUT
  */
 #global {
-    width: 760px;
-    background: white;
+    width: 960px;
+    background: url(../images/layout/body_background.jpg) repeat-x white;
     margin: 0 auto;
+    margin-top: 10px;
     text-align: left;
     display: table;
 }
 
 #global div#cabecalho {
-    margin: 10px;
+    margin: 20px;
 }
 
 #global div#view {
-    margin: 10px;
+    margin: 20px;
 }
 
 #global div#rodape {

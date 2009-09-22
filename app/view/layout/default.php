@@ -21,7 +21,7 @@
     /*
      * Uncomment the line below to use AjaxHelper
      */
-    echo $html->javascript("jquery");
+    //echo $html->javascript("jquery");
 
     echo $html->metatags();
     ?>
@@ -29,7 +29,7 @@
 <body>
     <div id="global">
         <div id="cabecalho">
-            <h1><?php echo $siteTitle; ?></h1>
+            <h1>Bem-vindo ao AcidPHP!</h1>
         </div>
         <div id="view">
             <div class="content">
@@ -37,7 +37,7 @@
             </div>
         </div>
         <div id="rodape">
-            Rodapé
+            
         </div>
     </div>
 </body>

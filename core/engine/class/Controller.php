@@ -463,7 +463,7 @@ class Controller
              *
              * Cria helpers solicitados
              */
-                if( count($this->helpers) ){
+                if( !empty($this->helpers) ){
                     /**
                      * Loop por cada helper requisitado.
                      *

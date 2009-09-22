@@ -9,7 +9,7 @@ $useDB = true;
  */
     $dbConn = array(
         'server' => 'localhost',
-        'database' => 'acidphp',
+        'database' => 'acphp',
         'username' => 'root',
         'password' => '',
         'encoding' => 'utf8',

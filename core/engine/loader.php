@@ -92,7 +92,10 @@ if( is_file(APP_MODEL_DEFAULT) ){
 
 include(APP_CONFIG_ROUTES);
 include(APP_CONFIG_CORE);
-include(APP_CONFIG_DATABASE);
+if( is_file(APP_CONFIG_DATABASE) )
+    include(APP_CONFIG_DATABASE);
+else
+    $useDB = false;
 
 /**
  * AJUSTA CONFIGURAÇÃO DE DEBUG
