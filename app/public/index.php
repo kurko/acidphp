@@ -23,7 +23,10 @@ include(CORE_CONFIG_VARIABLES);
 /*
  * APP
  */
-$url = $_GET["url"];
+$url = "";
+if( !empty($_GET["url"]) )
+    $url = $_GET["url"];
+
 if( empty($url) ){
 
     $webRoot = $_SERVER["REQUEST_URI"];
@@ -44,7 +47,6 @@ if( empty($url) ){
         define("APP_DIR", THIS_PATH_TO_ROOT ."app/");
     }
     
-    define("APP_DIR", THIS_PATH_TO_ROOT."app/");
 } else {
     if( is_string($url) ){
         unset($url);
