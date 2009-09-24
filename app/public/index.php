@@ -23,55 +23,40 @@ include(CORE_CONFIG_VARIABLES);
 /*
  * APP
  */
-$url = "";
-if( !empty($_GET["url"]) )
-    $url = $_GET["url"];
-
-if( empty($url) ){
-
+if( empty($_GET["url"]) )
     $webRoot = $_SERVER["REQUEST_URI"];
-    define("WEBROOT", $webRoot);
-
-    $webAppRoot = array_reverse( array_values(array_filter( explode("/", WEBROOT) )) );
-
-    /*
-     * Se é uma aplicação especificada
-     */
-    if( is_dir(THIS_PATH_TO_ROOT.$webAppRoot[0]) ){
-        define("APP_DIR", THIS_PATH_TO_ROOT .$webAppRoot[0]."/");
-    }
-    /*
-     * app/ padrão
-     */
-    else {
-        define("APP_DIR", THIS_PATH_TO_ROOT ."app/");
-    }
-    
-} else {
-    if( is_string($url) ){
-        unset($url);
+else {
+    if( is_string($_GET["url"]) ){
         $url[0] = $_GET["url"];
     }
 
     $webRoot = str_replace( implode("/", $url), "", $_SERVER["REQUEST_URI"] );
-    define("WEBROOT", $webRoot);
-    
-    $webAppRoot = array_reverse( array_values(array_filter( explode("/", WEBROOT) )) );
-
-    /*
-     * Se é uma aplicação especificada
-     */
-    if( is_dir(THIS_PATH_TO_ROOT.$webAppRoot[0]) ){
-        define("APP_DIR", THIS_PATH_TO_ROOT .$webAppRoot[0]."/");
-    }
-    /*
-     * app/ padrão
-     */
-    else {
-        define("APP_DIR", THIS_PATH_TO_ROOT ."app/");
-    }
-
 }
+
+define("WEBROOT", $webRoot);
+
+$webAppRoot = array_reverse( array_values(array_filter( explode("/", WEBROOT) )) );
+
+/*
+ * Se é uma aplicação especificada
+ */
+if( !empty($webAppRoot) AND is_dir(THIS_PATH_TO_ROOT.$webAppRoot[0]) ){
+    define("APP_DIR", THIS_PATH_TO_ROOT .$webAppRoot[0]."/");
+}
+/*
+ * app/ padrão
+ */
+else {
+    define("APP_DIR", THIS_PATH_TO_ROOT ."app/");
+}
+
+/*
+ * app/ padrão
+ */
+if (!defined('APP_DIR')) {
+    define("APP_DIR", THIS_PATH_TO_ROOT ."app/");
+}
+
 
 /*
  * APP_VARIABLES
