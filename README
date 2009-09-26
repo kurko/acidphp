@@ -34,6 +34,10 @@ Na lista atual de funcionalidade (v0.0.6), encontram-se:
 Colaboradores são bem-vindos. O projeto é aberto e precisa de cérebros que o
 levem adiante. A estrutura do framework está bem organizada, possibilitando o
 crescimento para qualquer direção.
+
+ATENÇÃO COLABORADOR: Cada diretório contém arquivos README com instruções. Vá
+até o diretório core/docs/ e leia mais sobre o framework em desenvolvedores/.
+
 _______________________________________________________________________________
 Conduta de desenvolvimento
 
