@@ -1,0 +1,6 @@
+Este diretório contém arquivos de suporte à aplicação.
+
+Um exemplo disto é o view/layout. Quando não há um layout na aplicação (app/), é
+chamado o layout que está aqui, em core/support/view/layout.
+
+Esta é uma forma de automatizar o processo de desenvolvimento.

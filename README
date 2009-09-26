@@ -1,27 +1,66 @@
-ACIDPHP
+ACID
 
-O AcidPHP é um framework PHP concebido com o objetivo de possibilitar
-o desenvolvimento fácil e agil de aplicações Web.
+O Acid é um framework PHP concebido com o objetivo de possibilitar
+o desenvolvimento fácil e agil de aplicações Web. O foco do projeto é:
+
+a) rapidez de processamento
+b) automatismo
+c) segurança
+d) facilidade de uso
+
+Dizem por aí que não é possível se ater a mais do que uma variável de qualidade
+com facilidade. Nós vamos nos esforçar para manter o projeto sobre os quatro
+pilares acima.
 
 Possui estrutura MVC, com bibliotecas prontas de Helpers, Components e
-Behaviors.
+Behaviors. ORM eficiente e models integrados com paginação e relacionamentos.
+
+Na lista atual de funcionalidade (v0.0.6), encontram-se:
+
+- MVC
+- ORM
+- Conexão PDO, possibilitando conexão a virtualmente qualquer banco de dados
+- Helpers
+-- AjaxHelper
+-- FormHelper
+-- HtmlHelper
+-- PaginatorHelper
+- Components
+-- AuthComponent
+- Validação automática de dados de formulários
+- Sanitize
+- Segurança aprimorada contra principais exploits e ameaças
+
+Colaboradores são bem-vindos. O projeto é aberto e precisa de cérebros que o
+levem adiante. A estrutura do framework está bem organizada, possibilitando o
+crescimento para qualquer direção.
 _______________________________________________________________________________
-Como o AcidPHP pode agilizar o desenvolvimento de Aplicações Web?
+Conduta de desenvolvimento
+
+O código deve ser feito somente em inglês, com comentários em português ou
+inglês. Códigos em português, além de tornar dificil levar o framework a um
+nível mundial, dificulta a leitura. getText() é melhor que pegaTexto().
+
+Procure comentar seus arquivos, métodos, classes e blocos de código o máximo
+possível. Outros participarão do projeto e precisarão entender seu código.
+
+_______________________________________________________________________________
+Newbies: Como o Acid pode agilizar o desenvolvimento de Aplicações Web?
 
 Quantas vezes você já se viu na situação de ter que criar e/ou lidar com
 infinitos formulários HTML? Quantas vezes você já teve de criar
 entermináveis linhas de código SQL para acesso a uma base de dados?
 
-O próposito do AcidPHP é justamente ser a ferramenta que tira você do
+O próposito do Acid é justamente ser a ferramenta que tira você do
 cenário acima e o coloca em um ambiente onde você especifica o que
 quer e o framework executa todo o trabalho operacional para você.
 
 Um dos propósitos do framework é dar funcionalidades de geração automática de
-código através do console. 
-
+código através do console.
 
 -----------------
 Versões de testes
 
-Se você está rodando uma versão de testes, configure o banco de dados e crie
-as tabelas que estão presentes em app/config/sql/dump.sql.
+Se você está rodando uma versão de testes, configure o banco de dados no arquivo
+app/config/database.php (renomeie database.sample.php) e crie as tabelas que
+estão presentes em app/config/sql/dump.sql.

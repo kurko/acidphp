@@ -1,7 +1,12 @@
 <?php
 /**
- * Bem-vindo ao AcidPHP. Este é o arquivo principal do sistema, o centralizador
- * que chamará todos os outros necessários.
+ * PUBLIC/INDEX.PHP
+ *
+ * Este é o arquivo principal da aplicação, o inicializador do Core Engine.
+ *
+ * Neste arquivo são feitas verificações na URL para chamar a aplicação correta.
+ * É possível mais de uma aplicação, como app/, app2/, app3/ todas para um mesmo
+ * core/. Assim, este arquivo verifica qual foi requisitada e configura APP_DIR.
  *
  * @package Core
  * @name Index
@@ -21,7 +26,7 @@ define("APP_CONFIG_VARIABLES", CORE_DIR."config/app_variables.php");
 include(CORE_CONFIG_VARIABLES);
 
 /*
- * APP
+ * VERIFICAÇÃO DE APP REQUISITADA
  */
 if( empty($_GET["url"]) )
     $webRoot = $_SERVER["REQUEST_URI"];

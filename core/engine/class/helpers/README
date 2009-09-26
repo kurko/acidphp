@@ -1,0 +1,50 @@
+Helpers são classes que auxiliam o desenvolvimento de views.
+
+Por exemplo, AjaxHelper possibilita, com apenas uma linha de comando, gerar
+ínumeras linhas de código javascript que carrega dados de um arquivo externo
+automaticamente. Sim, *apenas uma linha*!
+
+Helpers facilitam o trabalho de quem desenvolve. HtmlHelper contém métodos para
+geração automática de links com a URL correta.
+
+FormHelper cria formulário automaticamente, possibilitando uma integração
+muito forte com os models, capacitando o framework a salvar seus dados no banco
+de dados com apenas um $this->Model->save($this->data) no seu controller.
+
+Estes são alguns exemplos. Quer criar um Helper?
+
+== Criando um Helper ==
+
+Basicamente, seu Helper deve começar com o código abaixo.
+
+<?php
+/**
+ * MeuHelper
+ *
+ * Este Helper faz isto, aquilo e aquilo outro.
+ *
+ * Também faz mais isto.
+ *
+ * @package Helpers
+ * @name MeuHelper
+ * @author Seu nome vai aqui <seuemailvaiaqui@paraoutrosfalaremcomvoce.com>
+ * @since v0.1, 19/07/2009
+ */
+class MeuHelper extends Helper
+{
+    function __construct($params=""){
+        parent::__construct($params);
+        // insira aqui a inicialização do seu helper
+    }
+
+    // aqui vai seus métodos
+}
+?>
+
+Pronto. Feito. Terminado. (até aqui).
+
+Lembre-se de criar uma descrição para o arquivo no início dele.
+
+Você deve especificar o carregamente de seu Helper dentro dos controllers com a
+propriedade $helper = array("MeuHelper"). Ele estará então acessível nos seus
+views, bastando usar $meu->ummetodoqualquer().
