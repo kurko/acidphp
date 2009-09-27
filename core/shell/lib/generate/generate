@@ -1,0 +1,27 @@
+<?php
+/**
+ *
+ * @package Shell
+ * @name generate
+ * @author Alexandre de Oliveira <chavedomundo@gmail.com>
+ * @since v0.0.6
+ */
+include THIS_TO_ROOT."core/shell/shell";
+class Generate extends Shell
+{
+
+    function  __construct() {
+        echo "Informe uma palavra: ";
+
+        $var_stdin = fopen('php://stdin', 'r');
+        $var_palavra = fgets($var_stdin, 100);
+
+        echo "A palavra digitada foi ". $var_palavra;
+        print "\n";
+
+    }
+
+}
+
+$generate = new Generate;
+?>

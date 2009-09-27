@@ -1,0 +1,41 @@
+#!/usr/bin/php
+<?php
+/**
+ *
+ * @package Shell
+ * @name generate
+ * @author Alexandre de Oliveira <chavedomundo@gmail.com>
+ * @since v0.0.6
+ */
+/*
+ * DIRECTORY ANALYSIS
+ *
+ * Is it script/script or just script?
+ */
+    $pwd = exec("pwd");
+    $currentDir = reset( array_reverse( explode("/", $pwd) ) );
+
+    /*
+     * Define path to the root.
+     */
+    if( $currentDir == "script" ){
+        define( "THIS_TO_ROOT", "../" );
+    } else {
+        define( "THIS_TO_ROOT", "" );
+    }
+
+/*
+ * ANALYSE AUTOMATIC SCRIPT LOADER
+ *
+ * If it's 'generate', calls core/shell/generate/generate automatically.
+ */
+    $scriptFilename = $_SERVER["SCRIPT_FILENAME"];
+    $scriptFilename = reset( array_reverse( explode("/", $scriptFilename) ) );
+
+/*
+ * AUTOMATIC LIB CALL
+ */
+include THIS_TO_ROOT."core/shell/lib/".$scriptFilename."/".$scriptFilename;
+
+exit (0);
+?>
