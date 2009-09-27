@@ -1,0 +1,21 @@
+<?php
+/**
+ *
+ * @package Shell
+ * @name generate
+ * @author Alexandre de Oliveira <chavedomundo@gmail.com>
+ * @since v0.0.6
+ */
+class Shell {
+
+    function hello(){
+        print "meuhello\n";
+    }
+
+    function inputText(){
+
+    }
+
+    
+}
+?>
