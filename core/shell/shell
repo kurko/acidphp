@@ -6,16 +6,144 @@
  * @author Alexandre de Oliveira <chavedomundo@gmail.com>
  * @since v0.0.6
  */
-class Shell {
+class Shell
+{
+    /*
+     * Arguments passed through command line
+     */
+    protected $argv;
 
-    function hello(){
+    /**
+     *
+     * @var array Options passed in the command line
+     */
+    protected $options;
+
+    protected $appDir;
+
+
+    function  __construct() {
+        /*
+         * Sets in the arguments passed together in the command line
+         */
+        global $argv;
+        $tempArg = $argv;
+        
+        /*
+         * Verifies arguments for -options
+         */
+        if( is_array($argv) ){
+            foreach( $tempArg as $index=>$value ){
+
+                if( strpos($value,"-") === 0 ){
+                    $this->options[] = $value;
+                }
+
+                else {
+                    $this->argv[] = $value;
+                }
+            }
+        }
+    }
+
+    /*
+     * INTERNAL CHECKING METHODS
+     */
+
+    function checkAppDir(){
+
+        if( empty($this->appDir) ):
+            /*
+             * Gets public/ and config/ default dirs to verify if the current
+             * directory is an app
+             */
+            $dir["public"] = reset( array_reverse( arrayCleanEmptyValues( explode("/", APP_PUBLIC_DIR) ) ) );
+            $dir["config"] = reset( array_reverse( arrayCleanEmptyValues( explode("/", APP_CONFIG_DIR) ) ) );
+
+            foreach( glob(THIS_PATH_TO_ROOT. "*", GLOB_ONLYDIR) as $filename){
+
+                if( is_dir($filename."/".$dir["public"])
+                    AND is_dir($filename."/".$dir["config"]) )
+                {
+                    $appDirs[] = basename($filename);
+                }
+            }
+
+            if( count($appDirs) > 1 ){
+
+                division();
+                fwrite(STDOUT, "There's more than one app dir. Which one do you want to use?");
+                breakLine();
+
+                // Display the choices
+                foreach ( $appDirs as $choice => $dir ) {
+                   fwrite(STDOUT, "\t[$choice]: $dir\n");
+                }
+                fwrite(STDOUT, "Enter the app dir correspondent number (enter 'q' to cancel and quit): ");
+
+                // Loop until they enter 'q' for Quit
+                do {
+                    // A character from STDIN, ignoring whitespace characters
+                    do {
+                        $selection = "".fgetc(STDIN);
+                    } while ( trim($selection) == '' );
+
+                    if ( array_key_exists($selection, $appDirs) ) {
+                        $selected = true;
+                    }
+
+                } while ( $selected = false );
+
+                if( $selection == "q" ){
+                    exitBreakLine();
+                } else if( !array_key_exists($selection, $appDirs) ){
+                    write("Ops.. Please, type an existent number below.");
+                    $this->checkAppDir();
+                } else {
+                    $this->appDir = $appDirs[$selection];
+                }
+                
+            } else {
+                $this->appDir = $appDirs[0];
+            }
+        endif;
+    }
+
+    /*
+     * SHELL COMMANDS
+     */
+    function cp($from, $destination, $options = ""){
+        exec(   "cp ". $from." ".
+                    $destination." ".
+                    $options,
+                $output,
+                $err
+                );
+        return $err;
+    }
+
+    /*
+     * AUXILIARY FUNCTIONALITIES
+     */
+
+
+    function inputText($lengthToRead = ""){
+
+        $var_stdin = fopen('php://stdin', 'r');
+        
+        if( !empty($lengthToRead) )
+            return fgets($var_stdin, 100);
+        else
+            return fgets($var_stdin, 100);
+    }
+
+    /*
+     * TESTING METHODS
+     */
+
+    function helloWorld(){
         print "meuhello\n";
     }
-
-    function inputText(){
-
-    }
-
     
 }
 ?>

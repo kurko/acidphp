@@ -65,6 +65,8 @@ define("CORE_COMPONENTS_DIR", CORE_CLASS_DIR."components/");
 /**
  * CORE SUPPORT FILES
  */
+    define("CORE_DEFAULT_MODEL", CORE_SUPPORT_DIR."models/Default.php");
+
     define("CORE_SCRIPTS_DIR", CORE_SUPPORT_DIR."script/");
     define("CORE_JS_DIR", CORE_SCRIPTS_DIR."js/");
 
