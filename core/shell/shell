@@ -112,13 +112,27 @@ class Shell
     /*
      * SHELL COMMANDS
      */
+
+    function createFile($content, $destination){
+
+        $handle = fopen($destination, "w+");
+        return fwrite($handle, $content);
+    }
+
     function cp($from, $destination, $options = ""){
+
+        $file = file_get_contents($from);
+        $handle = fopen($destination, "w+");
+        return fwrite($handle, $file);
+        /*
         exec(   "cp ". $from." ".
                     $destination." ".
                     $options,
                 $output,
                 $err
                 );
+         *
+         */
         return $err;
     }
 

@@ -67,6 +67,7 @@ class Generate extends Shell
         $arg = str_replace("\n", "", $arg);
 
         if( !empty($arg[2]) ){
+            $arg[2] = ucfirst($arg[2]);
             /*
              * Arguments positions
              *
@@ -86,11 +87,20 @@ class Generate extends Shell
                 /*
                  * Creates model file
                  */
-                $fileCreated = $this->appDir."/model/".$arg[2].".php";
-                $return = $this->cp(  CORE_DEFAULT_MODEL,
+                $fileCreated = $this->appDir."/model/".ucfirst($arg[2]).".php";
+
+                /*
+                 * Creates model file content
+                 */
+                $modelContent = file_get_contents(CORE_SUPPORT_DIR."models/model_file_header");
+                $modelContent.= "class " . ucfirst($arg[2]) . " extends AppModel\n{\n";
+                $modelContent.= file_get_contents(CORE_SUPPORT_DIR."models/model_class_header");
+                $modelContent.= file_get_contents(CORE_SUPPORT_DIR."models/model_file_footer");
+                
+                $return = $this->createFile(  $modelContent,
                             THIS_PATH_TO_ROOT.$fileCreated );
 
-                if($return == 0)
+                if($return == true)
                     write("\tcreated: ".$fileCreated);
                 else
                     write("\terror: ".$fileCreated);
@@ -98,6 +108,10 @@ class Generate extends Shell
             }
             
         }
+    }
+
+    function generateModeFile($content){
+        
     }
 
 }
