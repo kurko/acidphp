@@ -19,9 +19,9 @@
      * Define path to the root.
      */
     if( $currentDir == "script" ){
-        define( "THIS_TO_ROOT", "../" );
+        define( "THIS_PATH_TO_ROOT", "../" );
     } else {
-        define( "THIS_TO_ROOT", "" );
+        define( "THIS_PATH_TO_ROOT", "./" );
     }
 
 /*
@@ -33,9 +33,17 @@
     $scriptFilename = reset( array_reverse( explode("/", $scriptFilename) ) );
 
 /*
- * AUTOMATIC LIB CALL
+ * AUTOMATIC LIB/CLASSES LOADING
  */
-include THIS_TO_ROOT."core/shell/lib/".$scriptFilename."/".$scriptFilename;
+include THIS_PATH_TO_ROOT."core/config/core_variables.php";
+include THIS_PATH_TO_ROOT."core/config/app_variables.php";
+include THIS_PATH_TO_ROOT."core/shell/shell_functions.php";
+include THIS_PATH_TO_ROOT."core/shell/lib/".$scriptFilename."/".$scriptFilename;
 
-exit (0);
+/*
+ * Call this script's class automatically
+ */
+$$scriptFilename = new $scriptFilename;
+
+exitBreakLine();
 ?>

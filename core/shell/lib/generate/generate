@@ -6,22 +6,101 @@
  * @author Alexandre de Oliveira <chavedomundo@gmail.com>
  * @since v0.0.6
  */
-include THIS_TO_ROOT."core/shell/shell";
+include THIS_PATH_TO_ROOT."core/shell/shell";
+
 class Generate extends Shell
 {
 
     function  __construct() {
-        echo "Informe uma palavra: ";
+        /*
+         * Standard, calls Shell's construct
+         */
+        parent::__construct();
+        
+        /*
+         * Checks the current app for use
+         */
+        $this->checkAppDir();
 
-        $var_stdin = fopen('php://stdin', 'r');
-        $var_palavra = fgets($var_stdin, 100);
+        if( !empty($this->argv[1]) ){
+            /*
+             * ANALYSE ARGUMENTS
+             */
+            /*
+             * GENERATE MODEL
+             *
+             * Verifies arguments passed. Inquires for a Model name if it is
+             * not specified.
+             */
+            if( strtolower($this->argv[1]) == "model" ){
+                
+                /*
+                 * There are more arguments
+                 */
+                if( !empty($this->argv[2]) ){
+                    $this->generateModel( $this->argv );
+                }
+                /*
+                 * No model name given, show input asking for one
+                 */
+                else {
+                    print "Model name to generate not specified.";
+                    print " Specify one, please (no spaces): ";
+                    $this->generateModel( array_merge( $this->argv, array($this->inputText()) ) );
+                }
 
-        echo "A palavra digitada foi ". $var_palavra;
-        print "\n";
+            }
+        }
 
+        else {
+
+            echo "Informe uma palavra: ";
+
+
+            echo "A palavra digitada foi ". $var_palavra;
+            print "\n";
+        }
+
+    }
+
+    function generateModel($arg){
+        $arg = str_replace("\n", "", $arg);
+
+        if( !empty($arg[2]) ){
+            /*
+             * Arguments positions
+             *
+             * $arg[0] -> script/generate
+             * $arg[1] -> model
+             * $arg[2] -> "model name"
+             */
+
+            /*
+             * Only Model Name was specified
+             */
+            if( empty($arg[3]) ){
+                division();
+                write("Generating...");
+                breakLine();
+
+                /*
+                 * Creates model file
+                 */
+                $fileCreated = $this->appDir."/model/".$arg[2].".php";
+                $return = $this->cp(  CORE_DEFAULT_MODEL,
+                            THIS_PATH_TO_ROOT.$fileCreated );
+
+                if($return == 0)
+                    write("\tcreated: ".$fileCreated);
+                else
+                    write("\terror: ".$fileCreated);
+
+            }
+            
+        }
     }
 
 }
 
-$generate = new Generate;
+
 ?>
