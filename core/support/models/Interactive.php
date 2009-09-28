@@ -1,20 +1,18 @@
 <?php
 /**
- * MODEL NAME
+ * USUARIO
  *
- * Use this line to comment your Model
+ * Esta classe é um exemplo de um Model do Acid.
  *
- * @package Model
- * @name Your Model Name
- * @author Your name here <youremail@here.com>
- * @since v0.x.x xx/xx/xxxx
+ * Basicamente, configuramos qual é a tabela do banco de dados que este model
+ * vai cuidar, configuramos validações e também relacionamentos entre tabelas.
  */
 class Usuario extends AppModel {
 
     /*
      * Qual a tabela que este model acessará?
      */
-    public $useTable = ""; // specify one
+    public $useTable = "usuarios";
 
     /*
      * VALIDATION
