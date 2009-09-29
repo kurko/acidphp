@@ -28,14 +28,14 @@ include(CORE_CONFIG_VARIABLES);
 /*
  * VERIFICAÇÃO DE APP REQUISITADA
  */
+
 if( empty($_GET["url"]) )
     $webRoot = $_SERVER["REQUEST_URI"];
 else {
     if( is_string($_GET["url"]) ){
-        $url[0] = $_GET["url"];
+        $url = $_GET["url"];
     }
-
-    $webRoot = str_replace( implode("/", $url), "", $_SERVER["REQUEST_URI"] );
+    $webRoot = str_replace( $url, "", $_SERVER["REQUEST_URI"] );
 }
 
 define("WEBROOT", $webRoot);
