@@ -19,6 +19,13 @@ class Model
          */
          
         protected $useTable;
+
+        /**
+         * Contém os behaviors a serem usados por este model
+         *
+         * @var array
+         */
+        public $Behaviors;
         /**
          * Contém o id (ou mais de um em array) do campo objeto de ação.
          *
@@ -193,6 +200,11 @@ class Model
                 )
             );
          }
+
+       /**
+        * BEHAVIORS
+        */
+        $this->initBehavior();
 
     } // fim __construct()
 
@@ -1444,6 +1456,36 @@ class Model
                 $describedTables[ get_class($this) ][$info['Field']] = $info;
             }
         }
+    }
+    /**
+     * MÉTODOS DE BEHAVIORS
+     */
+
+    /**
+     * Anexa um behavior ao Model
+     * @param string $behaviorName O nome do behavior
+     * @param array [$config] As configurações do behavior
+     */
+    public function attach($behaviorName , $config = array()){
+        if (is_string($behaviorName) && is_array($config)){
+        $this->actsAs[$behaviorName] = $config;
+        }
+    }
+
+    /**
+     *
+     */
+
+    private function initBehavior(){
+        if (is_array($this->actsAs)){
+        foreach($this->actsAs as $behavior => $v):
+            if (is_string($behavior)){
+            $behaviors[] = $behavior;
+            echo 'a';
+            }
+        endforeach;
+        }
+        pr($behaviors);
     }
 }
 ?>
