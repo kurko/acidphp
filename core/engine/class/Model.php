@@ -1477,15 +1477,24 @@ class Model
      */
 
     private function initBehavior(){
+        include 'Behavior.php';
         if (is_array($this->actsAs)){
-        foreach($this->actsAs as $behavior => $v):
-            if (is_string($behavior)){
-            $behaviors[] = $behavior;
-            echo 'a';
-            }
+
+            // Pega o nome de todos os behaviors anexados
+
+            $behaviors = array_keys($this->actsAs);
+
+            // Instancia todos os behaviors anexados
+
+        foreach($behaviors as $behavior):
+            // Inclui
+            include_once CORE_BEHAVIOR_DIR . $behavior . '.php';
+            // Cria nome para instancia
+            $behaviorName = $behavior . BEHAVIOR_CLASSNAME_SUFFIX;
+            // Efetua instancia
+            $this->$behavior = new $behaviorName(&$this);
         endforeach;
         }
-        pr($behaviors);
     }
 }
 ?>
