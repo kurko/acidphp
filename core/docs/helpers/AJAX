@@ -71,3 +71,33 @@ Confira a seguir a lista de parâmetros de opções que você pode usar.
               (ex: alert('funcionou: '+response.responseText); ).
               response.responseText é igual ao que retornou do servidor.
 
+
+=== Usando um formulário Ajax ===
+
+Usar um formulário em Ajax é simples. Basta substituir seu formulário
+formHelper
+
+$form->create("nome_do_model_principal", $options);
+
+por
+
+$ajax->form("nome_do_model_principal", $options);
+
+Feito, agora seu formulário vai se comportar com Ajax.
+
+É importante ressaltar que é necessário especificar em $options a URL remota
+para onde irá a requisição Ajax. Um exemplo:
+
+$ajax->form("nome_do_model_principal", array("url" => "usuarios/salvar") );
+
+O formato da URL pode ser o padrão string controller/action, como acima, ou
+no formato array. Neste formato, para se requisitar o controller usuarios e o
+action salvar, usaríamos:
+
+...array("url" => array("controller" => "usuarios", "action" => "salvar") )
+
+O Acid contém um mecanismo que traduz a URL para você deixando no formato
+adequado para o navegador.
+
+
+

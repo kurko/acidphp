@@ -35,6 +35,10 @@ class Controller
          * @var string Endereço do root da aplicação
          */
         protected $webroot;
+        /*
+         * Variáveis que serão enviadas para o view
+         */
+        public $globalVars = array();
     /**
      * HELPERS/COMPONENTS/BEHAVIORS
      */
@@ -46,7 +50,12 @@ class Controller
          * @var array Helpers são objetos que auxiliam em tarefas de View, como
          * Formulários, Javascript, entre outros.
          */
-        protected $helpers = array("Html");
+        protected $helpers = array("Html","Form");
+        /**
+         *
+         * @var Object Todos os helpers carregados ficam aqui.
+         */
+        public $_loadedHelpers;
         /**
          * COMPONENTS
          */
@@ -443,6 +452,30 @@ class Controller
              * Chama a action requerida com seus respectivos argumentos.
              */
             call_user_func_array( array($this, $param['action'] ), $this->params["args"] );
+            
+            /**
+             * Se não foi renderizado ainda, renderiza automaticamente
+             */
+            if( !$this->isRendered AND $this->autoRender )
+                $this->render( $this->action );
+            else if( !$this->isRendered )
+                $this->render( false );
+            /**
+             * $this->afterFilter() é chamado sempre depois de qualquer ação
+             */
+            $this->afterFilter();
+        }
+    }
+
+    /*
+     * MÉTODOS EXTERNOS DE SUPORTE
+     */
+    /**
+     * Renderiza a view
+     *
+     * @param string $path Indica qual o view deve ser carregado.
+     */
+    protected function render($path = "", $includeType = ''){
 
 
             /**
@@ -478,41 +511,26 @@ class Controller
                             "data" => $this->data,
                             "models" => $this->usedModels,
                             "environment" => $this->environment,
+                            // todos helpers têm acesso aos demais helpers
+                            "_loadedHelpers" => &$this->_loadedHelpers,
                         );
                         $$valor = new $helperName($helperParams);
+
+                        /*
+                         * Salva a instância do Helper atual
+                         */
+                        $this->_loadedHelpers[$valor] = &$$valor;
                         /**
                          * Envia Helper para o view
                          */
                         $this->set( strtolower($valor), $$valor);
                     }
+
                 }
 
 
-            /**
-             * Se não foi renderizado ainda, renderiza automaticamente
-             */
-            if( !$this->isRendered AND $this->autoRender )
-                $this->render( $this->action );
-            else if( !$this->isRendered )
-                $this->render( false );
-            /**
-             * $this->afterFilter() é chamado sempre depois de qualquer ação
-             */
-            $this->afterFilter();
-        }
-    }
-
-    /*
-     * MÉTODOS EXTERNOS DE SUPORTE
-     */
-    /**
-     * Renderiza a view
-     *
-     * @param string $path Indica qual o view deve ser carregado.
-     */
-    protected function render($path = "", $includeType = ''){
-
         /**
+         *
          * DEFINE VARIÁVEIS PARA AS VIEWS
          *
          * Cria todas as variáveis para serem acessadas pela view diretamente.
@@ -634,6 +652,20 @@ class Controller
             AND strtolower($_SERVER["HTTP_X_REQUESTED_WITH"]) == "xmlhttprequest" );
         
         return false;
+    }
+
+    /**
+     * setAjax()
+     *
+     * Ajusta as configurações do action para ser do tipo ideal para retornos
+     * a requisições Ajax.
+     *
+     * @param int $debug Por padrão, desativa o debug
+     * @param string $layout Ajax por padrão
+     */
+    public function setAjax($debug = 0, $layout = "ajax"){
+        Config::write("debug", $debug);
+        $this->layout = $layout;
     }
 
     

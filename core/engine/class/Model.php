@@ -211,7 +211,7 @@ class Model
      * @param array $options
      * @return bool Se salvou ou não
      */
-    public function save(array $data, $options = array()){
+    public function save($data, $options = array()){
 
         if( is_array($data) ){
 
@@ -319,13 +319,6 @@ class Model
                                  * VERIFICA FORMATO $DATA PARA HASMANY
                                  */
                                 $dataItems = array_keys( $data[ get_class($this) ]);
-
-                                //foreach( $dataItems as $chave ){
-                                    //if( is_int($chave) ){
-
-                                        
-                                    //}
-                                //}
 
                             }
                             
@@ -443,18 +436,20 @@ class Model
                          * Ops.. Alguma tabela não existe
                          */
                         else {
-                            //showWarning("Alguma tabela especificada não existe");
+                            showError("Alguma tabela especificada não existe");
                         }
                     } // fim modelFather==true
 
                 } // fim criação de SQLs
-
                 /**
                  * SALVA SQL CRIADO
                  *
                  * Executa o SQL do model principal
                  *
                  * Gera lastInsertId ao final
+                 */
+                /*
+                 * Se há uma SQL gerado nesta execução
                  */
                 if( !empty($sql) AND count($sql) > 0 ){
                     foreach( $sql as $instrucao ){
@@ -477,7 +472,12 @@ class Model
 
                         //$modelsFilhos = array();
                     }
-                } else {
+                }
+                /*
+                 * Não há um SQL criado. $lastInsertId é o id do model em
+                 * $this->data.
+                 */
+                else {
                     $lastInsertId = $data[get_class($this)]["id"];
                 }
 
@@ -1239,9 +1239,11 @@ class Model
         $vE = array();
 
         if( is_array($data) ){
-
             foreach($data as $model=>$campos){
 
+                /*
+                 * Model principal
+                 */
                 if( $model == get_class($this)
                     AND !empty($validationRules) )
                 {
@@ -1265,15 +1267,7 @@ class Model
                              * Uma regra somente
                              */
                             if( array_key_exists("rule", $vR) ){
-
-                                //if( is_string($vR["rule"]) )
-                                    $allRules[] = $vR;
-                                //elseif( is_array($vR["rule"]) ){
-
-                                    //foreach( $vR["rule"] as $argRule=>$argValue ){
-                                        //$allRules[]["rule"] = $argRule;
-                                    //}
-                                //}
+                                $allRules[] = $vR;
                             }
                             /**
                              * Mais de uma regra
@@ -1282,8 +1276,7 @@ class Model
 
                                 foreach( $vR as $subRule ){
                                     if( array_key_exists("rule", $subRule) ){
-                                        //if( is_string($subRule) )
-                                            $allRules[] = $subRule;
+                                        $allRules[] = $subRule;
                                     }
                                 }
 
@@ -1393,11 +1386,19 @@ class Model
 
                 } // fim é o model atual
                 /**
+                 * Não há regras, tudo ok
+                 */
+                elseif( empty($validationRules) ) {
+                    /*
+                     * Não faz nada :)
+                     */
+                }
+                /**
                  * Validação Model-Relacional
                  */
                 else {
-
-                    if( !$this->{$model}->validate( array($model=> $campos), true ) ){
+                    if( !$this->{$model}->validate(
+                            array($model=> $campos), true ) ){
                         $vE[$model] = 0;
                     }
                 }

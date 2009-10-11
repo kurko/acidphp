@@ -93,6 +93,45 @@ class AjaxHelper extends Helper {
     }
 
     /**
+     * form()
+     *
+     * Faz com que <form> seja enviado via Ajax, se fazer reload da página.
+     *
+     * @param string $modelName Nome do Model principal
+     * @param array $options Opções Javascript para amostragem
+     * @return string Tag de formulário
+     */
+    function form($modelName, $options) {
+        /*
+         * Prepara para que o Ajax saiba que esta requisição é por um <form>
+         */
+        $options['form'] = true;
+
+        /*
+         * Opcional, caso o usuário digite a opções 'method' em vez de 'type'
+         */
+        if( !empty($options["method"]) )
+            $options["type"] = $options["method"];
+
+        /*
+         *
+         */
+        $uid = ( isset($options['id']) ) ? $options['id'] : $this->randomizeId();
+        $idString = 'id="'.$uid.'"';
+
+        $options['url'] = translateUrl($options['url']);
+
+        $conteudo = '<form action="'.$options['url'].'" '.$idString.' onsubmit=\''.$this->remoteFunction($options).'; return false;\' method="'.(isset($options['type']) ? $options['type'] : 'GET').'" class="formHelper">';
+
+        if( !empty($this->_loadedHelpers["Form"]) ){
+            $this->_loadedHelpers["Form"]->create($modelName, array(), true);
+        }
+
+        return $conteudo;
+    }
+
+
+    /**
      * escape()
      *
      * Por segurança, se necessário, filtra strings.
@@ -157,7 +196,6 @@ class AjaxHelper extends Helper {
      * @return array
      */
     private function setOptionsForAjax($options){
-
         /*
          * Ajusta variáveis das funções Ajax
          */

@@ -49,6 +49,11 @@ class Helper
      * @var string Versão desta classe
      */
     protected $version;
+    /**
+     *
+     * @var Array Array com objetos dos Helpers instanciados
+     */
+    public $_loadedHelpers;
 
 
     function __construct($params = ""){
@@ -72,8 +77,16 @@ class Helper
          * $this->environment
          */
         $this->environment = ( empty($params["environment"]) ) ? array() : $params["environment"];
+
+        /*
+         * Carrega todos os Helpers criados, tendo acesso a eles via referência
+         */
+        $this->_loadedHelpers = ( empty($params["_loadedHelpers"]) ) ? array() : $params["_loadedHelpers"];
     }
 
+    function setGlobalProperties($param = array()){
+
+    }
     /**
      * MÉTODOS DE INFORMAÇÕES SOBRE CLASSE
      */

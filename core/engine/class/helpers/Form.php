@@ -29,7 +29,7 @@ class FormHelper extends Helper
      *
      * @var string Nome do Model principal
      */
-    protected $modelName;
+    public $modelName;
     /**
      *
      * @var array Contém as propriedades do respectivo Model objeto
@@ -61,7 +61,7 @@ class FormHelper extends Helper
      * @param array $options Opções de configuração e amostragem do formulário
      * @return string Código HTML contendo a abertura do formulário <form>
      */
-    public function create($modelName, $options = ''){
+    public function create($modelName, $options = '', $isAjax = false){
         $conteudo = "";
 
 
@@ -76,12 +76,9 @@ class FormHelper extends Helper
         } else
             $this->formId = $options["formId"];
 
-        //$_SESSION = array();
-
         if( isset($_SESSION["Sys"]["addToThisData"][$this->formId]) ){
             $this->data = $_SESSION["Sys"]["addToThisData"][$this->formId];
         }
-        //pr($_SESSION);
         global $globalVars;
         /**
          * Login
@@ -124,7 +121,7 @@ class FormHelper extends Helper
          * Verifica se o usuário especificou um controller que deverá
          * ser usado para salvar as informações do formulário
          */
-        $controller = (empty($options["controller"])) ? $this->modelName : $options["controller"];
+        $controller = (empty($options["controller"])) ? strtolower($this->modelName) : $options["controller"];
         /**
          * Action
          *
@@ -136,7 +133,9 @@ class FormHelper extends Helper
          * ABRE FORMULÁRIO
          */
         $this->destionationUrl = WEBROOT.''.$controller.'/'.$action."/";
-        $conteudo.= '<form method="post" action="'.$this->destionationUrl.'" class="formHelper">';
+
+        if( !$isAjax )
+            $conteudo.= '<form method="post" action="'.$this->destionationUrl.'" class="formHelper">';
 
         /**
          * INPUTS HIDDEN
