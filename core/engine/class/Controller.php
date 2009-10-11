@@ -528,9 +528,7 @@ class Controller
                          */
                         $this->set( strtolower($valor), $$valor);
                     }
-
                 }
-
 
         /**
          *

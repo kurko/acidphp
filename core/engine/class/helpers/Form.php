@@ -62,7 +62,7 @@ class FormHelper extends Helper
      * @return string Código HTML contendo a abertura do formulário <form>
      */
     public function create($modelName, $options = '', $isAjax = false){
-        
+
         $conteudo = "";
         $otherOptions = "";
 
@@ -79,8 +79,6 @@ class FormHelper extends Helper
             $this->formId = $options["formId"];
             unset($options["formId"]);
         }
-
-        
 
         if( !empty($_SESSION["Sys"]["addToThisData"][$this->formId]) ){
             $this->data = $_SESSION["Sys"]["addToThisData"][$this->formId];
