@@ -90,15 +90,19 @@ if( is_file(APP_MODEL_DEFAULT) ){
     include(CORE_APP_MODEL_DEFAULT);
 }
 
+/*
+ * CONFIGURAÇÕES
+ */
+/*
+ * Carregas as rotas do sistema (controllers e actions padrão)
+ */
 include(APP_CONFIG_ROUTES);
+/*
+ * Configuração do núcleo do sistema
+ */
 include(APP_CONFIG_CORE);
-if( is_file(APP_CONFIG_DATABASE) )
-    include(APP_CONFIG_DATABASE);
-else
-    $useDB = false;
-
 /**
- * AJUSTA CONFIGURAÇÃO DE DEBUG
+ * Debug
  */
 if( Config::read("debug") > 1 ){
     error_reporting(E_ALL);
@@ -107,7 +111,24 @@ if( Config::read("debug") > 1 ){
 } else {
     error_reporting(0);
 }
+/*
+ * CONFIGURAÇÕES DE BANCO DE DADOS
+ */
+if( is_file(APP_CONFIG_DATABASE) )
+    include(APP_CONFIG_DATABASE);
+else {
+    $useDB = false;
+    if( Config::read("debug") > 0 ){
+        /**
+         * @todo - mostrar página adequada mostrando que nâo há um DB
+         * configurado.
+         */
+        trigger_error("Renomeie seu arquivo <em>app/config/database.sample.php</em> ".
+                      "para <em>database.php</em> e configure seu banco de dados.", E_USER_ERROR);
 
+    }
+
+}
 
 /**
  * Carrega todos os models

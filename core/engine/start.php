@@ -29,7 +29,6 @@ session_start();
  *
  * Conexão principal com o banco de dados
  */
-//$conn = "";
 if( !$useDB ){
     $dbConn = array();
     $conn = false;
