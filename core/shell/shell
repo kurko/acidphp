@@ -39,9 +39,10 @@ class Shell
                     $this->options[] = $value;
                 }
 
-                else {
-                    $this->argv[] = $value;
-                }
+                /*
+                 * Options are located at argv too.
+                 */
+                $this->argv[] = $value;
             }
         }
     }
@@ -113,9 +114,13 @@ class Shell
      * SHELL COMMANDS
      */
 
-    function createFile($content, $destination){
+    function createFile($content, $fileName, $dirToFile){
 
-        $handle = fopen($destination, "w+");
+        if( !is_dir($dirToFile) ){
+            mkdir($dirToFile);
+        }
+
+        $handle = fopen($dirToFile."/".$fileName, "w+");
         return fwrite($handle, $content);
     }
 

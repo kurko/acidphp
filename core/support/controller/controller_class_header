@@ -1,0 +1,13 @@
+    /*
+     * Specify the models meant to be loaded in this controller
+     */
+    //var $uses = array("Users","Comments","Profiles");
+
+    /**
+     * index()
+     *
+     * Your comment here
+     */
+    function index(){
+
+    }

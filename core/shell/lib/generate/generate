@@ -22,9 +22,21 @@ class Generate extends Shell
          */
         $this->checkAppDir();
 
+        //var_dump($this->options);
+        //var_dump($this->argv);
+
+        /*
+         * There are arguments.
+         */
         if( !empty($this->argv[1]) ){
             /*
              * ANALYSE ARGUMENTS
+             */
+            /*
+             *
+             * MODEL
+             *
+             *
              */
             /*
              * GENERATE MODEL
@@ -50,14 +62,66 @@ class Generate extends Shell
                 }
 
             }
+            /*
+             *
+             * CONTROLLERS
+             *
+             *
+             */
+            /*
+             * GENERATE CONTROLLER
+             *
+             * Verifies arguments passed. Inquires for a Controller name if it
+             * is not specified.
+             */
+            else if( strtolower($this->argv[1]) == "controller" ){
+
+                /*
+                 * There are more arguments
+                 */
+                if( !empty($this->argv[2]) ){
+                    $this->generateController( $this->argv );
+                }
+                /*
+                 * No controller name given, show input asking for one
+                 */
+                else {
+                    print "Controller name to generate not specified. ";
+                    print "Specify one, please (no spaces): ";
+                    $this->generateController( array_merge( $this->argv, array($this->inputText()) ) );
+                }
+            }
+
+            /*
+             * --HELP
+             *
+             * The user requires the help.
+             */
+            else if( in_array( strtolower($this->argv[1]) , array("--help", "-h") ) ){
+
+                print "The Generate script allows you to set up an application ".
+                      "within seconds. It creates the most important files ".
+                      "automatically, doing the dirty (and tedious) job for you.";
+                breakLine(2);
+                print "usage: generate model <model name> <options>";
+                breakLine();
+                print "       generate controller <controller name> <options>";
+                breakLine(2);
+                print "Options:";
+                breakLine();
+                print "\t-h, --help    Shows help";
+                breakLine();
+            }
+
         }
 
         else {
-
-            echo "Informe uma palavra: ";
-
-
-            echo "A palavra digitada foi ". $var_palavra;
+            division();
+            print "What should I do? You haven't specified any request.";
+            breakLine(2);
+            print "If you don't know what to specify, type the --help argument.";
+            breakLine();
+            print "e.g. php generate --help";
             print "\n";
         }
 
@@ -87,7 +151,8 @@ class Generate extends Shell
                 /*
                  * Creates model file
                  */
-                $fileCreated = $this->appDir."/model/".ucfirst($arg[2]).".php";
+                $fileName = ucfirst($arg[2]).".php";
+                $fileDir = $this->appDir."/model";
 
                 /*
                  * Creates model file content
@@ -97,21 +162,115 @@ class Generate extends Shell
                 $modelContent.= file_get_contents(CORE_SUPPORT_DIR."models/model_class_header");
                 $modelContent.= file_get_contents(CORE_SUPPORT_DIR."models/model_file_footer");
                 
-                $return = $this->createFile(  $modelContent,
-                            THIS_PATH_TO_ROOT.$fileCreated );
+                $return = $this->createFile(
+                            $modelContent,
+                            $fileName,
+                            THIS_PATH_TO_ROOT.$fileDir );
 
                 if($return == true)
-                    write("\tcreated: ".$fileCreated);
+                    write("\tcreated: ".$fileDir."/".$fileName);
                 else
-                    write("\terror: ".$fileCreated);
+                    write("\terror: ".$fileDir."/".$fileName);
 
             }
             
         }
     }
 
-    function generateModeFile($content){
-        
+    /*
+     *
+     * CONTROLLER
+     *
+     */
+
+    function generateController($arg){
+        $arg = str_replace("\n", "", $arg);
+
+        if( !empty($arg[2]) ){
+            $arg[2] = trim( strtolower($arg[2]) );
+            /*
+             * Arguments positions
+             *
+             * $arg[0] -> script/generate
+             * $arg[1] -> model
+             * $arg[2] -> "model name"
+             */
+
+            /*
+             * Only Controller Name was specified
+             */
+            if( empty($arg[3]) ){
+                division();
+                write("Generating Controller...");
+                breakLine();
+
+                /*
+                 * FILE CONTENTS
+                 */
+                /*
+                 * app/controller/$controller_controller.php
+                 */
+                $fileContent[0] = file_get_contents(CORE_SUPPORT_DIR."controller/controller_file_header");
+                $fileContent[0].= "class " . ucfirst($arg[2])."Controller extends AppController\n{\n";
+                $fileContent[0].= file_get_contents(CORE_SUPPORT_DIR."controller/controller_class_header");
+                $fileContent[0].= file_get_contents(CORE_SUPPORT_DIR."controller/controller_file_footer");
+
+                /*
+                 * app/controller/$controller_controller.php
+                 */
+                $fileContent[1] = file_get_contents(CORE_SUPPORT_DIR."view/default_view.php");
+
+                /*
+                 * Files to create
+                 */
+                $filesToCreate = array(
+                    array(
+                        "fileName" => $arg[2]."_controller.php",
+                        "dirName" => $this->appDir."/controller",
+                        "fileContent" => $fileContent[0]
+                    ),
+                    array(
+                        "fileName" => "index.php",
+                        "dirName" => $this->appDir."/view/".$arg[2],
+                        "fileContent" => $fileContent[1]
+                    ),
+                );
+
+                /*
+                 * Creates each file and records a successful message.
+                 */
+                foreach( $filesToCreate as $key=>$value ){
+                    $return = $this->createFile( $value["fileContent"],
+                                $value["fileName"],
+                                THIS_PATH_TO_ROOT.$value["dirName"] );
+
+                    if($return == true){
+                        $creationStatus[] = "created: ".$value["dirName"]."/".$value["fileName"];
+                        $creationSuccess[] = 1;
+                    } else {
+                        $creationStatus[] = "error:   ".$value["dirName"]."/".$value["fileName"];
+                        $creationError[] = 1;
+                    }
+                }
+
+                /*
+                 *
+                 */
+                if( !empty($creationStatus) ){
+                    foreach($creationStatus as $status){
+                        write("\t".$status);
+                    }
+                }
+
+                else {
+                    write("\tSome error ocurred, none of the files were created. ");
+                    write("Indeed, I couldn't even try to create any.");
+                }
+
+
+            }
+
+        }
     }
 
 }
