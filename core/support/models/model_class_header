@@ -6,26 +6,30 @@
     /*
      * VALIDATION
      */
+    /*
     var $validation = array(
         "field" => array( // change "field" value to a field name you wish
             "rule" => "notEmpty", // which rule is set to this field
             "message" => "This field cannot be empty",
         )
     );
+    */
 
     /*
      * Model relationships
      *
      * Erase $hasMany and $hasOne if this model presents no relationship
      */
+    /*
     var $hasMany = array(
-        'model' => array(
+        'model_name' => array(
             'foreignKey' => 'modelname_id',
         ),
     );
 
     var $hasOne = array(
-        'mode_name' => array(
+        'model_name' => array(
             'foreignKey' => 'modelname_id',
         ),
     );
+    */
