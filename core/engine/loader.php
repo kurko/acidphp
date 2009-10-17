@@ -51,6 +51,7 @@ include(CORE_CLASS_DIR."Connection.php");
 include(CORE_CLASS_DIR."Engine.php");
 include(CORE_CLASS_DIR."Controller.php");
 include(CORE_CLASS_DIR."Model.php");
+include(CORE_CLASS_DIR."Behavior.php");
 
 
 include(CORE_CLASS_DIR."DataAbstractor.php");

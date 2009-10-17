@@ -39,6 +39,8 @@ define("APP_CONTROLLER_DIR", APP_DIR."controller/");
 define("APP_MODEL_DIR", APP_DIR."model/");
 define("APP_VIEW_DIR", APP_DIR.VIEW_DIR);
 
+define("APP_BEHAVIOR_DIR", APP_MODEL_DIR."behaviors/");
+
 /**
  * Principais caminhos dentro de app/
  */
