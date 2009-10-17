@@ -60,11 +60,16 @@ define("APP_LAYOUT_DIR", APP_VIEW_DIR.LAYOUT_DIR);
 /**
  * APP CORE CLIENT-SIDE FILES
  */
-define("APP_CORE_DIR", APP_DIR."public/");
-define("APP_IMAGES_DIR", APP_REQUESTED."images/");
-define("APP_CSS_DIR", APP_REQUESTED."css/");
-define("APP_JS_DIR", APP_REQUESTED."js/");
-define("APP_FLASH_DIR", APP_REQUESTED."flash/");
+    define("APP_CORE_DIR", APP_DIR."public/");
+    define("APP_IMAGES_DIR", APP_CORE_DIR."images/");
+    define("APP_CSS_DIR", APP_CORE_DIR."css/");
+    define("APP_JS_DIR", APP_CORE_DIR."js/");
+    define("APP_FLASH_DIR", APP_CORE_DIR."flash/");
+
+    /*
+     * Uploads
+     */
+    define("UPLOADS_PUBLIC_DIR", APP_CORE_DIR."upload/"); // public upload
 
 /**
  * APP SUPPORT FILES

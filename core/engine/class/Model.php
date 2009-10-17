@@ -92,6 +92,11 @@ class Model
 
         public $params;
         
+        /**
+         *
+         * @var array Contém todos os dados organizados provenientes de forms
+         */
+        public $data;
 
 
     /**
@@ -121,7 +126,14 @@ class Model
         /**
          * CONFIGURAÇÃO DE AMBIENTE
          */
-        $this->params = &$params["params"];
+             /*
+              * params
+              */
+            $this->params = &$params["params"];
+            /*
+             * $data
+             */
+            //$this->data = &$params["data"];
 
         /**
          * CONEXÃO

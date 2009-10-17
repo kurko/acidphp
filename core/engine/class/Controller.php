@@ -369,6 +369,7 @@ class Controller
                     'modelName' => $className,
                     'recursive' => $this->recursive,
                     'params' => &$this->params,
+                    "data" => &$this->data,
                 );
 
                 if( !class_exists($className) ){
