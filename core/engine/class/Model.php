@@ -19,7 +19,11 @@ class Model
          */
          
         protected $useTable;
-
+        /**
+         *
+         * @var <string> Contém o nome do model atual
+         */
+        protected $modelName;
         /**
          * Contém os behaviors a serem usados por este model
          *
@@ -90,7 +94,9 @@ class Model
      */
 
     function  __construct($params) {
-
+        // Seta o nome deste model
+        $this->modelName = get_class($this);
+        
         /**
          * RECURSIVE
          */
@@ -1472,8 +1478,20 @@ class Model
         }
     }
 
+    public function detach($behaviorName){
+        if (isset($this->actsAs[$behaviorName]))
+             unset($this->actsAs[$behaviorName]);
+    }
     /**
-     *
+     * Alias para attach
+     * 
+     */
+    public function loadBehavior($behaviorName , $config = array()){
+        $this->attach($behaviorName, $config);
+    }
+
+    /**
+     * Compoe todos os behaviors em objetos
      */
 
     private function initBehavior(){
