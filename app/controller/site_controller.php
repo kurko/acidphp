@@ -8,13 +8,18 @@
 class SiteController extends AppController
 {
 
-    var $uses = array("Usuario"); // change this to whatever models you have
+    var $uses = array('Categoria'); // change this to whatever models you have
     var $siteTitle = "AcidPHP";
+    var $components = array();
 
     function index(){
+        $this->autoRender = false;
         $this->pageTitle = "Página principal";
 
     }
 
+    function save(){
+
+    }
 }
 ?>
