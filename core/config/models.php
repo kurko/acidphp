@@ -22,5 +22,5 @@ Config::write("modelPasswordFields", array(
  *
  * Se nenhum limit for especificado, limit é igual ao número a seguir.
  */
-Config::write("modelAutoLimit", 50);
+Config::write("modelAutoLimit", "50");
 ?>

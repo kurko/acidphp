@@ -43,7 +43,7 @@ class Engine
     public $conn;
     public $dbTables;
 
-    function __construct($params = ""){
+    public function __construct($params = ""){
 
         /**
          * Carrega os routes do sistema
@@ -126,7 +126,7 @@ class Engine
      * @param array $params Configurações adicionais
      *      - 'conn' [opcional] : objeto conexão
      */
-    protected function checkTables($params = ""){
+    public function checkTables($params = ""){
         /**
          * Admite uma conexão (configurada ou padrão)
          */
@@ -152,7 +152,7 @@ class Engine
      *
      * @param array $url URL atual para definir qual controller carregar
      */
-    private function defineRoutes($url){
+    public function defineRoutes($url){
 
         /**
          * APP_DIR e Controller
@@ -209,8 +209,6 @@ class Engine
          * Finaliza tratamento de argumentos
          */
         $this->arguments = $url;
-
     }
 }
-
 ?>

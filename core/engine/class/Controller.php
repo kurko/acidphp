@@ -281,7 +281,7 @@ class Controller
          * VARIÁVEIS DE AMBIENTE
          */
         /**
-         * Variáveis de ambiente são ajustadas no método controller::trigger();
+         * Variáveis de ambiente são ajustadas no método controller::_trigger();
          */
 
         /**
@@ -298,24 +298,7 @@ class Controller
             foreach($this->uses as $valor){
                 $className = $valor;
                 
-                /**
-                 * Monta parâmetros para criar os models
-                 */
-                 //pr($this->engine->dbTables);
-                $modelParams = array(
-                    'conn' => $this->engine->conn,
-                    'dbTables' => $this->engine->dbTables,
-                    'modelName' => $className,
-                    'recursive' => $this->recursive,
-                    'params' => &$this->params,
-                );
-
-                if( !class_exists($className) ){
-                    include(APP_MODEL_DIR.$className.".php");
-                }
-                $this->{$className} = new $className($modelParams);
-                $this->usedModels[$className] = &$this->{$className};
-
+                $this->loadModel($className);
             }
         }
 
@@ -330,10 +313,10 @@ class Controller
          * Cria helpers solicitados
          */
             /**
-             * Helpers são criados no método TRIGGER(), após os actions
+             * Helpers são criados no método _TRIGGER(), após os actions
              * terem sido rodados.
              *
-             * Ver Controller::trigger()
+             * Ver Controller::_trigger()
              */
 
         /**
@@ -383,88 +366,47 @@ class Controller
          * Começa execução de métodos necessários.
          */
         /**
-         * trigger() é responsável por engatilhar todos os métodos
+         * _trigger() é responsável por engatilhar todos os métodos
          * automáticos a serem rodados, como beforeFilter, render, etc.
          */
-        $this->trigger( array( 'action' => $this->action ) );
+        $this->_trigger( array( 'action' => $this->action ) );
     }
 
-    /**
-     * MÉTODOS INTERNOS DE SUPORTE
+    /*
+     * MÉTODOS DE SUPORTE
      *
      * Todos os métodos que dão suporte ao funcionamento do sistema.
-     *      ex.: render, set, redirect, beforeFilter, afterFilter, trigger, ect
+     *      ex.: render, set, redirect, beforeFilter, afterFilter, _trigger, ect
+     */
+    /*
+     * CARREGAMENTO
      */
     /**
-     * TRIGGER()
-     *
-     * É o responsável por chamar as funções:
-     *      1. beforeFilter
-     *      2. o método do action
-     *      3. render
-     *      4. afterFilter
-     *
-     * @method TRIGGER()
-     * @param array $param
-     *      'ation': qual método deve ser chamado
+     * loadModel()
+     * 
+     * Carrega o model especificado.
+     * 
+     * @param string $modelName
+     * @return bool
      */
-    private function trigger($param){
-        /**
-         * Se não há um action especificado, então assume-se index()
-         */
-        if( empty( $param['action'] ) ){
-            $param['action'] = 'index';
-        }
+    public function loadModel($modelName){
 
         /**
-         * MÉTODO EXISTE?
-         *
-         * Se método não existe, pára tudo. Se existe, continua.
+         * Monta parâmetros para criar os models
          */
-        if( method_exists($this, $param['action']) ){
-            $actionExists = true;
-        } else {
-            $actionExists = false;
-        }
-        if( Config::read("debug") > 0 )
-            $actionExists = true;
+        $modelParams = array(
+            'conn' => $this->engine->conn,
+            'dbTables' => $this->engine->dbTables,
+            'modelName' => $modelName,
+            'recursive' => $this->recursive,
+            'params' => &$this->params,
+        );
 
-        /**
-         * Se o action existe
-         */
-        if( $actionExists ){
-            /**
-             * $this->beforeFilter() é chamado sempre antes de qualquer ação
-             */
-            $this->beforeFilter();
-            /**
-             * Components->afterBeforeFilter()
-             *
-             * Se há afterBeforeFilter() no component, carrega
-             */
-            foreach( $this->loadedComponents as $component ){
-                if( method_exists($this->$component, "afterBeforeFilter") ){
-                    $this->$component->afterBeforeFilter();
-                }
-            }
+        include_once(APP_MODEL_DIR.$modelName.".php");
 
-            /**
-             * Chama a action requerida com seus respectivos argumentos.
-             */
-            call_user_func_array( array($this, $param['action'] ), $this->params["args"] );
-            
-            /**
-             * Se não foi renderizado ainda, renderiza automaticamente
-             */
-            if( !$this->isRendered AND $this->autoRender )
-                $this->render( $this->action );
-            else if( !$this->isRendered )
-                $this->render( false );
-            /**
-             * $this->afterFilter() é chamado sempre depois de qualquer ação
-             */
-            $this->afterFilter();
-        }
+        $this->{$modelName} = new $modelName($modelParams);
+        $this->usedModels[$modelName] = &$this->{$modelName};
+        return true;
     }
 
     /*
@@ -475,7 +417,7 @@ class Controller
      *
      * @param string $path Indica qual o view deve ser carregado.
      */
-    protected function render($path = "", $includeType = ''){
+    public function render($path = "", $includeType = ''){
 
 
             /**
@@ -583,16 +525,18 @@ class Controller
      * @param string $varName Nome da variável com valor dentro do view
      * @param mixed $varValue Valor da variável a ser passada para o view
      */
-    protected function set($varName, $varValue){
+    public function set($varName, $varValue){
         $this->globalVars[$varName] = $varValue;
     }
 
     /**
+     * redirect()
+     * 
      * @todo - implementar
      *
      * @param <type> $url
      */
-    protected function redirect($url){
+    public function redirect($url){
         if( is_array($url) ){
             if( !empty($url["controller"]) ){
                 echo $this->webroot.$url["controller"].$url["action"];
@@ -612,29 +556,16 @@ class Controller
      * beforeFilter, afterFilter
      */
 
-    protected function beforeFilter(){
+    public function beforeFilter(){
 
         return true;
     }
 
 
-    protected function afterFilter(){
+    public function afterFilter(){
 
         return true;
     }
-
-    /**
-     * Tenta chamar alguma action não declarada de forma automática.
-     *
-     * @param string $function Que método foi chamado.
-     * @param string $args Que argumentos foram passados.
-     */
-    private function __call($function, $args){
-
-        //pr($args);
-
-    }
-
 
     /*
      * MÉTODOS DE SUPORTE DE AMBIENTE
@@ -668,7 +599,96 @@ class Controller
         $this->layout = $layout;
     }
 
-    
+    /*
+     * MÉTODOS INTERNOS DE SUPORTE
+     */
+    /**
+     * _TRIGGER()
+     *
+     * É o responsável por chamar as funções:
+     *      1. beforeFilter
+     *      2. o método do action
+     *      3. render
+     *      4. afterFilter
+     *
+     * @method _TRIGGER()
+     * @param array $param
+     *      'ation': qual método deve ser chamado
+     */
+    public function _trigger($param){
+        /**
+         * Se não há um action especificado, então assume-se index()
+         */
+        if( empty( $param['action'] ) ){
+            $param['action'] = 'index';
+        }
+
+        /**
+         * MÉTODO EXISTE?
+         *
+         * Se método não existe, pára tudo. Se existe, continua.
+         */
+        if( method_exists($this, $param['action']) ){
+            $actionExists = true;
+        } else {
+            $actionExists = false;
+        }
+        if( Config::read("debug") > 0 )
+            $actionExists = true;
+
+        /**
+         * Se o action existe
+         */
+        if( $actionExists ){
+            /**
+             * $this->beforeFilter() é chamado sempre antes de qualquer ação
+             */
+            $this->beforeFilter();
+            /**
+             * Components->afterBeforeFilter()
+             *
+             * Se há afterBeforeFilter() no component, carrega
+             */
+            foreach( $this->loadedComponents as $component ){
+                if( method_exists($this->$component, "afterBeforeFilter") ){
+                    $this->$component->afterBeforeFilter();
+                }
+            }
+
+            /**
+             * Chama a action requerida com seus respectivos argumentos.
+             */
+            call_user_func_array( array($this, $param['action'] ), $this->params["args"] );
+
+            /**
+             * Se não foi renderizado ainda, renderiza automaticamente
+             */
+            if( !$this->isRendered AND $this->autoRender )
+                $this->render( $this->action );
+            else if( !$this->isRendered )
+                $this->render( false );
+            /**
+             * $this->afterFilter() é chamado sempre depois de qualquer ação
+             */
+            $this->afterFilter();
+        }
+    }
+
+    /*
+     * MÉTODOS INTERNOS DO CONTROLLER
+     */
+    /**
+     * Tenta chamar alguma action não declarada de forma automática.
+     *
+     * @todo - implementar
+     *
+     * @param string $function Que método foi chamado.
+     * @param string $args Que argumentos foram passados.
+     */
+    public function __call($function, $args){
+        return false;
+    }
+
 }
 
 ?>

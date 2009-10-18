@@ -74,7 +74,7 @@ function showError($str){
  */
 function showLoadingTime($totalTime){
     if( Config::read("debug") > 0 ){
-        echo number_format($totalTime, 3, '.', '');
+        echo number_format($totalTime, 4, '.', '');
     }
 }
 

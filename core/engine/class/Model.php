@@ -70,7 +70,6 @@ class Model
         public $validation = array();
 
         protected $params;
-        
 
 
     /**
@@ -81,7 +80,6 @@ class Model
      * @param array $params
      *      "conn" object : conexão com o db;
      */
-
     function  __construct($params) {
 
         /**
@@ -140,6 +138,7 @@ class Model
             foreach( $this->hasOne as $model=>$propriedades ){
 
                 if( $params["currentRecursive"] <= $params["recursive"] ){
+                    include_once(APP_MODEL_DIR.$model.".php");
                     $this->{$model} = new $model($params);
                     $this->modelsLoaded[] = $model;
                 }
@@ -149,10 +148,10 @@ class Model
         /**
          * hasMany
          */
-         //pr($this->hasMany);
         if( !empty($this->hasMany) ){
             foreach( $this->hasMany as $model=>$propriedades ){
                 if( $params["currentRecursive"] <= $params["recursive"] ){
+                    include_once(APP_MODEL_DIR.$model.".php");
                     $this->{$model} = new $model($params);
                     $this->modelsLoaded[] = $model;
                 }
@@ -165,6 +164,7 @@ class Model
         if( !empty($this->belongsTo) ){
             foreach( $this->belongsTo as $model=>$propriedades ){
                 if( $params["currentRecursive"] <= $params["recursive"] ){
+                    include_once(APP_MODEL_DIR.$model.".php");
                     $this->{$model} = new $model($params);
                     $this->modelsLoaded[] = $model;
                 }
@@ -226,7 +226,6 @@ class Model
 
             unset( $_SESSION["Sys"]["FormHelper"]["notValidated"] );
 
-//pr($data);
             /**
              * VALIDATE
              */
@@ -663,7 +662,6 @@ class Model
                     }
                 }
                 
-                //echo "é";
             }
 
             /**

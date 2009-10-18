@@ -8,9 +8,11 @@
  * @author Alexandre de Oliveira <chavedomundo@gmail.com>
  * @since v0.1
  */
-
-
-
+/*
+ * Xdebug Notes:
+ *
+ *      - include mais rápido que include_once aqui.
+ */
 /**
  * CLASSES CRÍTICAS
  *
@@ -129,14 +131,4 @@ else {
     }
 
 }
-
-/**
- * Carrega todos os models
- */
-foreach (glob(APP_MODEL_DIR."*.php") as $filename) {
-   include($filename);
-}
-
-
-
 ?>

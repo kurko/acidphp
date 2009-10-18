@@ -14,7 +14,6 @@
  *
  * Inicializa Timer para saber quanto tempo o sistema levou para carregar
  */
-$startTime = microtime(true);
 
 /**
  * SESSION
@@ -61,9 +60,9 @@ $globalVars = array();
 /**
  * CARREGA O CONTROLLER NECESSÁRIO
  */
-if( is_file(APP_CONTROLLER_DIR.$engine->callController."_controller.php") ){
+//if( is_file(APP_CONTROLLER_DIR.$engine->callController."_controller.php") ){
     include(APP_CONTROLLER_DIR.$engine->callController."_controller.php");
-}
+//}
 
 /**
  * MVC
@@ -95,5 +94,8 @@ showLoadingTime($endTime - $startTime);
  */
 if( Config::read("debug") >= 1 )
     debugSQLs( Config::read("SQLs") );
+
+//echo $endTime-$startTime;
+
 
 ?>
