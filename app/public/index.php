@@ -1,5 +1,6 @@
 <?php
 /**
+ *
  * PUBLIC/INDEX.PHP
  *
  * Este é o arquivo principal da aplicação, o inicializador do Core Engine.
@@ -17,6 +18,9 @@
 /*
  * Define o caminho até o diretório raiz
  */
+
+
+$startTime = microtime(true);
 define("THIS_PATH_TO_ROOT", "../../");
 
 define("CORE_DIR", THIS_PATH_TO_ROOT."core/");
@@ -54,15 +58,6 @@ if( !empty($webAppRoot) AND is_dir(THIS_PATH_TO_ROOT.$webAppRoot[0]) ){
 else {
     define("APP_DIR", THIS_PATH_TO_ROOT ."app/");
 }
-
-/*
- * app/ padrão
- */
-if (!defined('APP_DIR')) {
-    define("APP_DIR", THIS_PATH_TO_ROOT ."app/");
-}
-
-
 /*
  * APP_VARIABLES
  *
@@ -70,8 +65,20 @@ if (!defined('APP_DIR')) {
  */
 include(APP_CONFIG_VARIABLES);
 
+/*
+ * GERA UM WEBROOT ABSOLUTO
+ *
+ * Este WEBROOT contém sempre o app atual. Assim, é possível salvar imagens com
+ * path absoluto.
+ */
+if( !empty($webAppRoot[0])
+    AND $webAppRoot[0] == str_replace("/","", WEBROOT) )
+{
+    define("WEBROOT_ABSOLUTE", WEBROOT."app/");
+} else {
+    define("WEBROOT_ABSOLUTE", WEBROOT);
+}
 
 include(CORE_LOADER);
 include(ENGINE_START);
-
 ?>

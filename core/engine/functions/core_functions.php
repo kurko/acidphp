@@ -49,9 +49,8 @@ function isDebugMode($level = 2){
  * @param string $str Aviso a ser mostrado
  */
 function showWarning($str){
-    var_dump($str);
-    if( Config::read("debug") > 0 ){
-        //trigger_error( $str , E_USER_WARNING);
+    if( Config::read("debug") >= 3 ){
+        trigger_error( $str , E_USER_WARNING);
     }
 }
 

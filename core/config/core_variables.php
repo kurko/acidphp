@@ -62,6 +62,9 @@ define("CORE_HELPERS_DIR", CORE_CLASS_DIR."helpers/");
 define("COMPONENT_CLASSNAME_SUFFIX", "Component");
 define("CORE_COMPONENTS_DIR", CORE_CLASS_DIR."components/");
 
+define("BEHAVIOR_CLASSNAME_SUFFIX", "Behavior");
+define("CORE_BEHAVIOR_DIR", CORE_CLASS_DIR."behaviors/");
+
 /**
  * CORE SUPPORT FILES
  */

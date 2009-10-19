@@ -81,7 +81,7 @@ class HtmlHelper extends Helper
                 }
             }
 
-            $conteudo.= '<img src="'.translateUrl($url, true).'" '.$inlineProperties.' />';
+            $conteudo.= '<img src="'.translateUrl(APP_IMAGES_DIR.$url, true).'" '.$inlineProperties.' />';
 
             return $conteudo;
         } else {
@@ -98,7 +98,7 @@ class HtmlHelper extends Helper
      * @return string Código HTML para carregar o arquivo CSS especificado
      */
     public function css($path){
-        $cssLink = '<link rel="stylesheet" href="'. WEBROOT.APP_CSS_DIR.$path .'.css" />';
+        $cssLink = '<link rel="stylesheet" href="'. WEBROOT . APP_CSS_DIR . $path .'.css" />';
         return $cssLink;
     }
 

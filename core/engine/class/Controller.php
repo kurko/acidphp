@@ -188,19 +188,80 @@ class Controller
         }
 
         $this->params["url"] = $this->engine->webroot.$this->params["controller"]."/".$this->params["action"]."/".implode("/", $args ) ;
-        /**
+        /*
          *
          * $THIS->DATA
          *
-         * Ajusta $_POST, inserindo os dados organizadamente em $this->data
+         * Ajusta $_POST e $_FILES, inserindo os dados organizadamente em
+         * $this->data.
          */
-        if( !empty($_POST) ){
-            $this->params["post"] = $_POST;
-            if( !empty($_POST["data"]) ){
-                $this->data = $_POST["data"];
+            /*
+             * $_FILES
+             *
+             * Guarda tudo de $_FILES em $this->params["files"] e $this->data
+             */
+            if( !empty($_FILES) ){
+                $formattedFilesData = array();
+                if( !empty($_FILES["data"]) ){
+                    $data = $_FILES["data"];
+
+                    /*
+                     * O resultado que vem em $_FILES são bagunçados. O código
+                     * abaixo faz um loop por este comando e organiza as
+                     * informações.
+                     */
+                    /*
+                     * Loop pelos tipos de dados do arquivo
+                     */
+                    foreach( $data as $infoName=>$model ){
+
+                        /*
+                         * Loop por cada model
+                         */
+                        foreach( $model as $modelName=>$fields ){
+                            if( is_array($fields) ){
+
+                                /*
+                                 * Loop pelos arquivos enviados
+                                 */
+                                foreach( $fields as $fieldName=>$fieldData ){
+                                    $formattedFilesData[$modelName][$fieldName][$infoName] = $fieldData;
+                                }
+
+                            }
+                        }
+                    }
+                    $this->params["files"] = $formattedFilesData;
+                } else {
+                    /**
+                     * @todo -
+                     */
+                    $this->params["files"] = $_FILES;
+                }
             }
-        }
-        /**
+
+            /*
+             * $_POST
+             */
+            if( !empty($_POST) ){
+                $this->params["post"] = $_POST;
+                if( !empty($_POST["data"]) ){
+                    $this->data = $_POST["data"];
+                }
+            }
+
+            if( !empty($formattedFilesData) ){
+                if( !empty($this->data) ){
+                    $this->data = array_merge_recursive($this->data, $formattedFilesData);
+                } else {
+                    $this->data = $formattedFilesData;
+                }
+            }
+
+            if( !empty($this->data) )
+                $this->params["data"] = $this->data;
+
+        /*
          * Soma em $this->data os dados necessários
          * 
          * Os dados que estiverem na Session no seguinte endereço serão

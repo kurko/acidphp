@@ -1,0 +1,125 @@
+== UploadBehavior ==
+
+O UploadBehavior serve para fazer upload facilmente.
+
+Importante: dê permissões de escrita no diretório app/public
+
+Comece anexando o Behavior a um Model, com a propriedade:
+
+<source lang="php">
+class User extends AppModel {
+
+var $actsAs = array("Upload");
+
+</source>
+
+Este é o método simples de anexar um Behavior a um model.
+
+
+=== Realizando Uploads ===
+
+Suponhamos que você tenha um formulário e deseja fazer o upload de um arquivo.
+
+No action que recebeu os dados do formulário, vamos tentar salvar o arquivo,
+tomar o endereço e salvar no banco de dados no campo foto_url. O código está
+a seguir.
+
+<source lang="php">
+
+function save(){
+
+    if( !empty($this->data) ){ // se há dados enviados
+
+        $this->Usuario->Upload->max_width = "1024"; // largura máxima permitida
+        $this->Usuario->Upload->max_height = "768"; // altura máxima permitida
+
+        // file() faz o upload de um arquivo e retorna o endereço de destino.
+        // Como argumento, o campo enviado do formulário.
+        if( $this->Usuario->Upload->file($this->data["Usuario"]["arquivo"]) ){
+
+            // Diz que o campo foto_url da tabela terá o endereço da imagem
+            // há pouco enviada. lastInsertPath contem este endereço.
+            $this->data["Usuario"]["foto_url"] = $this->Usuario->Upload->lastInsertPath;
+
+            // Salva os dados enviados do formulário e também o endereço da
+            // imagem salva.
+            $this->Usuario->save($this->data);
+
+        }
+        // Em caso de erro no upload, a propriedade error contém uma array com
+        // todos os erros que ocasionaram o insucesso. Por exemplo, max_width
+        // significa que a largura máxima permitida (width) da uma imagem (caso
+        // tenha sido enviada uma imagem) foi ultrapassada.
+        else {
+            pr( $this->Usuario->Upload->error );
+        }
+
+    }
+
+}
+
+</source>
+
+Note que tentamos fazer o upload do arquivo, dissemos que foto_url tem valor
+igual ao endereço da nova imagem e salvamos os dados no DB. Assim, podemos no
+futuro mostrar imagens do usuário cadastrado.
+
+Se o upload ocorrer com sucesso, o retorno é o endereço do arquivo salvo. Caso
+contrário, file() retorna false.
+
+Nota: Lembre-se de criar um formulário adequado para envio de arquivos, com
+<form ... enctype='multipart/form-data'>. Use o FormHelper para criar tudo
+automaticamente.
+
+
+=== Opções de Upload ===
+
+Você pode (e deve) configurar seu UploadBehavior. Se você quer que o tamanho
+limite do arquivo seja 200Kb, então escreve o seguinte código no seu action
+(ou no momento de anexar seu UploadBehavior a um model, conforme mostraremos
+mais adiante):
+
+    $path;
+        Pode ser public ou private. Por padrão, os uploads são feitos para
+        $app/public/upload/
+
+    $max_filesize = "10000000";
+        Tamanho máximo permitido do arquivo, em bytes. Padrão é 10Mb.
+
+    $max_width;
+        Largura máxima permitida caso o arquivo seja uma imagem.
+
+    $max_height;
+        Altura máxima permitida caso o arquivo seja uma imagem.
+
+    $autoOrganizeFolders = true;
+        Cria automaticamente, dentro de $path, um subdiretório com o ano atual
+        e o mês atual. Assim, por exemplo, o UploadBehavior cria
+        app/public/uploads/2009/10/ e assim subsequentemente, salvando arquivos
+        lá. Desta forma, seus arquivos ficam mais organizados. True por padrão.
+
+Para configurar, por exemplo, a largura máxima para 1024, use o código abaixo.
+
+<source lang="php">
+
+function save(){
+
+    $this->Model->Upload->max_width = "1024"; // largura máxima permitida
+
+    // Aqui vai o resto do seu código
+
+}
+
+</source>
+
+
+=== Valores úteis ===
+
+Nas propriedades a seguir, você tem acesso a alguns valores úteis.
+
+    $error;
+        Array que contém os erros ocorridos no UploadBehavior.
+
+    $lastInsertPath;
+        Endereço físico do último arquivo inserido.
+

@@ -22,8 +22,9 @@
  *      - 0: Não mostra erro algum;
  *      - 1: Mostra quais comandos SQL foram rodados;
  *      - 2: Mostra todos os erros mais configuração do modo 1;
+ *      - 3: Mostra todos os Warnings mais configuração do modo 2;
  */
-Config::write("debug", 2);
+Config::write("debug", 3);
 /**
  * Debug: SQL com estilo (negrito, cores, etc) para melhor interpretação
  */

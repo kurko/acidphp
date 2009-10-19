@@ -62,7 +62,9 @@ class FormHelper extends Helper
      * @return string Código HTML contendo a abertura do formulário <form>
      */
     public function create($modelName, $options = '', $isAjax = false){
+        
         $conteudo = "";
+        $otherOptions = "";
 
 
         /**
@@ -75,6 +77,9 @@ class FormHelper extends Helper
             unset($this->data);
         } else
             $this->formId = $options["formId"];
+
+        unset($options["formId"]);
+        
 
         if( isset($_SESSION["Sys"]["addToThisData"][$this->formId]) ){
             $this->data = $_SESSION["Sys"]["addToThisData"][$this->formId];
@@ -122,20 +127,53 @@ class FormHelper extends Helper
          * ser usado para salvar as informações do formulário
          */
         $controller = (empty($options["controller"])) ? strtolower($this->modelName) : $options["controller"];
+        unset($options["controller"]);
         /**
          * Action
          *
          * O action padrão para salvar um formulário é 'save'
          */
         $action = (empty($options["action"])) ? 'save' : $options["action"];
+        unset($options["action"]);
+
+
+        /**
+         * formId
+         *
+         * Dá um ID único para cada formulário
+         */
+        if( isset($options["edit"]) AND $options["edit"] == false ){
+            $this->editable = false;
+        } else
+            $this->editable = true;
+
+        unset($options["edit"]);
+        
+        /**
+         * Type File
+         *
+         * Se o formulário contém mimeType
+         */
+        if( isset($options["type"]) AND in_array( $options["type"], array("file", "mimetype") ) ){
+            $otherOptions.='enctype="multipart/form-data"';
+        }
+        unset($options["type"]);
+
 
         /**
          * ABRE FORMULÁRIO
          */
         $this->destionationUrl = WEBROOT.''.$controller.'/'.$action."/";
 
+        foreach($options as $property=>$value){
+            $otherOptions.= "$property='$value'";
+        }
+
+        // Se não é ajax
         if( !$isAjax )
-            $conteudo.= '<form method="post" action="'.$this->destionationUrl.'" class="formHelper">';
+            $conteudo.= '<form method="post" action="'.$this->destionationUrl.'" class="formHelper" '.$otherOptions.' >';
+
+
 
         /**
          * INPUTS HIDDEN
@@ -150,16 +188,6 @@ class FormHelper extends Helper
             }
         }
 
-
-        /**
-         * formId
-         *
-         * Dá um ID único para cada formulário
-         */
-        if( isset($options["edit"]) AND $options["edit"] == false ){
-            $this->editable = false;
-        } else
-            $this->editable = true;
 
         /**
          * MODEL PRINCIPAL
@@ -270,11 +298,21 @@ class FormHelper extends Helper
         /**
          * ["select"]
          * 
-         * Tipos de campos
+         * Tipos de campos é <select>
          */
         if( !empty($options["select"]) ){
             $inputType = "select";
             unset($options["select"]);
+        }
+
+        /**
+         * ["type"]
+         *
+         * Qual o tipo de campo
+         */
+        if( !empty($options["type"]) ){
+            $inputType = $options["type"];
+            unset($options["type"]);
         }
 
         /**
@@ -546,6 +584,21 @@ class FormHelper extends Helper
             $conteudo.= '</select>';
         }
         /*
+         * FILE
+         *
+         * Input de arquivos.
+         */
+        else if( $inputType == "file" ){
+
+            /**
+             * Gera campo de arquivo
+             */
+            $conteudo.= '<div class="input_field input_file">';
+            $conteudo.= '<input type="file" name="'.$inputName.'" '.$standardAtrib.' '.$standardAtribValue.' />';
+
+        }
+
+        /*
          * Não é nenhum tipo de campo pré-definido.
          *
          * Imprime campo com mensagem de erro para que o desenvolvedor veja
@@ -581,6 +634,11 @@ class FormHelper extends Helper
         $conteudo.= '</div>'; // fecha div do .input
 
         return $conteudo;
+    }
+
+    public function file($fieldName, $options=array()){
+        $options["type"] = "file";
+        return $this->input($fieldName, $options);
     }
 
     /**

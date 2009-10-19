@@ -34,6 +34,12 @@
     RewriteCond %{REQUEST_FILENAME} -d [OR]
     RewriteCond %{REQUEST_FILENAME} -f
     RewriteRule ^(.*)$ $1 [L]
+    #RewriteRule ^(.*)$ uhulllllll/$1 [R]
+
+
+    # public é uma palavra reservada, não pode ser usada como controller nem
+    # app.
+    #RewriteRule ^public/(.*)$ $1 [L]
 
     #RewriteRule ^core/support/script/(.*)$ ../../core/support/script/$1 [L]
     RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]

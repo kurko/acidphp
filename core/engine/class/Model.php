@@ -18,13 +18,34 @@ class Model
          * @var string Tabela a ser usada
          */
          
-        protected $useTable;
+        public $useTable;
         /**
          * Contém o id (ou mais de um em array) do campo objeto de ação.
          *
          * @var mixed
          */
         public $id;
+        /**
+         * Contém informações sobre os Behaviors que devem ser carregados.
+         *
+         * @var array 
+         */
+        public $actsAs = array();
+
+    /**
+     * CONFIGURAÇÕES INTERNAS
+     */
+        /**
+         *
+         * @var <string> Contém o nome do model atual
+         */
+        protected $modelName;
+        /**
+         * Contém os behaviors a serem usados por este model
+         *
+         * @var array
+         */
+        public $Behaviors;
 
 
     /**
@@ -69,7 +90,13 @@ class Model
 
         public $validation = array();
 
-        protected $params;
+        public $params;
+        
+        /**
+         *
+         * @var array Contém todos os dados organizados provenientes de forms
+         */
+        public $data;
 
 
     /**
@@ -81,7 +108,9 @@ class Model
      *      "conn" object : conexão com o db;
      */
     function  __construct($params) {
-
+        // Seta o nome deste model
+        $this->modelName = get_class($this);
+        
         /**
          * RECURSIVE
          */
@@ -96,7 +125,14 @@ class Model
         /**
          * CONFIGURAÇÃO DE AMBIENTE
          */
-        $this->params = &$params["params"];
+             /*
+              * params
+              */
+            $this->params = &$params["params"];
+            /*
+             * $data
+             */
+            //$this->data = &$params["data"];
 
         /**
          * CONEXÃO
@@ -193,6 +229,11 @@ class Model
                 )
             );
          }
+
+       /**
+        * BEHAVIORS
+        */
+        $this->_initBehaviors();
 
     } // fim __construct()
 
@@ -362,7 +403,13 @@ class Model
                                     }
                                     
                                 } else {
-                                    showWarning("Campo inexistente configurado no formulário.");
+
+                                    /*
+                                     * O campo não existe e não é um arquivo.
+                                     */
+                                    if( !$this->_isFileField( array($campo=>$valor) ) ){
+                                        showWarning("Campo inexistente configurado no formulário.");
+                                    }
                                 }
                             }
 
@@ -625,7 +672,6 @@ class Model
             /**
              * Formato $this->data passado
              */
-
             if( is_array($toUpdate) ){
 
                 $has = array_merge($this->hasOne, $this->hasMany, array( get_class($this)=>"" ) );
@@ -1443,5 +1489,144 @@ class Model
             }
         }
     }
+
+    /*
+     *
+     */
+    public function _isFileField($params){
+
+        if( is_array(reset($params) ) ){
+            if( in_array("name", array_keys(reset($params)))
+                AND in_array("type", array_keys(reset($params)))
+                AND in_array("size", array_keys(reset($params)))
+            )
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+    /**
+     *
+     * BEHAVIORS
+     *
+     *
+     */
+
+    /**
+     * _initBehaviors()
+     *
+     * Inicializa e carrega todos os Behaviors deste model que estão
+     * especificados em $this->actAs.
+     *
+     * Os formatos aceitáveis em $this->actsAs são:
+     *
+     *      1) $this->actsAs = array( 'nome_do_behavior', array($options) );
+     *      2) $this->actsAs = array( 'nome_do_behavior' );
+     *
+     * O segundo método não apresenta opções ou configurações extras.
+     *
+     */
+    public function _initBehaviors(){
+        if( is_array($this->actsAs) ){
+
+            /*
+             * Toma o nome de todos os behaviors anexados
+             */
+            $behaviorsToLoad = $this->actsAs;
+
+            /*
+             * Instancia todos os behaviors anexados
+             */
+            foreach( $behaviorsToLoad as $behaviorName=>$behaviorConfig ){
+
+                /*
+                 * Dependendo do formato que o usuário especificar o Behavior,
+                 * chama $this->attach de uma forma diferente.
+                 */
+                if( !is_string($behaviorName) || is_int($behaviorName) ){
+                    $behaviorName = $behaviorConfig;
+                    $behaviorConfig = array();
+                }
+
+                $this->attach($behaviorName, $behaviorConfig);
+
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * attach()
+     *
+     * Anexa um Behavior ao Model
+     *
+     * @param string $behaviorName O nome do behavior
+     * @param array [$config] As configurações do behavior
+     */
+    public function attach($behaviorName, $config = array()){
+
+        /*
+         * Inclui a classe do behavior
+         */
+        if( is_file(CORE_BEHAVIOR_DIR.$behaviorName.'.php') ){
+            include_once CORE_BEHAVIOR_DIR.$behaviorName.'.php';
+        } else if( is_file(APP_BEHAVIOR_DIR.$behaviorName.'.php') ){
+            include_once APP_BEHAVIOR_DIR.$behaviorName.'.php';
+        }
+
+        /*
+         * Ajusta nome para instanciação
+         */
+        $behaviorObjectName = $behaviorName . BEHAVIOR_CLASSNAME_SUFFIX;
+        
+        /*
+         * Instancia Behavior
+         */
+        /**
+         * @todo - $this->Behaviors existe no behavior instanciado abaixo,
+         * sendo recursivo.
+         */
+        $this->Behaviors->{$behaviorName} = new $behaviorObjectName(&$this);
+        $this->{$behaviorName} = &$this->Behaviors->{$behaviorName};
+
+        if( is_string($behaviorName) && is_array($config) ){
+            $this->actsAs[$behaviorName] = $config;
+        }
+    }
+
+    /**
+     * detach()
+     *
+     * Desanexa um behavior
+     *
+     * @param string $behaviorName Nome do Behavior que será desanexado
+     * @return bool
+     */
+    public function detach($behaviorName){
+        if( isset($this->actsAs[$behaviorName]) ){
+             unset($this->actsAs[$behaviorName]);
+             unset($this->{$behaviorName});
+        }
+        return true;
+    }
+
+    /**
+     *
+     *
+     * ALIASES
+     *
+     *
+     */
+    /**
+     * Alias para attach
+     * 
+     */
+    public function loadBehavior($behaviorName , $config = array()){
+        $this->attach($behaviorName, $config);
+    }
+
 }
 ?>
