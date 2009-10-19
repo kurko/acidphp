@@ -1589,7 +1589,7 @@ class Model
          * @todo - $this->Behaviors existe no behavior instanciado abaixo,
          * sendo recursivo.
          */
-        $this->Behaviors->{$behaviorName} = new $behaviorObjectName(&$this);
+        $this->Behaviors->{$behaviorName} = new $behaviorObjectName($this);
         $this->{$behaviorName} = &$this->Behaviors->{$behaviorName};
 
         if( is_string($behaviorName) && is_array($config) ){

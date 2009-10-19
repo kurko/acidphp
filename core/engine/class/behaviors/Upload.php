@@ -72,7 +72,7 @@ class UploadBehavior extends Behavior
      */
     public $autoOrganizeFolders = true;
 
-    function __construct($model) {
+    function __construct(&$model) {
         parent::__construct($model);
     }
 

@@ -16,9 +16,9 @@ class Behavior
      */
     public $model;
 
-    function __construct($model){
+    function __construct(&$model){
         
-        $this->model = &$model;
+        $this->model = $model;
     }
 }
 ?>
