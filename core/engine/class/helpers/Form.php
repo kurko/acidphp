@@ -75,10 +75,11 @@ class FormHelper extends Helper
         if( empty($options["formId"]) ){
             $this->formId = $this->formId+1;//;sha1( rand(1, 99999) );
             unset($this->data);
-        } else
+        } else {
             $this->formId = $options["formId"];
+            unset($options["formId"]);
+        }
 
-        unset($options["formId"]);
         
 
         if( isset($_SESSION["Sys"]["addToThisData"][$this->formId]) ){
@@ -127,14 +128,14 @@ class FormHelper extends Helper
          * ser usado para salvar as informações do formulário
          */
         $controller = (empty($options["controller"])) ? strtolower($this->modelName) : $options["controller"];
-        unset($options["controller"]);
+        if( !empty($options["controller"]) ) unset($options["controller"]);
         /**
          * Action
          *
          * O action padrão para salvar um formulário é 'save'
          */
         $action = (empty($options["action"])) ? 'save' : $options["action"];
-        unset($options["action"]);
+        if( !empty($options["action"]) ) unset($options["action"]);
 
 
         /**
@@ -147,7 +148,7 @@ class FormHelper extends Helper
         } else
             $this->editable = true;
 
-        unset($options["edit"]);
+        if( !empty($options["edit"]) ) unset($options["edit"]);
         
         /**
          * Type File
@@ -157,7 +158,7 @@ class FormHelper extends Helper
         if( isset($options["type"]) AND in_array( $options["type"], array("file", "mimetype") ) ){
             $otherOptions.='enctype="multipart/form-data"';
         }
-        unset($options["type"]);
+        if( !empty($options["type"]) ) unset($options["type"]);
 
 
         /**
@@ -165,8 +166,10 @@ class FormHelper extends Helper
          */
         $this->destionationUrl = WEBROOT.''.$controller.'/'.$action."/";
 
-        foreach($options as $property=>$value){
-            $otherOptions.= "$property='$value'";
+        if( !empty($options) AND is_array($options) ){
+            foreach($options as $property=>$value){
+                $otherOptions.= "$property='$value'";
+            }
         }
 
         // Se não é ajax
