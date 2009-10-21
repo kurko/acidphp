@@ -880,8 +880,8 @@ class Model
         /**
          * Quando nenhum limit especificado (por questões de segurança)
          */
-        if( is_array($options) AND empty($options["limit"]) )
-            $options["limit"] = "50";// Config::read("modelAutoLimit");
+        //if( is_array($options) AND empty($options["limit"]) )
+            //$options["limit"] = "50";// Config::read("modelAutoLimit");
 
 
         if( is_array($options) AND array_key_exists("page", $options) ){

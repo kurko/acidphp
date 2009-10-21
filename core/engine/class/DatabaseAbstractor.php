@@ -320,10 +320,49 @@ class DatabaseAbstractor extends DataAbstractor
         //pr( array_ $registro);
 
         /**
-         * Modos
+         * MODOS
+         */
+        /*
+         * First
          */
         if( $mode == "first" ){
             $registro = reset($registro);
+        }
+        /*
+         * List
+         *
+         *
+         */
+        /**
+         * @todo - Se o usuário requisita o campo nome, por exemplo, o formato
+         * ficará:
+         *      [id] => nome1
+         *      [id] => nome2
+         *
+         * Se ele não requisitar nada, vai ficar
+         *
+         *      [id] =>
+         *      [id] =>
+         *
+         * É necessário verificar se o usuário requisitou um campo para que não
+         * retorne vazio. Se retornar, que retorno o id como valor.
+         */
+        else if( $mode == "list" ){
+            if( !empty($registro) ){
+                foreach($registro as $chave=>$model){
+                    /*
+                     * Usa-se reset pois há ainda outra array dentro de $valor, que
+                     * é um model.
+                     */
+                    $actualModel = reset($model);
+                    $campoId = $actualModel["id"];
+                    unset($actualModel["id"]);
+                    $campoValor = reset($actualModel);
+
+                    $tmp[ $campoId ] = $campoValor;//reset( next($valor) );
+                }
+                $registro = $tmp;
+            }
         }
 
         return $registro;

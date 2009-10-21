@@ -305,6 +305,9 @@ class FormHelper extends Helper
          */
         if( !empty($options["select"]) ){
             $inputType = "select";
+            $selectOptions = $options["select"];
+            if( !empty($options["selected"]) )
+                $selectOptionsSelected = $options["selected"];
             unset($options["select"]);
         }
 
@@ -557,15 +560,13 @@ class FormHelper extends Helper
          * um <select> com vários <option></option>
          */
         else if( $inputType == "select" ){
-            $select = $options["select"];
             /**
              * <option> selecionado
              */
-            $selectSelected = $select["selected"];
             /**
              * Opções a serem mostradas
              */
-            $selectOptions = $select["options"];
+            $selectOptions = $selectOptions;
             $conteudo.= '<div class="input_field input_select">';
             $conteudo.= '<select name="'.$inputName.'" '.$standardAtrib.'>';
             /**
@@ -576,7 +577,7 @@ class FormHelper extends Helper
                  * Verifica se o <option> atual deve ser selecionado por
                  * padrão
                  */
-                if( !empty($selectSelected) AND $selectSelected == $chave ){
+                if( !empty($selectOptionsSelected) AND $selectOptionsSelected == $chave ){
                     $selectThis = 'selected="true"';
                 } else {
                     $selectThis = false;
