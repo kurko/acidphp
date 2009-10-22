@@ -74,7 +74,7 @@ class FormHelper extends Helper
          */
         if( empty($options["formId"]) ){
             $this->formId = $this->formId+1;//;sha1( rand(1, 99999) );
-            unset($this->data);
+            //unset($this->data);
         } else {
             $this->formId = $options["formId"];
             unset($options["formId"]);
@@ -82,8 +82,9 @@ class FormHelper extends Helper
 
         
 
-        if( isset($_SESSION["Sys"]["addToThisData"][$this->formId]) ){
+        if( !empty($_SESSION["Sys"]["addToThisData"][$this->formId]) ){
             $this->data = $_SESSION["Sys"]["addToThisData"][$this->formId];
+            unset($_SESSION["Sys"]["addToThisData"][$this->formId]);
         }
         global $globalVars;
         /**
@@ -318,6 +319,8 @@ class FormHelper extends Helper
          */
         if( !empty($options["type"]) ){
             $inputType = $options["type"];
+            if( $options["type"] !== "password" AND $options["type"] !== "passw" )
+                $notPassw = true;
             unset($options["type"]);
         }
 
@@ -393,7 +396,6 @@ class FormHelper extends Helper
              * @todo - mostrar valores para outros campos fora input=text,
              * como select, radio, etc.
              */
-
             if( !empty($this->data[$modelName][$fieldName]) ){
                 $fieldValue = 'value="'. $this->data[$modelName][$fieldName]. '"';
             } else {
@@ -433,7 +435,10 @@ class FormHelper extends Helper
          * Se não há tipos especificados na configuração do $form, verifica qual
          * o tipo de campo na tabela e mostra o campo <input> de acordo
          */
-        if( empty($inputType) AND !empty($this->modelProperties["describedTables"][$modelName]) ){
+        if( empty($inputType)
+            AND !empty($this->modelProperties["describedTables"][$modelName])
+            AND !empty($this->modelProperties["describedTables"][$modelName][$fieldName]["Type"]) )
+        {
             /**
              * Verifica global $describedTables que já está carregado e salvo
              * em $this->modelProperties[$modelName]["describedTables"]
@@ -519,14 +524,27 @@ class FormHelper extends Helper
          *
          * TYPE="TEXT"
          */
-        if( $inputType == "text" ){
+        if( $inputType == "text"
+            OR $inputType == "password"
+            OR $inputType == "passw" )
+        {
 
+            /*
+             * notPassw diz que o campo não é password.
+             */
+            if( empty($notPassw) )
+                $notPassw = false;
             /**
              * Verifica campo de password
              */
-            if( in_array($fieldName, Config::read("modelPasswordFields")) )
+            if( (
+                in_array($fieldName, Config::read("modelPasswordFields"))
+                OR $inputType == "password"
+                OR $inputType == "passw"
+                ) AND $notPassw == false )
+            {
                 $inputType = "password";
-
+            }
             /**
              * Gera conteúdo para o formulário
              */
