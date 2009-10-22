@@ -292,9 +292,11 @@ class AuthComponent extends Component
                      * Cria conditions
                      */
 
-
+                    //pr($this->models[$this->model()]->tableDescribed);
                     foreach( $dataFields as $campo=>$valor ){
-                        $conditions[$this->model().'.'.$campo] = $valor;
+                        if( array_key_exists( $campo, $this->models[$this->model()]->tableDescribed ) ){
+                            $conditions[$this->model().'.'.$campo] = $valor;
+                        }
                     }
 
                     $result = $model->find( array(
