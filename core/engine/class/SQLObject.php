@@ -501,8 +501,27 @@ class SQLObject {
                     /**
                      * Se está tudo OK com as verificações do campo
                      */
-                    if( empty($campoError) OR !$campoError )
-                        $rules[] = $campo .' '.$glue.' (\''. implode('\', \'', $valor) . '\')';
+                    if( empty($campoError) OR !$campoError ){
+
+                        /*
+                         * REGRAS EXCEÇÕES
+                         *
+                         * Verifica as regras:
+                         *
+                         *      LIKE, >, <, !=
+                         */
+                        $space = strpos($campo, " " );
+                        
+                        if( $space !== false ){
+                            $rules[] = $campo .' \''. $valor[0] . '\'';
+                        }
+                        /*
+                         * Não há exceções, criar condição normalmente
+                         */
+                        else {
+                            $rules[] = $campo .' '.$glue.' (\''. implode('\', \'', $valor) . '\')';
+                        }
+                    }
                 } else {
                     $rules[] = implode('\', \'', $valor);
                 }

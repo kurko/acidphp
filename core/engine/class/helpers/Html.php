@@ -42,11 +42,21 @@ class HtmlHelper extends Helper
          */
         foreach($options as $chave=>$valor){
             if( !in_array($chave, $reservedOptions) ){
-                $inlineProperties.= ' '.$class.'="'.$valor.'"';
+                $inlineProperties.= ' '.$chave.'="'.$valor.'"';
             }
         }
 
         return '<a href="'.translateUrl($linkDestination).'" '.$inlineProperties.'>'.$linkText.'</a>';
+    }
+
+    /**
+     * CONFIRM()
+     *
+     * Chama $this->link, mas perguntando antes se o usuário confirma a ação
+     */
+    public function confirm($linkText, $linkDestination, $message, array $options = array() ){
+        $options["onclick"] = "if(confirm('$message')) return true; else return false;";
+        return $this->link($linkText, $linkDestination, $options);
     }
 
     /**

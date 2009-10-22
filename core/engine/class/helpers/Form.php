@@ -168,7 +168,7 @@ class FormHelper extends Helper
 
         if( !empty($options) AND is_array($options) ){
             foreach($options as $property=>$value){
-                $otherOptions.= "$property='$value'";
+                $otherOptions.= " $property='$value'";
             }
         }
 
@@ -246,7 +246,7 @@ class FormHelper extends Helper
          */
 
         global $describedTables;
-        if( $fieldName == "id"  AND isset($describedTables[$this->modelName]) ){
+        if( $fieldName == "id"  AND !empty($describedTables[$this->modelName]) ){
 
             if( is_int($options) OR is_string($options) )
                 $fieldValue = $options;
@@ -303,8 +303,11 @@ class FormHelper extends Helper
          * 
          * Tipos de campos é <select>
          */
-        if( !empty($options["select"]) ){
+        if( array_key_exists("select", $options) ){
+
             $inputType = "select";
+            if( empty($options["select"]) )
+                $options["select"] = array("Opções não definidas");
             $selectOptions = $options["select"];
             if( !empty($options["selected"]) )
                 $selectOptionsSelected = $options["selected"];
@@ -407,6 +410,13 @@ class FormHelper extends Helper
         $standardAtrib = 'id="input-'.$fieldName.'" ';
         $standardAtribValue = $fieldValue;
 
+        if( !empty($options) ){
+            foreach( $options as $chave=>$valor){
+                $standardAtrib.= " ".$chave.'="'.$valor.'" ';
+            }
+        }
+        
+
         /**
          * @todo - Escrever value digitado anteriormente quando envia formulário
          * e retorna para ele de volta.
@@ -433,7 +443,9 @@ class FormHelper extends Helper
          * Se não há tipos especificados na configuração do $form, verifica qual
          * o tipo de campo na tabela e mostra o campo <input> de acordo
          */
-        if( empty($inputType) AND !empty($this->modelProperties["describedTables"][$modelName]) ){
+        if( empty($inputType)
+            AND !empty($this->modelProperties["describedTables"][$modelName][$fieldName]["Type"])
+            AND !empty($this->modelProperties["describedTables"][$modelName]) ){
             /**
              * Verifica global $describedTables que já está carregado e salvo
              * em $this->modelProperties[$modelName]["describedTables"]
@@ -502,7 +514,7 @@ class FormHelper extends Helper
          *
          * Somente inputs com labels podem ter o atributo between
          */
-        if( !in_array($inputType, array("checkbox")) ){
+        if( !in_array($inputType, array("checkbox","hidden")) ){
             $conteudo.= '<label for="input-'.$fieldName.'">'.$label.'</label>';
             
             /**
@@ -531,6 +543,17 @@ class FormHelper extends Helper
              * Gera conteúdo para o formulário
              */
             $conteudo.= '<div class="input_field input_text">';
+            $conteudo.= '<input type="'.$inputType.'" name="'.$inputName.'" '.$standardAtrib.' '.$standardAtribValue.' />';
+        }
+        /**
+         * TYPE="HIDDEN"
+         */
+        else if( $inputType == "hidden" ){
+
+            /**
+             * Gera conteúdo para o formulário
+             */
+            $conteudo.= '<div class="input_field">';
             $conteudo.= '<input type="'.$inputType.'" name="'.$inputName.'" '.$standardAtrib.' '.$standardAtribValue.' />';
         }
         /**
