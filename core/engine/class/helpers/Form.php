@@ -248,14 +248,16 @@ class FormHelper extends Helper
 
         global $describedTables;
         if( $fieldName == "id"  AND !empty($describedTables[$this->modelName]) ){
-
+            
             if( is_int($options) OR is_string($options) )
                 $fieldValue = $options;
             else if( !empty($options["value"]) )
                 $fieldValue = $options["value"];
 
             /**
-             * Se é editavel
+             * Se é permitida a edição
+             *
+             * Por padrão, é permitida.
              */
             if($this->editable == true){
 
@@ -266,7 +268,11 @@ class FormHelper extends Helper
 
                 $_SESSION["Sys"]["addToThisData"][$this->formId][$this->modelName]["id"] = $fieldValue;
                 $_SESSION["Sys"]["options"]["addToThisData"][$this->formId]["destLocation"] = $this->destionationUrl;
-                if( !empty($options["show"]) AND is_array($options) AND $options["show"] == true ){
+                if( !empty($options["show"])
+                    AND is_array($options)
+                    AND $options["show"] == true )
+                {
+
                 } else {
                     unset($options);
                     return false;
@@ -401,8 +407,10 @@ class FormHelper extends Helper
              */
             if( !empty($this->data[$modelName][$fieldName]) ){
                 $fieldValue = 'value="'. $this->data[$modelName][$fieldName]. '"';
+                $fieldTextValue = $this->data[$modelName][$fieldName];
             } else {
                 $fieldValue = 'value=""';
+                $fieldTextValue = "";
             }
         }
 
@@ -411,9 +419,14 @@ class FormHelper extends Helper
          */
         $standardAtrib = 'id="input-'.$fieldName.'" ';
         $standardAtribValue = $fieldValue;
+        $extraOptions = array();
 
         if( !empty($options) ){
             foreach( $options as $chave=>$valor){
+                /*
+                 * Guarda as opções extra.
+                 */
+                $extraOptions[$chave] = $valor;
                 $standardAtrib.= " ".$chave.'="'.$valor.'" ';
             }
         }
@@ -588,8 +601,16 @@ class FormHelper extends Helper
          */
         else if( $inputType == "textarea"){
             $conteudo.= '<div class="input_field input_textarea">';
-            $conteudo.= '<textarea name="'.$inputName.'" '.$standardAtrib.' />';
-            $conteudo.= $standardAtribValue;
+
+            $rows = '';
+            $cols = '';
+            if( !array_key_exists("row", $extraOptions) )
+                $rows = 'rows="4"';
+            if( !array_key_exists("cols", $extraOptions) )
+                $cols = 'cols="35"';
+
+            $conteudo.= '<textarea name="'.$inputName.'" '.$standardAtrib.' '.$rows.' '.$cols.' />';
+            $conteudo.= $fieldTextValue;
             $conteudo.= '</textarea>';
         }
         /**

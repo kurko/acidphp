@@ -31,6 +31,15 @@ class Model
          * @var array 
          */
         public $actsAs = array();
+    /*
+     * INFORMAÇÕES DE TRANSAÇÕES
+     */
+    /**
+     * lastInsertId
+     *
+     * @var int Contém o id do último campo inserido
+     */
+    var $lastInsertId;
 
     /**
      * CONFIGURAÇÕES INTERNAS
@@ -297,9 +306,14 @@ class Model
                         /**
                          * Verifica se este Model pertence a outro
                          */
+                        /**
+                         * @todo - verificar integridade
+                         */
                         if( !empty($this->belongsTo) ){
                             foreach( $this->belongsTo as $relationalModel=>$propriedades ){
-                                if( array_key_exists($relationalModel, $data) ){
+                                if( array_key_exists($relationalModel, $data) 
+                                    AND !empty($data[$relationalModel]["id"]) )
+                                {
                                     $campos[ $propriedades["foreignKey"] ] = $data[$relationalModel]["id"];
                                 }
                             }
@@ -526,6 +540,14 @@ class Model
                 else {
                     $lastInsertId = $data[get_class($this)]["id"];
                 }
+
+                /*
+                 * Guarda lastInsertId.
+                 *
+                 * Esta variável é útil para se saber qual o id foi salvo e pode
+                 * ser acessada através de Model::lastInsertId
+                 */
+                $this->lastInsertId = $lastInsertId;
 
                 /**
                  * Se há dados de models filhas (relacionais), envia dados para

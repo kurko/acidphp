@@ -69,7 +69,9 @@ class SQLObject {
             /**
              * Verifica recursividade atual
              */
-            if( $mainModel->currentRecursive < $mainModel->recursive ){
+            if( $mainModel->currentRecursive < $mainModel->recursive
+                AND !empty($options["models"][$model]) )
+            {
 
                 $usedModels[] = $options["models"][$model];
                 $leftJoinSyntax = "LEFT JOIN ".$options["tableAlias"][$model] . " AS " . $model;
