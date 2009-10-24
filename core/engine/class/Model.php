@@ -294,6 +294,7 @@ class Model
                  *
                  */
                 foreach($data as $model=>$campos){
+
                     /**
                      * Verifica possíveis relacionamentos entre o model $this
                      * atual e o model atual de $data
@@ -309,7 +310,25 @@ class Model
                         /**
                          * @todo - verificar integridade
                          */
+                         //pr($campos);
                         if( !empty($this->belongsTo) ){
+
+                            /*
+                             * Percorre cada Model a qual o Model atual ($this)
+                             * pertence, verificando se um campo no formulário
+                             * foi especificado.
+                             *
+                             * Se foi especificado, cria um índice em $data
+                             * com o ID do model relacionado.
+                             *
+                             * Ex:
+                             *      - Idade belongsTo Usuario
+                             *      |
+                             *      | Se o formulário é do model Idade e há um
+                             *      | campo chamado Usuario.id, substitui por
+                             *      | Idade.usuario_id
+                             *
+                             */
                             foreach( $this->belongsTo as $relationalModel=>$propriedades ){
                                 if( array_key_exists($relationalModel, $data) 
                                     AND !empty($data[$relationalModel]["id"]) )
@@ -344,7 +363,7 @@ class Model
                      *
                      */
                     if( $modelPai ){
-
+                        
                         /**
                          * subModel
                          *
@@ -379,18 +398,22 @@ class Model
                             else {
 
                             }
-                        }
+                        } // fim chamada subModel
 
+                        /*
+                         * Se a tabela atual existe de fato.
+                         */
                         if( in_array($tabela, $this->dbTables) ){
                             /**
                              * Loop por cada campo e seus valores para gerar uma
                              * string com os campos a serem incluidos.
                              */
                             foreach( $campos as $campo=>$valor ){
-                                
-                                if( array_key_exists($campo, $this->tableDescribed) )
-                                {
-
+                                /*
+                                 * Se o campo existe de fato na tabela
+                                 * especificada.
+                                 */
+                                if( array_key_exists($campo, $this->tableDescribed) ){
                                     /**
                                      * Atualizando subModel (model filho)
                                      */
@@ -416,7 +439,11 @@ class Model
                                         $valorStr[] = $valor;
                                     }
                                     
-                                } else {
+                                }
+                                /*
+                                 * O campo não existe
+                                 */
+                                else {
 
                                     /*
                                      * O campo não existe e não é um arquivo.
@@ -427,7 +454,7 @@ class Model
                                 }
                             }
 
-                            //pr($camposStr);
+                            pr($camposStr);
 
                             if( !empty($camposStr) ){
                                 /**

@@ -39,12 +39,14 @@ function translateUrl($mixed, $isFile = false){
     else if( is_string($mixed) ){
 
         /*
-         * A URL é uma string mas nenhum dos termos a seguir.
+         * A URL é uma string mas não contém nenhum dos termos a seguir,
+         * ou seja, é um link para uma página interna.
          */
         if( !in_array(  StrTreament::getNameSubStr($mixed, ":"),
                         array("http","ftp","ssh","git","https") )
             AND (!$isFile)
-        ){
+        )
+        {
 
             $url = explode("/", $mixed);
             $args = array();
@@ -63,6 +65,12 @@ function translateUrl($mixed, $isFile = false){
                     $i++;
                 }
             }
+
+            /*
+             * Se não foi especificado um action
+             */
+            if( empty($action) )
+                $action = "index";
 
             $url = $engine->webroot.$controller."/".$action."/".implode("/", $args);
         }
