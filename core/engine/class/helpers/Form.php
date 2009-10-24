@@ -48,6 +48,19 @@ class FormHelper extends Helper
     }
 
     /**
+     * afterFilter()
+     *
+     * Acontece sempre após toda a execução do código.
+     */
+    public function afterFilter(){
+
+        /*
+         * Exclui as mensagens de campos não-validas das Sessions.
+         */
+        $this->_deleteUnvalidatedFieldSession();
+    }
+
+    /**
      * create()
      *
      * Inicializa um formulário HTML e um novo objeto de formulário.
@@ -65,8 +78,7 @@ class FormHelper extends Helper
 
         $conteudo = "";
         $otherOptions = "";
-
-
+        
         /**
          * formId
          *
@@ -237,7 +249,7 @@ class FormHelper extends Helper
      *      ""
      * @return string Código HTML para o form input pedido.
      */
-    public function input($fieldName, $options = ''){
+    public function input($fieldName, $options = array()){
         /**
          * ID
          *
@@ -715,6 +727,7 @@ class FormHelper extends Helper
         $conteudo = '';
         $conteudo.= '<input type="submit" name="formSubmit" value="'.$submitValue.'" class="submit" />';
         $conteudo.= '</form>';
+
         return $conteudo;
     }
 
@@ -743,6 +756,23 @@ class FormHelper extends Helper
         return false;
     }
 
+    /**
+     *
+     * MÉTODOS INTERNOS DE SUPORTE
+     *
+     * Os métodos a seguir são relacionados ao funcionamento interno da classe.
+     *
+     */
+    /**
+     * _deleteUnvalidatedFieldSession()
+     *
+     * Exclui sessions que indicam quais campos não foram validados. Isto só
+     * é permitido quando o Form indica que os dados podem ser excluídos.
+     */
+    public function _deleteUnvalidatedFieldSession(){
+        unset($_SESSION["Sys"]["FormHelper"]["notValidated"]);
+    }
+    
 }
 
 ?>

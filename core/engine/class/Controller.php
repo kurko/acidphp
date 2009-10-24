@@ -726,6 +726,13 @@ class Controller
                 $this->render( $this->action );
             else if( !$this->isRendered )
                 $this->render( false );
+
+
+
+            /*
+             * HELPERS AFTERFILTER()
+             */
+            $this->_helperAfterFilter();
             /**
              * $this->afterFilter() é chamado sempre depois de qualquer ação
              */
@@ -746,6 +753,22 @@ class Controller
      */
     public function __call($function, $args){
         return false;
+    }
+
+    /**
+     * _helperAfterFilter()
+     * 
+     * Chama o Helper::afterFilter de todos os Helpers instanciados.
+     * 
+     * @return bool
+     */
+    public function _helperAfterFilter(){
+
+        foreach( $this->_loadedHelpers as $helper=>$helperObject ){
+            $helperObject->afterFilter();
+        }
+
+        return true;
     }
 
 }

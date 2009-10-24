@@ -87,6 +87,10 @@ class Helper
     function setGlobalProperties($param = array()){
 
     }
+
+    function afterFilter(){
+        
+    }
     /**
      * MÉTODOS DE INFORMAÇÕES SOBRE CLASSE
      */

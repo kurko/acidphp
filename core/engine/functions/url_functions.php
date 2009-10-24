@@ -90,7 +90,7 @@ function translateUrl($mixed, $isFile = false){
  * @param string $url Endereço Url válido a ser aberto
  * @return boolean Retorna falso se não conseguir redirecionar
  */
-function redirect($url=""){
+function redirect($url){
     /**
      * Segurança: se $url for array
      */
@@ -102,7 +102,9 @@ function redirect($url=""){
      * Redireciona
      */
     if( !empty($url) ){
+        header("Status: 200");
         header("Location: ". $url);
+        exit();
         return false;
     } else {
         return false;

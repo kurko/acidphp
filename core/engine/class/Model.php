@@ -141,7 +141,7 @@ class Model
             /*
              * $data
              */
-            //$this->data = &$params["data"];
+            $this->data = &$params["data"];
 
         /**
          * CONEXÃO
@@ -661,7 +661,7 @@ class Model
                 return true;
             }
             /**
-             * Não validou
+             * NÂO VALIDOU
              */
             else {
                 $_SESSION["Sys"]["addToThisData"][ $this->params["post"]["formId"] ] = $data;
@@ -1439,7 +1439,7 @@ class Model
                                             $vE[$campo] = '1';
                                         else
                                             $vE[$model][$campo] = '1';
-
+                                            
                                         $_SESSION["Sys"]["FormHelper"]["notValidated"][$model][$campo]["message"] = $message;
                                     } // fim [não validou]
 
