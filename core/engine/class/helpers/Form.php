@@ -7,7 +7,7 @@
  * @package Helpers
  * @name Form
  * @author Alexandre de Oliveira <chavedomundo@gmail.com>
- * @since v0.1, 19/07/2009
+ * @since v0.0.2, 19/07/2009
  */
 /**
  * SESSIONS
@@ -47,6 +47,22 @@ class FormHelper extends Helper
         
     }
 
+    /**
+     * Termina um formulário, inserindo o campo Submit e fechando o bloco de
+     * código HTML <form></form>.
+     *
+     * @param string $submitValue Valor a ser escrito no botão de Submit
+     * @param array $options Opções de amostragem e configurações
+     * @return string Código HTML para finalizar bloco de código <form></form>
+     */
+    public function end($submitValue = "Enviar", $options = ""){
+        $conteudo = '';
+        $conteudo.= '<input type="submit" name="formSubmit" value="'.$submitValue.'" class="submit" />';
+        $conteudo.= '</form>';
+
+        return $conteudo;
+    }
+    
     /**
      * afterFilter()
      *
@@ -689,7 +705,6 @@ class FormHelper extends Helper
          *
          * Mostra mensagens de erro de validação
          */
-         //pr($_SESSION);
         if( !empty($_SESSION["Sys"]["FormHelper"]["notValidated"][$modelName][$fieldName] ) ){
             $conteudo.= '<div class="input_validation_error">';
             $conteudo.= $_SESSION["Sys"]["FormHelper"]["notValidated"][$modelName][$fieldName]["message"];
@@ -700,9 +715,7 @@ class FormHelper extends Helper
          * Se AFTER está especificado
          */
         if( !empty($after) ){
-            $conteudo.= '<span class="input_after">';
-            $conteudo.= $after;
-            $conteudo.= '</span>';
+            $conteudo.= $this->_afterField($after);
         }
 
         $conteudo.= '</div>'; // fecha div do .input
@@ -710,26 +723,48 @@ class FormHelper extends Helper
         return $conteudo;
     }
 
-    public function file($fieldName, $options=array()){
+    /*
+     *
+     *      FIELDS
+     *
+     */
+    public function file( $fieldName, $options=array() ){
         $options["type"] = "file";
         return $this->input($fieldName, $options);
     }
 
-    /**
-     * Termina um formulário, inserindo o campo Submit e fechando o bloco de
-     * código HTML <form></form>.
-     *
-     * @param string $submitValue Valor a ser escrito no botão de Submit
-     * @param array $options Opções de amostragem e configurações
-     * @return string Código HTML para finalizar bloco de código <form></form>
-     */
-    public function end($submitValue = "Enviar", $options = ""){
-        $conteudo = '';
-        $conteudo.= '<input type="submit" name="formSubmit" value="'.$submitValue.'" class="submit" />';
-        $conteudo.= '</form>';
-
-        return $conteudo;
+    public function hidden(){
+        
     }
+    
+    /*
+     *
+     *      HTML NON-FIELD ELEMENTS
+     *
+     */
+
+    /**
+     * _afterField
+     *
+     * Mostra conteúdo após o Input field
+     *
+     * @param string $after
+     * @return string
+     */
+    public function _afterField($after = ""){
+        
+        if( !empty($after) ){
+            $conteudo = "";
+            $conteudo.= '<span class="input_after">';
+            $conteudo.= $after;
+            $conteudo.= '</span>';
+            return $conteudo;
+        }
+
+        return false;
+    }
+
+
 
     public function statusMessage(){
         /**
