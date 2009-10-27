@@ -51,11 +51,18 @@ class UploadBehavior extends Behavior
     public $max_height;
 
     /**
-     * Mensagens de erro, se ocorreram.
+     * Última mensagem de erro.
+     *
+     * @var string
+     */
+    public $error;
+
+    /**
+     * Todas as mensagens de erro, se ocorreram.
      *
      * @var array
      */
-    public $error = array();
+    public $allErrors = array();
 
     /**
      * Endereço do último arquivo inserido
@@ -63,6 +70,10 @@ class UploadBehavior extends Behavior
      * @var string
      */
     public $lastInsertPath;
+
+    public $lastFilename;
+    public $lastSize;
+    public $lastType;
 
     /**
      * Funcionalidade que cria subdiretórios em app/public/uploads
@@ -272,15 +283,17 @@ class UploadBehavior extends Behavior
      * @param string $str Mensagem de erro.
      */
     public function _setError($str){
-        if( empty($this->error) ){
-            $this->error[] = $str;
-        } else if( is_string($this->error) ){
-            $tmp = $this->error;
-            $this->error = null;
-            $this->error[] = $tmp;
-            $this->error[] = $str;
-        } else if( is_array($this->error) ) {
-            $this->error[] = $str;
+        $this->error = $str;
+        
+        if( empty($this->allErrors) ){
+            $this->allErrors[] = $str;
+        } else if( is_string($this->allErrors) ){
+            $tmp = $this->allErrors;
+            $this->allErrors = null;
+            $this->allErrors[] = $tmp;
+            $this->allErrors[] = $str;
+        } else if( is_array($this->allErrors) ) {
+            $this->allErrors[] = $str;
         }
     }
 
