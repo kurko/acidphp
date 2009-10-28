@@ -55,6 +55,34 @@ class Component
     }
 
     /**
+     * afterAfterFilter()
+     *
+     * Acontece depois do BeforeFilter() do controller
+     */
+    function beforeBeforeFilter(){ }
+
+    /**
+     * afterAfterFilter()
+     *
+     * Acontece depois do BeforeFilter() do controller
+     */
+    function afterBeforeFilter(){ }
+
+    /**
+     * afterAfterFilter()
+     *
+     * Acontece depois do BeforeFilter() do controller
+     */
+    function beforeAfterFilter(){ }
+
+    /**
+     * afterAfterFilter()
+     *
+     * Acontece depois do BeforeFilter() do controller
+     */
+    function afterAfterFilter(){ }
+
+    /**
      * MÉTODOS DE INFORMAÇÕES SOBRE CLASSE
      */
     /**

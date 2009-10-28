@@ -97,6 +97,12 @@ class AuthComponent extends Component
     public $logged;
 
     /**
+     *
+     * @var array Contém dados do usuário logado
+     */
+    public $user;
+
+    /**
      * CONFIGURAÇÃO
      */
         /**
@@ -155,6 +161,34 @@ class AuthComponent extends Component
         $this->forbidden = false;
 
         $this->checkLogin();
+    }
+
+    /**
+     * beforeBeforeFilter()
+     *
+     * Cria variáveis importantes para os controllers, como carregar os dados
+     * dos usuários.
+     *
+     * @return bool
+     */
+    public function beforeBeforeFilter(){
+        /*
+         * LOGADO
+         *
+         * Verifica se o usuário logado e salva suas informações em
+         */
+        if( $this->checkLogin() ){
+
+            /*
+             * Guarda informações sobre o usuário atual
+             */
+            if( !empty($_SESSION["Sys"]["Auth"]["user"]) ){
+                $this->user = $_SESSION["Sys"]["Auth"]["user"];
+            }
+
+        }
+
+        return true;
     }
 
     /**
@@ -316,8 +350,9 @@ class AuthComponent extends Component
 
                         $_SESSION["Sys"]["Auth"]["logged"] = true;
                         $_SESSION["Sys"]["Auth"]["startMicrotime"] = microtime(true);
-                        $_SESSION["Sys"]["Auth"][$this->model()] =
+                        $_SESSION["Sys"]["Auth"]["user"][$this->model()] =
                             $result[$tempResult[0]][$this->model()];
+
                         
                         /*
                          * Verifica se deve-se fazer redirecionamento automático
@@ -474,7 +509,7 @@ class AuthComponent extends Component
          * LOGADO
          */
         else {
-            
+
             if( !empty($_SESSION["Sys"]["Auth"]["autoRedirect"]) )
                 unset($_SESSION["Sys"]["Auth"]["autoRedirect"]);
 
@@ -692,11 +727,14 @@ class AuthComponent extends Component
         /**
          * Verifica se usuário está logado
          */
-        if( !empty($_SESSION["Sys"]["Auth"]["logged"]) AND $_SESSION["Sys"]["Auth"]["logged"] == 1 ){
+        if( !empty($_SESSION["Sys"]["Auth"]["logged"])
+            AND $_SESSION["Sys"]["Auth"]["logged"] == "1" )
+        {
             $this->logged = true;
         } else {
             $this->logged = false;
         }
+        return $this->logged;
     }
 }
 ?>

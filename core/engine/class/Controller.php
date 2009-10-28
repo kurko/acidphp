@@ -699,19 +699,28 @@ class Controller
          * Se o action existe
          */
         if( $actionExists ){
+
+            /*
+             * COMPONENTS
+             *
+             * -> beforeBeforeFilter()
+             */
+            foreach( $this->loadedComponents as $component ){
+                $this->$component->beforeBeforeFilter();
+            }
+
             /**
              * $this->beforeFilter() é chamado sempre antes de qualquer ação
              */
             $this->beforeFilter();
-            /**
-             * Components->afterBeforeFilter()
+
+            /*
+             * COMPONENTS
              *
-             * Se há afterBeforeFilter() no component, carrega
+             * -> afterBeforeFilter()
              */
             foreach( $this->loadedComponents as $component ){
-                if( method_exists($this->$component, "afterBeforeFilter") ){
-                    $this->$component->afterBeforeFilter();
-                }
+                $this->$component->afterBeforeFilter();
             }
 
             /**
@@ -727,16 +736,34 @@ class Controller
             else if( !$this->isRendered )
                 $this->render( false );
 
-
+            /*
+             * COMPONENTS
+             *
+             * -> beforeAfterFilter()
+             */
+            foreach( $this->loadedComponents as $component ){
+                $this->$component->beforeAfterFilter();
+            }
 
             /*
              * HELPERS AFTERFILTER()
              */
             $this->_helperAfterFilter();
+
             /**
              * $this->afterFilter() é chamado sempre depois de qualquer ação
              */
             $this->afterFilter();
+
+            /*
+             * COMPONENTS
+             *
+             * -> afterAfterFilter()
+             */
+            foreach( $this->loadedComponents as $component ){
+                $this->$component->afterAfterFilter();
+            }
+
         }
     }
 
