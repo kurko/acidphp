@@ -53,8 +53,14 @@ class HtmlHelper extends Helper
      * CONFIRM()
      *
      * Chama $this->link, mas perguntando antes se o usuário confirma a ação
+     *
+     * @param string $message Mensagem de confirmação
+     * @param string $linkText Texto do link
+     * @param string $linkDestination URL Destino
+     * @param array $options
+     * @return string
      */
-    public function confirm($linkText, $linkDestination, $message, array $options = array() ){
+    public function confirm($message, $linkText, $linkDestination, array $options = array() ){
         $options["onclick"] = "if(confirm('$message')) return true; else return false;";
         return $this->link($linkText, $linkDestination, $options);
     }

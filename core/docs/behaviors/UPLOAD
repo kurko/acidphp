@@ -98,6 +98,11 @@ mais adiante):
         app/public/uploads/2009/10/ e assim subsequentemente, salvando arquivos
         lá. Desta forma, seus arquivos ficam mais organizados. True por padrão.
 
+    $filenameType;
+        Por padrão, o nome do arquivo inserido não é alterado. Ajuste
+        $filenameType para 'sha1' para que o nome do arquivo seja convertido
+        em hash SHA1. 'md5' também é aceito.
+
 Para configurar, por exemplo, a largura máxima para 1024, use o código abaixo.
 
 <source lang="php">
@@ -120,6 +125,8 @@ Nas propriedades a seguir, você tem acesso a alguns valores úteis.
     $error;
         Array que contém os erros ocorridos no UploadBehavior.
 
-    $lastInsertPath;
-        Endereço físico do último arquivo inserido.
+    $lastWebPath;
+        Endereço para Web do arquivo inserido.
 
+    $lastSystemPath;
+        Endereço físico do sistema do último arquivo inserido.
