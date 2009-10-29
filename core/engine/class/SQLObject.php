@@ -153,20 +153,37 @@ class SQLObject {
              */
             if( is_array($options["fields"]) ){
                 foreach( $options["fields"] as $campo ){
-                    /**
-                     * Verifica sintaxe: "Model.campo"
-                     */
-                    $underlinePos = strpos($campo, "." );
-                    if( $underlinePos !== false ){
-                        /**
-                         * Model do campo usado
-                         */
-                        $modelReturned = substr( $campo, 0, $underlinePos );
-                    }
 
-                    if( in_array($modelReturned, $options["models"]) ){
-                        $fieldModelUsed[$modelReturned] = $modelReturned;
-                        $fields[] = $campo. " AS '".str_replace(".", $separadorModelCampo, $campo)."'";
+                    /*
+                     * 'Field' com espaço
+                     *
+                     * Quando field tem espaço é pq tem alguma regra especial,
+                     * então não insere 'AS Model.campo1' no final.
+                     */
+                    $space = strpos($campo, " " );
+                    if( $space !== false ){
+                        $fields[] = $campo;
+                    }
+                    /*
+                     * Field deve ser tratado
+                     */
+                    else {
+                        
+                        /**
+                         * Verifica sintaxe: "Model.campo"
+                         */
+                        $underlinePos = strpos($campo, "." );
+                        if( $underlinePos !== false ){
+                            /**
+                             * Model do campo usado
+                             */
+                            $modelReturned = substr( $campo, 0, $underlinePos );
+                        }
+
+                        if( in_array($modelReturned, $options["models"]) ){
+                            $fieldModelUsed[$modelReturned] = $modelReturned;
+                            $fields[] = $campo. " AS '".str_replace(".", $separadorModelCampo, $campo)."'";
+                        }
                     }
                 }
                 /**
