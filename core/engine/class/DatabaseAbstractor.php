@@ -144,7 +144,17 @@ class DatabaseAbstractor extends DataAbstractor
             $mainModel->hasMany = $hasManyTemp;
 
             /**
-             * Se há dados no banco de dados
+             * HASMANY
+             *
+             * Se há dados no banco de dados, faz busca hasMany separado.
+             *
+             * Como um registro X pode ter vários registros Y, não é possível
+             * realizar uma busca conjunta de X e Y no mesmo SQL, pois usando
+             * LIMIT limitaremos X (ex. últimos 10 X), mas também limitaremos
+             * Y que pode ter 100 registros.
+             *
+             * Assim, fazemos o query do subModel ( neste caso seria Y)
+             * separadamente.
              */
             if( !empty($mainIds) ){
                 /**
@@ -160,7 +170,8 @@ class DatabaseAbstractor extends DataAbstractor
                             $model.".".$properties["foreignKey"] => $mainIds,
                         )
                     );
-                    $subOptions["order"] = ( empty($options["order"]) ) ? "" : $options["order"];
+                    //$subOptions["order"] = ( empty($options["order"]) ) ? "" : $options["order"];
+                    $subOptions["order"] = "";
                     $sql = array_merge($sql, $this->sqlObject->select($subOptions) );
                 }
             }

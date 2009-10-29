@@ -454,8 +454,6 @@ class Model
                                 }
                             }
 
-                            pr($camposStr);
-
                             if( !empty($camposStr) ){
                                 /**
                                  * @todo - comentar

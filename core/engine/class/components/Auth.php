@@ -182,6 +182,7 @@ class AuthComponent extends Component
             /*
              * Guarda informações sobre o usuário atual
              */
+
             if( !empty($_SESSION["Sys"]["Auth"]["user"]) ){
                 $this->user = $_SESSION["Sys"]["Auth"]["user"];
             }
