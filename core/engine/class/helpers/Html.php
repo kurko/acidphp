@@ -108,6 +108,19 @@ class HtmlHelper extends Helper
         }
     }
     /**
+     * image() alias
+     *
+     * É um alias para $this->image()
+     *
+     * @param string $url
+     * @param array $options
+     * @return string
+     */
+    public function img($url, $options = array()){
+        return $this->image($url, $options);
+    }
+
+    /**
      * Cria e retorna o código HTML para carregar um arquivo CSS
      *
      * @param string $path Caminho para o arquivo CSS
