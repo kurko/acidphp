@@ -7,8 +7,7 @@
  * @author Alexandre de Oliveira <chavedomundo@gmail.com>
  * @since v0.1, 19/07/2009
  */
-class DatabaseAbstractor extends DataAbstractor
-{
+class DatabaseAbstractor extends DataAbstractor {
     /**
      * CONFIGURAÇÕES
      */
@@ -44,7 +43,7 @@ class DatabaseAbstractor extends DataAbstractor
          * Configura a conexão com a base de dados
          */
         $this->conn = ( empty($params["conn"]) ) ? '' : $params["conn"];
-        
+
 
         /**
          * Instancia sqlObject;
@@ -81,7 +80,7 @@ class DatabaseAbstractor extends DataAbstractor
      * @return array Resultado da base de dados no formato requisitado
      */
     public function find($options, $mode = "all"){
-        
+
         $findStartTime = microtime(true);
         /**
          * Configuração inicial
@@ -99,13 +98,13 @@ class DatabaseAbstractor extends DataAbstractor
          */
         /**
          * LIMIT
-         * 
+         *
          * Verificação: Se SQL Limit definido
          */
         if( !empty($options["limit"]) ){
             /**
              * hasMany
-             * 
+             *
              * Desativa relacionamentos hasMany para buscá-los separadamente
              */
             $hasManyTemp = $mainModel->hasMany;
@@ -116,7 +115,7 @@ class DatabaseAbstractor extends DataAbstractor
              * Toma os códigos SQL gerados por sqlObject para o Model principal
              */
             $sql = $this->sqlObject->select($options);
-            
+
             /**
              * Carrega os dados da tabela principal
              */
@@ -128,7 +127,7 @@ class DatabaseAbstractor extends DataAbstractor
                 }
             }
             //pr($query);
-            
+
             /**
              * Desmancha $sql do model principal para não haver recarregamento
              */
@@ -190,7 +189,7 @@ class DatabaseAbstractor extends DataAbstractor
 
         /**
          * RETURN
-         * 
+         *
          * Retorna dados para Models
          */
         /**
@@ -252,10 +251,6 @@ class DatabaseAbstractor extends DataAbstractor
             $i++;
 
         }
-        //echo "<table width=100%><tr><td style='font-size: 12px;'>";
-        //pr($tempResult);
-        //echo $o;
-        //echo "</td></tr></table>";
 
         $loopEndTime = microtime(true);
         /**
@@ -324,6 +319,7 @@ class DatabaseAbstractor extends DataAbstractor
         $loopEndTime = ( empty($loopEndTime) ) ? microtime(true) : $loopEndTime;
         //echo "Loop Time: ".($loopEndTime - $loopStartTime)."<br />";
 
+
         Config::write("dataFormatted", $loopProcessments);
         Config::write("modelLoops", $loopEndTime - $loopStartTime);
         Config::add("findStartTime", array($findEndTime - $findStartTime) );
@@ -379,5 +375,4 @@ class DatabaseAbstractor extends DataAbstractor
         return $registro;
 
     } // fim find()
-}
-?>
+} ?>
