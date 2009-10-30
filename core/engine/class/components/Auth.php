@@ -206,16 +206,32 @@ class AuthComponent extends Component
         $actionCommand = "";
 
         /*
+         * 
          * EXPIRE TIME
+         *
          */
-        if( !empty($this->expireTime) ){
+        /*
+         * Se foi configurado um tempo limite da sessão autenticada
+         */
+        if( !empty($this->expireTime) OR $this->expireTime > 0 ){
 
             if( !empty($_SESSION["Sys"]["Auth"]["startMicrotime"]) ){
 
                 $expireTimeInSec = $this->expireTime * 60;
+
+                /*
+                 * Sets the session lifetime
+                 */
+                try {
+                    ini_set("session.gc_maxlifetime", $expireTimeInSec); // in seconds
+                } catch(exception $e){
+
+                }
+
                 $elapsedTime = microtime(true) - $_SESSION["Sys"]["Auth"]["startMicrotime"];
 
                 if( $elapsedTime > $expireTimeInSec ){
+                    $this->logout();
                     $actionCommand = "logout";
                 }
             }
@@ -224,7 +240,17 @@ class AuthComponent extends Component
              * Update actual microtime
              */
             $_SESSION["Sys"]["Auth"]["startMicrotime"] = microtime(true);
+        }
+        /*
+         * Não foi especificado um tempo limite da sessão, então é infinito
+         * (até o browser ser fechado)
+         */
+        else {
+            try {
+                ini_set("session.gc_maxlifetime", 0); // in seconds
+            } catch(exception $e){
 
+            }
         }
 
         /**
@@ -233,10 +259,11 @@ class AuthComponent extends Component
          * Redireciona para $this->loginPage
          */
         if( $this->params["action"] == "logout" or $actionCommand == "logout" ){
-            unset($_SESSION["Sys"]["Auth"]);
-            unset($_SESSION["Sys"]["FormHelper"]["statusMessage"]);
-            $this->checkLogin();
-            redirect( translateUrl( $this->loginPage() ) );
+
+            /*
+             * Precisa de explicação? :)
+             */
+            $this->logout();
         }
 
         /**
@@ -372,9 +399,9 @@ class AuthComponent extends Component
                             /*
                              * Redireciona para a última página acessada
                              */
-                            header("Location: ". translateUrl( $newUrl ) );
+                            redirect( $newUrl );
                         } else {
-                            header("Location: ". translateUrl( $this->redirectTo() ) );
+                            redirect( $this->redirectTo() );
                         }
                         
                     }
@@ -736,6 +763,24 @@ class AuthComponent extends Component
             $this->logged = false;
         }
         return $this->logged;
+    }
+
+    /*
+     *
+     * MÉTODOS DE AÇÃO
+     *
+     */
+    /**
+     * logout()
+     * 
+     * Faz logout do usuário logado.
+     */
+    public function logout(){
+        unset($_SESSION["Sys"]["Auth"]);
+        unset($_SESSION["Sys"]["FormHelper"]["statusMessage"]);
+        $this->checkLogin();
+        redirect( $this->loginPage() );
+        return false;
     }
 }
 ?>

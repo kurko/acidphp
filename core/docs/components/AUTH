@@ -103,5 +103,41 @@ c) deny(a)              -> bloqueia somente a e libera o resto
 
 === Formulários de Login ===
 
-Veja o doc sobre o FormHelper para saber como criar o formulário de login
-automaticamente.
+Para criar um formulário de login, basta criar um formulário usando FormHelper
+como qualquer outro usando. O AuthComponent vai tentar autenticar com os
+dados enviados. Se você usou os campos 'email' e 'senha', ele vai verificar se
+um usuário existe com estas informações. Se você usar três, quatro ou quantos
+campos você quiser, o Auth sempre vai autenticar usando TODOS os dados que você
+enviar
+
+Exemplo de formulário de login:
+    <?php
+    echo $form->create("Usuario", array(
+            "controller" => "site",
+            "action" => "login",
+        ));
+
+    echo $form->statusMessage(); // Mostra mensagens de erro
+
+    echo $form->input("email");
+    echo $form->input("senha");
+    echo $form->end("Enviar");
+    ?>
+
+No formulário acima, não importa o local que você redirecione o formulário,
+desde que seja um controller e um action existentes. O Auth sempre vai
+levar o usuário para o que estiver configurado em $this->auth->redirectTo em
+caso de sucesso ou para a tela de login caso não ocorra a autenticação dos
+dados.
+
+Para Logout, basta redirecionar para o action chamado 'logout' de qualquer
+controller. O Auth considera que um action 'logout' é para deslogar o usuário
+logado.
+
+=== Logout manual no controller ===
+
+O Auth faz logout automaticamente para você, basta acessar um action chamado
+'logout'. Entretanto, se você quer fazer logout manualmente, no seu
+controller use o comando:
+
+$this->auth->logout();
