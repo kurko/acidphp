@@ -110,7 +110,7 @@ function redirect($url){
      * Redireciona
      */
     if( !empty($url) ){
-        header("Status: 200");
+        //header("Status: 200"); if needed for IE6
         header("Location: ". $url);
         exit();
         return false;
