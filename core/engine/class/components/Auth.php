@@ -101,6 +101,14 @@ class AuthComponent extends Component
      * @var array Contém dados do usuário logado
      */
     public $user;
+    /**
+     * Loaded Models
+     *
+     * @var array Contém quais models devem ser carregados. Se nenhum for
+     * especificado, carrega todos.
+     */
+    public $userModels = array();
+
 
     /**
      * CONFIGURAÇÃO
@@ -301,7 +309,6 @@ class AuthComponent extends Component
          * Verifica se dados enviados estão corretos para Login
          */
         if( !$this->logged AND !empty($this->data) ){
-            
             /**
              * Assegura os dados passados pelo usuário
              */
@@ -322,15 +329,22 @@ class AuthComponent extends Component
                      * Carrega o $model verdadeiro relacionado ao Login
                      */
                     $model = $this->models[ $this->model() ];
-                    $dataFields = $data[ $this->model() ];
-                    /**
-                     * Cria conditions
-                     */
+                    $dataFields = $data;
 
-                    //pr($this->models[$this->model()]->tableDescribed);
-                    foreach( $dataFields as $campo=>$valor ){
-                        if( array_key_exists( $campo, $this->models[$this->model()]->tableDescribed ) ){
-                            $conditions[$this->model().'.'.$campo] = $valor;
+                    /**
+                     * Cria conditions para SQL
+                     */
+                    /*
+                     * Loop por cada model passado
+                     */
+                    foreach( $dataFields as $fieldModel=>$campos ){
+                        /*
+                         * Loop por cada campo
+                         */
+                        foreach( $campos as $campo=>$valor ){
+                            if( array_key_exists( $campo, $this->models[$fieldModel]->tableDescribed ) ){
+                                $conditions[$fieldModel.'.'.$campo] = $valor;
+                            }
                         }
                     }
 
@@ -351,8 +365,29 @@ class AuthComponent extends Component
 
                         $_SESSION["Sys"]["Auth"]["logged"] = true;
                         $_SESSION["Sys"]["Auth"]["startMicrotime"] = microtime(true);
-                        $_SESSION["Sys"]["Auth"]["user"][$this->model()] =
-                            $result[$tempResult[0]][$this->model()];
+
+                        /*
+                         * Carrega dados do usuário e guarda em $auth->user
+                         */
+                        if( $this->userModels === false ){
+                            $_SESSION["Sys"]["Auth"]["user"] = array();
+                        } else if( empty($this->userModels) ){
+                            $_SESSION["Sys"]["Auth"]["user"] =
+                                $result[$tempResult[0]];
+                        } else {
+                            if( is_array($this->userModels) ){
+                                foreach( $this->userModels as $modelToLoad){
+                                    if( !empty($result[$tempResult[0]][$modelToLoad]) ){
+                                        $_SESSION["Sys"]["Auth"]["user"][$modelToLoad] =
+                                            $result[$tempResult[0]][$modelToLoad];
+                                    }
+                                }
+                            } else {
+                                $_SESSION["Sys"]["Auth"]["user"][$this->model()] =
+                                    $result[$tempResult[0]][$this->model()];
+                            }
+                        }
+
 
                         
                         /*

@@ -105,3 +105,11 @@ c) deny(a)              -> bloqueia somente a e libera o resto
 
 Veja o doc sobre o FormHelper para saber como criar o formulário de login
 automaticamente.
+
+
+=== Carregando dados de usuários ===
+
+Ajuste $this->auth->userModels para dizer quais models devem ser carregados
+e guardados em Auth::user. Auth::userModels é uma array. Se não for especificado
+nada, serão carregados todos os models relacionados ao model principal de
+autenticação. Se false for especificado, não guarda nenhum model.
