@@ -265,13 +265,14 @@ class UploadBehavior extends Behavior
 
         if( $this->autoOrganizeFolders ){
             $dirToUpload.= date("Y")."/";
+
             if( !is_dir($dirToUpload) ){
-                if( mkdir($dirToUpload) ){
+                if( mkdir($dirToUpload, 0755) ){
                     chmod($dirToUpload, 0777);
 
                     $dirToUpload.= date("m") . "/";
                     if( !is_dir($dirToUpload) ){
-                        if( mkdir($dirToUpload) ){
+                        if( mkdir($dirToUpload, 0755) ){
                             chmod($dirToUpload, 0777);
                         } else {
                             showError("Permission denied on creating year/ dir for uploading files. Verify this.");
@@ -285,6 +286,14 @@ class UploadBehavior extends Behavior
 
             } else {
                 $dirToUpload.= date("m") . "/";
+                if( !is_dir($dirToUpload) ){
+                    if( mkdir($dirToUpload, 0755) ){
+                        chmod($dirToUpload, 0777);
+                    } else {
+                        showError("Permission denied on creating month/ dir for uploading files. Verify this.");
+                        return false;
+                    }
+                }
             }
         }
 
