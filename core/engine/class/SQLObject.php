@@ -136,8 +136,10 @@ class SQLObject {
                 /**
                  * Loop por cada campo da tabela para montar Fields
                  */
-                foreach( $model->tableDescribed as $campo=>$info ){
-                    $fields[] = get_class( $model ).".".$campo." AS '".get_class( $model ).$separadorModelCampo.$campo."'";
+                if( is_array($model->tableDescribed) ){
+                    foreach( $model->tableDescribed as $campo=>$info ){
+                        $fields[] = get_class( $model ).".".$campo." AS '".get_class( $model ).$separadorModelCampo.$campo."'";
+                    }
                 }
             }
         }
