@@ -270,7 +270,6 @@ class DatabaseAbstractor extends DataAbstractor {
          * Loop por cada item do banco de dados retornado
          */
         $loopProcessments = 0;
-
         foreach( $tempResult as $chave=>$index ){
 
             $hasManyResult = array();

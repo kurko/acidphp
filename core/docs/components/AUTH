@@ -107,9 +107,27 @@ Veja o doc sobre o FormHelper para saber como criar o formulário de login
 automaticamente.
 
 
-=== Carregando dados de usuários ===
+=== Carregando dados personalizados de usuários ===
 
 Ajuste $this->auth->userModels para dizer quais models devem ser carregados
 e guardados em Auth::user. Auth::userModels é uma array. Se não for especificado
 nada, serão carregados todos os models relacionados ao model principal de
 autenticação. Se false for especificado, não guarda nenhum model.
+
+=== Campos obrigatórios ===
+
+Você pode definir que algum campo seja obrigatório no formulário de login. Isto
+evita fraudes.
+
+Por padrão, independente dos campos, é necessário que o usuário especifique dois
+campos existentes no banco de dados. Se você quiser configurar manualmente quais
+campos são obrigatórios, use Auth::requiredFields() no seu app_controller,
+assim:
+
+$this->auth->requiredFields( array("Usuario.email", "UsuarioPassw.passw") );
+
+No código acima, estamos especificando apenas dois campos, mas pode-se
+especificar quantos se quiser.
+
+Igualmente, se você deseja que somente um campo seja enviado, especifique
+apenas um campo.

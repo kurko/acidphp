@@ -148,6 +148,19 @@ class AuthComponent extends Component
             "password" => "password"
         );
 
+        public $requiredFields = array();
+
+    /*
+     * CONFIGURAÇÕES INTERNAS
+     */
+
+    /**
+     *
+     * @var int Quantos campos devem ser enviados no mínimo num formulário
+     * (exceto se especificado $this->requiredFields)
+     */
+    public $_minimumSentFields = 2;
+
     /**
      * MENSAGENS DE STATUS
      */
@@ -337,6 +350,7 @@ class AuthComponent extends Component
                     /*
                      * Loop por cada model passado
                      */
+                    $sentFields = array();
                     foreach( $dataFields as $fieldModel=>$campos ){
                         /*
                          * Loop por cada campo
@@ -344,9 +358,15 @@ class AuthComponent extends Component
                         foreach( $campos as $campo=>$valor ){
                             if( array_key_exists( $campo, $this->models[$fieldModel]->tableDescribed ) ){
                                 $conditions[$fieldModel.'.'.$campo] = $valor;
+                                /*
+                                 * Indica quantos campos foram enviados.
+                                 */
+                                $sentFields[$fieldModel][$campo] = true;
                             }
                         }
                     }
+
+                    $processStatus = $this->_checkSentFields( $dataFields );
 
                     $result = $model->find( array(
                                                 "conditions" => $conditions
@@ -360,7 +380,10 @@ class AuthComponent extends Component
                     /**
                      * Usuário existe
                      */
-                    if( !empty($result) AND count($result) > 0 ){
+                    if( !empty($result)
+                        AND count($result) > 0
+                        AND $processStatus )
+                    {
                         $this->logged = true;
 
                         $_SESSION["Sys"]["Auth"]["logged"] = true;
@@ -751,6 +774,22 @@ class AuthComponent extends Component
     }
 
     /**
+     * requiredFields()
+     *
+     * Ajusta ou retorna quais campos devem ser enviados obrigatoriamente
+     *
+     * @param array $fields
+     * @author Alexandre de Oliveira <chavedomundo@gmail.com>
+     */
+    public function requiredFields($fields = array()){
+        if( !empty($fields) ){
+            $this->requiredFields = $fields;
+        } else {
+            return $this->requiredFields;
+        }
+    }
+
+    /**
      * MÉTODOS DE VERIFICAÇÃO
      */
     /**
@@ -771,6 +810,57 @@ class AuthComponent extends Component
             $this->logged = false;
         }
         return $this->logged;
+    }
+
+    public function _checkSentFields($data = array(), $customRequiredFields = array() ){
+        if( empty($data) )
+            return false;
+
+        /*
+         * Loop por cada model
+         */
+        $numSentFields = 0;
+        foreach( $data as $fieldModel=>$campos ){
+
+            /*
+             * Loop por cada campo do model
+             */
+            foreach( $campos as $campo=>$valor ){
+                if( array_key_exists( $campo, $this->models[$fieldModel]->tableDescribed ) ){
+                    $conditions[] = $fieldModel.'.'.$campo;
+
+                    if( $this->model == $fieldModel )
+                        $conditions[] = $campo;
+                    /*
+                     * Indica quantos campos foram enviados.
+                     */
+                    $numSentFields++;
+                }
+            }
+        }
+
+        if( empty($customRequiredFields) )
+            $requiredFields = $this->requiredFields;
+        else
+            $requiredFields = $customRequiredFields;
+            
+        if( empty($requiredFields) ){
+            if( $numSentFields < $this->_minimumSentFields )
+                return false;
+        } else {
+             if( is_string($requiredFields) ){
+                 $requiredFields = array($requiredFields);
+             }
+
+             foreach( $requiredFields as $campo ){
+                 if( !in_array($campo, $conditions) ){
+                     return false;
+                 }
+             }
+
+        }
+
+        return true;
     }
 }
 ?>

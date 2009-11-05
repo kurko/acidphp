@@ -149,15 +149,24 @@ class FormHelper extends Helper
         $this->modelProperties["describedTables"] = $describedTables;
 
         /**
-         * Controller
+         * APP
+         *
+         * O formulário pode ser redirecionado para outra aplicação.
+         */
+        $app = ( empty($options["app"]) ) ? "" : $options["app"];
+        if( !empty($options["app"]) ) unset($options["app"]);
+
+        /**
+         * CONTROLLER
          *
          * Verifica se o usuário especificou um controller que deverá
          * ser usado para salvar as informações do formulário
          */
         $controller = (empty($options["controller"])) ? strtolower($this->modelName) : $options["controller"];
         if( !empty($options["controller"]) ) unset($options["controller"]);
+
         /**
-         * Action
+         * ACTION
          *
          * O action padrão para salvar um formulário é 'save'
          */
@@ -191,7 +200,18 @@ class FormHelper extends Helper
         /**
          * ABRE FORMULÁRIO
          */
-        $this->destionationUrl = WEBROOT.''.$controller.'/'.$action."/";
+
+        /*
+         * Tem app?
+         */
+        $appUrl = '';
+        if( !empty($app) )
+            $appUrl = $app.'/';
+
+        /*
+         * Define 'action' do <form>
+         */
+        $this->destionationUrl = WEBROOT.$appUrl.$controller.'/'.$action."/";
 
         if( !empty($options) AND is_array($options) ){
             foreach($options as $property=>$value){
