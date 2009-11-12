@@ -493,7 +493,15 @@ class SQLObject {
              * Loop por cada campo passado como parâmetro
              */
             foreach($cond as $campo=>$valor){
-                
+
+                $emptyCampo = false;
+                if( empty($campo)
+                    OR is_int($campo) )
+                {
+                    $campo = "";
+                    $emptyCampo = true;
+                }
+
                 /**
                  * Ajusta modos
                  *
@@ -566,9 +574,12 @@ class SQLObject {
                      * Se models foram passados, verifica se o nome do campo
                      * digitado é condizente com o schema do DB
                      */
-                    if( !empty($options["models"]) ){
+                    if( !empty($options["models"]) 
+                        AND !$emptyCampo)
+                    {
                         $underlinePos = strpos($campo, "." );
-                        if( $underlinePos !== false ){
+                        if( $underlinePos !== false )
+                        {
                             /**
                              * Model e Campo
                              */
@@ -596,6 +607,15 @@ class SQLObject {
                      */
                     if( empty($campoError) OR !$campoError ){
 
+                        $space = strpos($campo, " " );
+
+                        /*
+                         * Não há um field especificado, somente um valor na
+                         * array, tipo array("Usuario.id='10'"), sem um índice.
+                         */
+                        if( $emptyCampo ){
+                            $rules[] = $valor[0];
+                        }
                         /*
                          * REGRAS EXCEÇÕES
                          *
@@ -603,9 +623,7 @@ class SQLObject {
                          *
                          *      LIKE, >, <, !=
                          */
-                        $space = strpos($campo, " " );
-                        
-                        if( $space !== false ){
+                        else if( $space !== false ){
                             $rules[] = $campo .' \''. $valor[0] . '\'';
                         }
                         /*
