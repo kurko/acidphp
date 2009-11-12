@@ -39,20 +39,27 @@ $scriptNameDivided = array_reverse( explode("/", $scriptName ) );
 
 $app = $scriptNameDivided[0];
 
+    /*
+     * Verifica o diretório anterior a app. Se alguém inventar de criar algo como
+     * app/app/app/, isto pode dar problema para descobrir o WEBROOT_ABSOLUTE.
+     */
+        $equalAppBeforeAppDir = false;
+        if( !empty($scriptNameDivided[1]) ){
+            $beforeAppDir = $scriptNameDivided[1];
+
+            if( $app == $beforeAppDir)
+                $equalAppBeforeAppDir = true;
+
+        } else {
+            $beforeAppDir = "";
+        }
+
 /*
- * Verifica o diretório anterior a app. Se alguém inventar de criar algo como
- * app/app/app/, isto pode dar problema para descobrir o WEBROOT_ABSOLUTE.
+ * ROOT DIR
+ *
+ * Contém o endereço da aplicação sem app alguma na URL.
  */
-    $equalAppBeforeAppDir = false;
-    if( !empty($scriptNameDivided[1]) ){
-        $beforeAppDir = $scriptNameDivided[1];
-
-        if( $app == $beforeAppDir)
-            $equalAppBeforeAppDir = true;
-
-    } else {
-        $beforeAppDir = "";
-    }
+DEFINE("ROOT", str_replace($app, "", $scriptName ) );
 
 /*
  * VERIFICAÇÃO DE APP REQUISITADA
