@@ -23,6 +23,17 @@ function translateUrl($mixed, $isFile = false){
      * $mixed é array
      */
     if( is_array($mixed) ){
+
+        /*
+         * Define APP
+         */
+        if( isset($mixed["app"])
+            AND is_string($mixed["app"]) ){
+            $app = $mixed["app"]."/";
+        } else {
+            $app = "";
+        }
+
         $controller = ( empty($mixed["controller"]) ) ? $engine->callController : $mixed["controller"];
         $action = ( empty($mixed["action"]) ) ? "index" : $mixed["action"];
         $args = ( empty($mixed[0]) ) ? "" : $mixed[0];
@@ -31,7 +42,19 @@ function translateUrl($mixed, $isFile = false){
             $args = "/".$args;
         }
 
-        $url = $engine->webroot.$controller."/".$action.$args;
+        /*
+         * Se app é vazio mas existe, acessa app sem nome, que é automaticamente
+         * levado para app/.
+         */
+        if( !empty($app) ){
+            $rootDir = ROOT;
+            if( $app == "/" )
+                $app = "";
+        } else {
+            $rootDir = $engine->webroot;
+        }
+
+        $url = $rootDir.$app.$controller."/".$action.$args;
     }
     /**
      * $mixed é string

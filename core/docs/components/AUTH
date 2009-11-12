@@ -131,3 +131,40 @@ especificar quantos se quiser.
 
 Igualmente, se você deseja que somente um campo seja enviado, especifique
 apenas um campo.
+
+=== Propriedades ===
+
+As propriedades presentes neste componente.
+
+$this->auth->model("Usuario");
+    Qual é o model que contém username e password dos usuários para login
+
+$this->auth->allow( mixed )
+    Indica numa array quais os controllers e actions são permitidos o acesso
+    sem autenticação.
+
+$this->auth->expireTime( integer )
+    Use a linha abaixo somente se você deseja deslogar o usuário após
+    x minutos de inatividade. Não use este comando para permitir inatividade.
+    Tempo em minutos.
+
+$this->auth->redirectTo( mixed );
+    Após login com sucesso, para onde o usuário deve ser redirecionado.
+    Exemplo de argumento: array("controller" => "site", "action" => "index")
+
+$this->auth->logoutRedirectTo( mixed );
+    Determina para onde o usuário deve ser redirecionado após logout.
+    Exemplo de argumento: array("controller" => "site", "action" => "index")
+
+$this->auth->autoRedirect(true);
+    Redirecionamento automático para a última página acessada (opcional).
+
+$this->auth->loginPage( array("controller" => "site", "action" => "login") );
+    Qual é a página de login.
+
+$this->auth->errorMessage("Seus dados estão incorretos!");
+    Mensagem de erro: dados incorretos.
+
+$this->auth->deniedMessage("Você não tem permissão de acesso!");
+    Mensagem de erro: quando usuário tenta acessar action proibida.
+

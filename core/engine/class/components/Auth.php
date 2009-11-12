@@ -135,9 +135,16 @@ class AuthComponent extends Component
         protected $expireTime = "";
         /**
          *
-         * @var array Endereço para onde deve ser redirecionado o usuário após login
+         * @var mixed Endereço para onde deve ser redirecionado o usuário após login
          */
         public $redirectTo;
+
+        /**
+         *
+         * @var mixed Endereço para onde deve ser redirecionado o usuário após
+         * logout. Pode ser formato array ou string
+         */
+        public $logoutRedirectTo;
 
         /**
          *
@@ -254,10 +261,7 @@ class AuthComponent extends Component
          * Redireciona para $this->loginPage
          */
         if( $this->params["action"] == "logout" or $actionCommand == "logout" ){
-            unset($_SESSION["Sys"]["Auth"]);
-            unset($_SESSION["Sys"]["FormHelper"]["statusMessage"]);
-            $this->checkLogin();
-            redirect( translateUrl( $this->loginPage() ) );
+            return $this->logout();
         }
 
         /**
@@ -626,6 +630,29 @@ class AuthComponent extends Component
     } // fim afterBeforeFilter()
 
     /**
+     * logout()
+     *
+     * Força o Logout
+     *
+     * @return bool
+     */
+    public function logout($redir = true){
+        unset($_SESSION["Sys"]["Auth"]);
+        unset($_SESSION["Sys"]["FormHelper"]["statusMessage"]);
+        $this->checkLogin();
+
+        if( $redir ){
+            if( !empty($this->logoutRedirectTo) )
+                redirect( translateUrl( $this->logoutRedirectTo ) );
+            else
+                redirect( translateUrl( $this->loginPage() ) );
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    /**
      * MÉTODOS DE CONFIGURAÇÃO
      */
     /**
@@ -690,6 +717,21 @@ class AuthComponent extends Component
             return $this->redirectTo;
         }
     }
+    /**
+     * logoutRedirectTo()
+     *
+     * @param array $logoutRedirectTo Contém endereço para onde o usuário será
+     *                          redirecionado após efetuar logout
+     * @author Alexandre de Oliveira <chavedomundo@gmail.com>
+     */
+    public function logoutRedirectTo($logoutRedirectTo=""){
+        if( !empty($logoutRedirectTo) ){
+            $this->logoutRedirectTo = $logoutRedirectTo;
+        } else {
+            return $this->logoutRedirectTo;
+        }
+    }
+    
     /**
      * loginFields()
      *
