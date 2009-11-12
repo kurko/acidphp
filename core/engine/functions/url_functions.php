@@ -34,9 +34,9 @@ function translateUrl($mixed, $isFile = false){
             $app = "";
         }
 
-        $controller = ( empty($mixed["controller"]) ) ? $engine->callController : $mixed["controller"];
-        $action = ( empty($mixed["action"]) ) ? "index" : $mixed["action"];
-        $args = ( empty($mixed[0]) ) ? "" : $mixed[0];
+        $controller = ( empty($mixed["controller"]) ) ? "" : $mixed["controller"]."/";
+        $action = ( empty($mixed["action"]) OR empty($controller) ) ? "" : $mixed["action"];
+        $args = ( empty($mixed[0]) OR empty($action) ) ? "" : $mixed[0];
 
         if( isset($args[0]) AND $args[0] != "/" ){
             $args = "/".$args;
@@ -54,7 +54,7 @@ function translateUrl($mixed, $isFile = false){
             $rootDir = $engine->webroot;
         }
 
-        $url = $rootDir.$app.$controller."/".$action.$args;
+        $url = $rootDir.$app.$controller.$action.$args;
     }
     /**
      * $mixed é string
