@@ -28,7 +28,7 @@ class SQLObject {
      * @return string Código SQL
      */
     public function select($options){
-
+        
         /**
          * AJUSTA MODEL PRINCIPAL
          */
@@ -136,8 +136,10 @@ class SQLObject {
                 /**
                  * Loop por cada campo da tabela para montar Fields
                  */
-                foreach( $model->tableDescribed as $campo=>$info ){
-                    $fields[] = get_class( $model ).".".$campo." AS '".get_class( $model ).$separadorModelCampo.$campo."'";
+                if( is_array($model->tableDescribed) ){
+                    foreach( $model->tableDescribed as $campo=>$info ){
+                        $fields[] = get_class( $model ).".".$campo." AS '".get_class( $model ).$separadorModelCampo.$campo."'";
+                    }
                 }
             }
         }
@@ -186,15 +188,29 @@ class SQLObject {
                         }
                     }
                 }
-                /**
+
+                /*
                  * Sempre carrega junto o id e o foreignKey das tabelas
                  * relacionadas
                  */
                 foreach($fieldModelUsed as $model){
-                    /**
-                     * 'id' do registro
-                     */
-                    $fields[] = $model.".id AS '".$model.$separadorModelCampo."id'";
+
+                    $regex = "/('". $model.$separadorModelCampo."id')/";
+
+                    $loadingIdAlready = false;
+                    foreach( $fields as $soughtField ){
+                        if( preg_match($regex, $soughtField) )
+                            $loadingIdAlready = true;
+                    }
+
+                    if( !$loadingIdAlready ){
+
+                        /**
+                         * 'id' do registro
+                         */
+                        $fields[] = $model.".id AS '".$model.$separadorModelCampo."id'";
+                    }
+                    
                     /**
                      * foreignKey da tabela relacionada
                      */
@@ -273,6 +289,63 @@ class SQLObject {
          */
         if( !empty($order) ) $order = "ORDER BY ".$order;
         else $order = "";
+
+        /************************
+         *
+         * GROUP
+         *
+         * Trata "group" requisitada, que equivale ao GROUP BY de um SQL
+         */
+            /**
+             * Se group não especificada
+             */
+            if( empty($options['group']) ){
+                $group = "";
+            }
+            /**
+             * Se group foi passado em formato array
+             */
+            else if( is_array($options['group']) ) {
+                /**
+                 * Verifica se o campo/Model pedido realmente existe
+                 */
+                foreach( $options["group"] as $chave=>$currentGroup ){
+                    /**
+                     * Verifica sintaxe: "Model.campo"
+                     */
+                    $underlinePos = strpos($currentGroup, "." );
+                    if( $underlinePos !== false ){
+                        /**
+                         * Model do campo usado
+                         */
+                        $modelReturned = substr( $currentGroup, 0, $underlinePos );
+                        $campoReturned = substr( $currentGroup, $underlinePos+1, 100 );
+                    }
+                    if( !in_array($modelReturned, $options["models"]) ){
+
+                        //pr($options);
+                        if( array_key_exists($modelReturned, $options["hiddenHasMany"]) )
+                            unset($options["group"][$chave]);
+                        else
+                            trigger_error( "Specified Model <em>".$modelReturned."</em> is not a related model (hasMany, hasOne, etc)" , E_USER_ERROR);
+                    }
+                }
+
+                if( !empty($options["group"]) )
+                    $group = implode(', ', $options['group']);
+            } else {
+                $group = $options['group'];
+            }
+            /**
+             * Formato final de GROUP BY
+             */
+            if( !empty($group) ) $group = "GROUP BY ".$group;
+            else $group = "";
+            
+        /*
+         * // FIM DE GROUP
+         * 
+         ************************/
 
 
         /**
@@ -365,6 +438,7 @@ class SQLObject {
                     ". implode(", ", $table) ."
                     $leftJoin
                     $rules
+                    $group
                     $order
                     $limit
                 ";
@@ -419,7 +493,15 @@ class SQLObject {
              * Loop por cada campo passado como parâmetro
              */
             foreach($cond as $campo=>$valor){
-                
+
+                $emptyCampo = false;
+                if( empty($campo)
+                    OR is_int($campo) )
+                {
+                    $campo = "";
+                    $emptyCampo = true;
+                }
+
                 /**
                  * Ajusta modos
                  *
@@ -492,9 +574,12 @@ class SQLObject {
                      * Se models foram passados, verifica se o nome do campo
                      * digitado é condizente com o schema do DB
                      */
-                    if( !empty($options["models"]) ){
+                    if( !empty($options["models"]) 
+                        AND !$emptyCampo)
+                    {
                         $underlinePos = strpos($campo, "." );
-                        if( $underlinePos !== false ){
+                        if( $underlinePos !== false )
+                        {
                             /**
                              * Model e Campo
                              */
@@ -522,6 +607,15 @@ class SQLObject {
                      */
                     if( empty($campoError) OR !$campoError ){
 
+                        $space = strpos($campo, " " );
+
+                        /*
+                         * Não há um field especificado, somente um valor na
+                         * array, tipo array("Usuario.id='10'"), sem um índice.
+                         */
+                        if( $emptyCampo ){
+                            $rules[] = $valor[0];
+                        }
                         /*
                          * REGRAS EXCEÇÕES
                          *
@@ -529,9 +623,7 @@ class SQLObject {
                          *
                          *      LIKE, >, <, !=
                          */
-                        $space = strpos($campo, " " );
-                        
-                        if( $space !== false ){
+                        else if( $space !== false ){
                             $rules[] = $campo .' \''. $valor[0] . '\'';
                         }
                         /*
@@ -546,8 +638,8 @@ class SQLObject {
                 }
 
                 unset($glue);
-
             }
+
             /**
              * Ajustes finais da operação atual
              */
@@ -559,13 +651,11 @@ class SQLObject {
                 } else {
                     $rules = implode(' AND ', $rules);
                 }
-            $finalRules[] = '('.$rules.')';
+                $finalRules[] = '('.$rules.')';
             }
-            //pr($rules);
             unset($modo);
             unset($rules);
         }
-        //pr($rules);
         $return = $finalRules;
         return $return;
 

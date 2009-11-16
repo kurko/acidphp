@@ -335,7 +335,6 @@ class Controller
             }
 
         }
-
         $this->webroot = $this->engine->webroot;
 
         /**
@@ -695,76 +694,76 @@ class Controller
         if( Config::read("debug") > 0 )
             $actionExists = true;
 
+
+        /*
+         * COMPONENTS
+         *
+         * -> beforeBeforeFilter()
+         */
+        foreach( $this->loadedComponents as $component ){
+            $this->$component->beforeBeforeFilter();
+        }
+
+        /**
+         * $this->beforeFilter() é chamado sempre antes de qualquer ação
+         */
+        $this->beforeFilter();
+
+        /*
+         * COMPONENTS
+         *
+         * -> afterBeforeFilter()
+         */
+        foreach( $this->loadedComponents as $component ){
+            $this->$component->afterBeforeFilter();
+        }
+
         /**
          * Se o action existe
          */
         if( $actionExists ){
-
-            /*
-             * COMPONENTS
-             *
-             * -> beforeBeforeFilter()
-             */
-            foreach( $this->loadedComponents as $component ){
-                $this->$component->beforeBeforeFilter();
-            }
-
-            /**
-             * $this->beforeFilter() é chamado sempre antes de qualquer ação
-             */
-            $this->beforeFilter();
-
-            /*
-             * COMPONENTS
-             *
-             * -> afterBeforeFilter()
-             */
-            foreach( $this->loadedComponents as $component ){
-                $this->$component->afterBeforeFilter();
-            }
-
             /**
              * Chama a action requerida com seus respectivos argumentos.
              */
             call_user_func_array( array($this, $param['action'] ), $this->params["args"] );
 
-            /**
-             * Se não foi renderizado ainda, renderiza automaticamente
-             */
-            if( !$this->isRendered AND $this->autoRender )
-                $this->render( $this->action );
-            else if( !$this->isRendered )
-                $this->render( false );
-
-            /*
-             * COMPONENTS
-             *
-             * -> beforeAfterFilter()
-             */
-            foreach( $this->loadedComponents as $component ){
-                $this->$component->beforeAfterFilter();
-            }
-
-            /*
-             * HELPERS AFTERFILTER()
-             */
-            $this->_helperAfterFilter();
-
-            /**
-             * $this->afterFilter() é chamado sempre depois de qualquer ação
-             */
-            $this->afterFilter();
-
-            /*
-             * COMPONENTS
-             *
-             * -> afterAfterFilter()
-             */
-            foreach( $this->loadedComponents as $component ){
-                $this->$component->afterAfterFilter();
-            }
-
         }
+        /**
+         * Se não foi renderizado ainda, renderiza automaticamente
+         */
+        if( !$this->isRendered AND $this->autoRender )
+            $this->render( $this->action );
+        else if( !$this->isRendered )
+            $this->render( false );
+
+        /*
+         * COMPONENTS
+         *
+         * -> beforeAfterFilter()
+         */
+        foreach( $this->loadedComponents as $component ){
+            $this->$component->beforeAfterFilter();
+        }
+
+        /*
+         * HELPERS AFTERFILTER()
+         */
+        $this->_helperAfterFilter();
+
+        /**
+         * $this->afterFilter() é chamado sempre depois de qualquer ação
+         */
+        $this->afterFilter();
+
+        /*
+         * COMPONENTS
+         *
+         * -> afterAfterFilter()
+         */
+        foreach( $this->loadedComponents as $component ){
+            $this->$component->afterAfterFilter();
+        }
+
     }
 
     /*

@@ -30,6 +30,38 @@ define("APP_CONFIG_VARIABLES", CORE_DIR."config/app_variables.php");
 include(CORE_CONFIG_VARIABLES);
 
 /*
+ * APP ATUAL
+ *
+ * Toma o nome do diretório da APP atual
+ */
+$scriptName = str_replace("/public/index.php", "", $_SERVER["SCRIPT_NAME"] );
+$scriptNameDivided = array_reverse( explode("/", $scriptName ) );
+
+$app = $scriptNameDivided[0];
+
+    /*
+     * Verifica o diretório anterior a app. Se alguém inventar de criar algo como
+     * app/app/app/, isto pode dar problema para descobrir o WEBROOT_ABSOLUTE.
+     */
+        $equalAppBeforeAppDir = false;
+        if( !empty($scriptNameDivided[1]) ){
+            $beforeAppDir = $scriptNameDivided[1];
+
+            if( $app == $beforeAppDir)
+                $equalAppBeforeAppDir = true;
+
+        } else {
+            $beforeAppDir = "";
+        }
+
+/*
+ * ROOT DIR
+ *
+ * Contém o endereço da aplicação sem app alguma na URL.
+ */
+DEFINE("ROOT", str_replace($app, "", $scriptName ) );
+
+/*
  * VERIFICAÇÃO DE APP REQUISITADA
  */
 
@@ -66,18 +98,44 @@ else {
 include(APP_CONFIG_VARIABLES);
 
 /*
- * GERA UM WEBROOT ABSOLUTO
+ * WEBROOT_ABSOLUTE
  *
- * Este WEBROOT contém sempre o app atual. Assim, é possível salvar imagens com
- * path absoluto.
+ * Esta url contém SEMPRE o app atual ao final. Assim, é possível salvar
+ * imagens com path absoluto, entre outras funcionalidades.
+ *
+ * Ex.:
+ *
+ *      /myfolder/anotherfolder/app/
  */
-if( !empty($webAppRoot[0])
-    AND $webAppRoot[0] == str_replace("/","", WEBROOT) )
-{
-    define("WEBROOT_ABSOLUTE", WEBROOT."app/");
-} else {
-    define("WEBROOT_ABSOLUTE", WEBROOT);
-}
+    /*
+     * O último diretório antes do controller é o mesmo da app
+     */
+    if( !empty($webAppRoot[0])
+        AND $webAppRoot[0] == $app )
+    {
+        define( "WEBROOT_ABSOLUTE", WEBROOT );
+    }
+    /*
+     * O último diretório antes do controller é diferente da app. Isto acontece
+     * quando não se digita o app atual. O padrão é carregar app/
+     */
+    else if( !empty($webAppRoot[0])
+        AND $webAppRoot[0] != $app )
+    {
+        define( "WEBROOT_ABSOLUTE", WEBROOT."app/" );
+    }
+    /*
+     * Se estamos no root do servidor (/), então vemos a app atual.
+     */
+    else if( WEBROOT == "/" ){
+        define( "WEBROOT_ABSOLUTE", "/".$app."/" );
+    }
+    /*
+     * Nenhuma alternativa acima
+     */
+    else {
+        define( "WEBROOT_ABSOLUTE", WEBROOT );
+    }
 
 include(CORE_LOADER);
 include(ENGINE_START);

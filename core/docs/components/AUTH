@@ -101,6 +101,7 @@ a) allow(a,c)           -> libera a,c e trava b,d
 b) allow(a,c) deny(a,c) -> libera a,c (se allow está configurado, ignora deny)
 c) deny(a)              -> bloqueia somente a e libera o resto
 
+
 === Formulários de Login ===
 
 Para criar um formulário de login, basta criar um formulário usando FormHelper
@@ -141,3 +142,68 @@ O Auth faz logout automaticamente para você, basta acessar um action chamado
 controller use o comando:
 
 $this->auth->logout();
+
+
+=== Carregando dados personalizados de usuários ===
+
+Ajuste $this->auth->userModels para dizer quais models devem ser carregados
+e guardados em Auth::user. Auth::userModels é uma array. Se não for especificado
+nada, serão carregados todos os models relacionados ao model principal de
+autenticação. Se false for especificado, não guarda dados de nenhum model.
+
+
+=== Campos obrigatórios ===
+
+Você pode definir que algum campo seja obrigatório no formulário de login. Isto
+evita fraudes.
+
+Por padrão, independente dos campos, é necessário que o usuário especifique dois
+campos existentes no banco de dados. Se você quiser configurar manualmente quais
+campos são obrigatórios, use Auth::requiredFields() no seu app_controller,
+assim:
+
+$this->auth->requiredFields( array("Usuario.email", "UsuarioPassw.passw") );
+
+No código acima, estamos especificando apenas dois campos, mas pode-se
+especificar quantos se quiser.
+
+Igualmente, se você deseja que somente um campo seja enviado, especifique
+apenas um campo.
+
+=== Propriedades ===
+
+As propriedades presentes neste componente.
+
+$this->auth->model("Usuario");
+    Qual é o model que contém username e password dos usuários para login
+
+$this->auth->allow( mixed )
+    Indica numa array quais os controllers e actions são permitidos o acesso
+    sem autenticação.
+
+$this->auth->expireTime( integer )
+    Use a linha abaixo somente se você deseja deslogar o usuário após
+    x minutos de inatividade. Não use este comando para permitir inatividade.
+    Tempo em minutos.
+
+$this->auth->redirectTo( mixed );
+    Após login com sucesso, para onde o usuário deve ser redirecionado.
+    Exemplo de argumento: array("controller" => "site", "action" => "index")
+
+$this->auth->logoutRedirectTo( mixed );
+    Determina para onde o usuário deve ser redirecionado após logout.
+    Exemplo de argumento: array("controller" => "site", "action" => "index")
+
+$this->auth->autoRedirect(true);
+    Redirecionamento automático para a última página acessada (opcional).
+
+$this->auth->loginPage( array("controller" => "site", "action" => "login") );
+    Qual é a página de login.
+
+$this->auth->errorMessage("Seus dados estão incorretos!");
+    Mensagem de erro: dados incorretos.
+
+$this->auth->deniedMessage("Você não tem permissão de acesso!");
+    Mensagem de erro: quando usuário tenta acessar action proibida.
+
+

@@ -60,6 +60,10 @@ exemplo a seguir:
 * "after"
 * "between"
 
+Qualquer outra propriedade inserida é escrita diretamente no input. Se você
+especificar "class"=>"minha_classe", o Helper vai criar um input com
+class="minha_classe". Qualquer outra propriedade pode ser usada.
+
 Exemplo de uso:
 
 <source lang="php">

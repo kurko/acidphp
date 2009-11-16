@@ -23,15 +23,38 @@ function translateUrl($mixed, $isFile = false){
      * $mixed é array
      */
     if( is_array($mixed) ){
-        $controller = ( empty($mixed["controller"]) ) ? $engine->callController : $mixed["controller"];
-        $action = ( empty($mixed["action"]) ) ? "index" : $mixed["action"];
-        $args = ( empty($mixed[0]) ) ? "" : $mixed[0];
+
+        /*
+         * Define APP
+         */
+        if( isset($mixed["app"])
+            AND is_string($mixed["app"]) ){
+            $app = $mixed["app"]."/";
+        } else {
+            $app = "";
+        }
+
+        $controller = ( empty($mixed["controller"]) ) ? "" : $mixed["controller"]."/";
+        $action = ( empty($mixed["action"]) OR empty($controller) ) ? "" : $mixed["action"];
+        $args = ( empty($mixed[0]) OR empty($action) ) ? "" : $mixed[0];
 
         if( isset($args[0]) AND $args[0] != "/" ){
             $args = "/".$args;
         }
 
-        $url = $engine->webroot.$controller."/".$action.$args;
+        /*
+         * Se app é vazio mas existe, acessa app sem nome, que é automaticamente
+         * levado para app/.
+         */
+        if( !empty($app) ){
+            $rootDir = ROOT;
+            if( $app == "/" )
+                $app = "";
+        } else {
+            $rootDir = $engine->webroot;
+        }
+
+        $url = $rootDir.$app.$controller.$action.$args;
     }
     /**
      * $mixed é string
@@ -110,7 +133,7 @@ function redirect($url){
      * Redireciona
      */
     if( !empty($url) ){
-        header("Status: 200");
+        //header("Status: 200"); if needed for IE6
         header("Location: ". $url);
         exit();
         return false;

@@ -101,6 +101,14 @@ class AuthComponent extends Component
      * @var array Contém dados do usuário logado
      */
     public $user;
+    /**
+     * Loaded Models
+     *
+     * @var array Contém quais models devem ser carregados. Se nenhum for
+     * especificado, carrega todos.
+     */
+    public $userModels = array();
+
 
     /**
      * CONFIGURAÇÃO
@@ -127,9 +135,16 @@ class AuthComponent extends Component
         protected $expireTime = "";
         /**
          *
-         * @var array Endereço para onde deve ser redirecionado o usuário após login
+         * @var mixed Endereço para onde deve ser redirecionado o usuário após login
          */
         public $redirectTo;
+
+        /**
+         *
+         * @var mixed Endereço para onde deve ser redirecionado o usuário após
+         * logout. Pode ser formato array ou string
+         */
+        public $logoutRedirectTo;
 
         /**
          *
@@ -139,6 +154,19 @@ class AuthComponent extends Component
             "username" => "username",
             "password" => "password"
         );
+
+        public $requiredFields = array();
+
+    /*
+     * CONFIGURAÇÕES INTERNAS
+     */
+
+    /**
+     *
+     * @var int Quantos campos devem ser enviados no mínimo num formulário
+     * (exceto se especificado $this->requiredFields)
+     */
+    public $_minimumSentFields = 2;
 
     /**
      * MENSAGENS DE STATUS
@@ -259,11 +287,7 @@ class AuthComponent extends Component
          * Redireciona para $this->loginPage
          */
         if( $this->params["action"] == "logout" or $actionCommand == "logout" ){
-
-            /*
-             * Precisa de explicação? :)
-             */
-            $this->logout();
+            return $this->logout();
         }
 
         /**
@@ -328,7 +352,6 @@ class AuthComponent extends Component
          * Verifica se dados enviados estão corretos para Login
          */
         if( !$this->logged AND !empty($this->data) ){
-            
             /**
              * Assegura os dados passados pelo usuário
              */
@@ -349,17 +372,31 @@ class AuthComponent extends Component
                      * Carrega o $model verdadeiro relacionado ao Login
                      */
                     $model = $this->models[ $this->model() ];
-                    $dataFields = $data[ $this->model() ];
-                    /**
-                     * Cria conditions
-                     */
+                    $dataFields = $data;
 
-                    //pr($this->models[$this->model()]->tableDescribed);
-                    foreach( $dataFields as $campo=>$valor ){
-                        if( array_key_exists( $campo, $this->models[$this->model()]->tableDescribed ) ){
-                            $conditions[$this->model().'.'.$campo] = $valor;
+                    /**
+                     * Cria conditions para SQL
+                     */
+                    /*
+                     * Loop por cada model passado
+                     */
+                    $sentFields = array();
+                    foreach( $dataFields as $fieldModel=>$campos ){
+                        /*
+                         * Loop por cada campo
+                         */
+                        foreach( $campos as $campo=>$valor ){
+                            if( array_key_exists( $campo, $this->models[$fieldModel]->tableDescribed ) ){
+                                $conditions[$fieldModel.'.'.$campo] = $valor;
+                                /*
+                                 * Indica quantos campos foram enviados.
+                                 */
+                                $sentFields[$fieldModel][$campo] = true;
+                            }
                         }
                     }
+
+                    $processStatus = $this->_checkSentFields( $dataFields );
 
                     $result = $model->find( array(
                                                 "conditions" => $conditions
@@ -373,13 +410,37 @@ class AuthComponent extends Component
                     /**
                      * Usuário existe
                      */
-                    if( !empty($result) AND count($result) > 0 ){
+                    if( !empty($result)
+                        AND count($result) > 0
+                        AND $processStatus )
+                    {
                         $this->logged = true;
 
                         $_SESSION["Sys"]["Auth"]["logged"] = true;
                         $_SESSION["Sys"]["Auth"]["startMicrotime"] = microtime(true);
-                        $_SESSION["Sys"]["Auth"]["user"][$this->model()] =
-                            $result[$tempResult[0]][$this->model()];
+
+                        /*
+                         * Carrega dados do usuário e guarda em $auth->user
+                         */
+                        if( $this->userModels === false ){
+                            $_SESSION["Sys"]["Auth"]["user"] = array();
+                        } else if( empty($this->userModels) ){
+                            $_SESSION["Sys"]["Auth"]["user"] =
+                                $result[$tempResult[0]];
+                        } else {
+                            if( is_array($this->userModels) ){
+                                foreach( $this->userModels as $modelToLoad){
+                                    if( !empty($result[$tempResult[0]][$modelToLoad]) ){
+                                        $_SESSION["Sys"]["Auth"]["user"][$modelToLoad] =
+                                            $result[$tempResult[0]][$modelToLoad];
+                                    }
+                                }
+                            } else {
+                                $_SESSION["Sys"]["Auth"]["user"][$this->model()] =
+                                    $result[$tempResult[0]][$this->model()];
+                            }
+                        }
+
 
                         
                         /*
@@ -595,6 +656,29 @@ class AuthComponent extends Component
     } // fim afterBeforeFilter()
 
     /**
+     * logout()
+     *
+     * Força o Logout
+     *
+     * @return bool
+     */
+    public function logout($redir = true){
+        unset($_SESSION["Sys"]["Auth"]);
+        unset($_SESSION["Sys"]["FormHelper"]["statusMessage"]);
+        $this->checkLogin();
+
+        if( $redir ){
+            if( !empty($this->logoutRedirectTo) )
+                redirect( translateUrl( $this->logoutRedirectTo ) );
+            else
+                redirect( translateUrl( $this->loginPage() ) );
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    /**
      * MÉTODOS DE CONFIGURAÇÃO
      */
     /**
@@ -659,6 +743,21 @@ class AuthComponent extends Component
             return $this->redirectTo;
         }
     }
+    /**
+     * logoutRedirectTo()
+     *
+     * @param array $logoutRedirectTo Contém endereço para onde o usuário será
+     *                          redirecionado após efetuar logout
+     * @author Alexandre de Oliveira <chavedomundo@gmail.com>
+     */
+    public function logoutRedirectTo($logoutRedirectTo=""){
+        if( !empty($logoutRedirectTo) ){
+            $this->logoutRedirectTo = $logoutRedirectTo;
+        } else {
+            return $this->logoutRedirectTo;
+        }
+    }
+    
     /**
      * loginFields()
      *
@@ -743,6 +842,22 @@ class AuthComponent extends Component
     }
 
     /**
+     * requiredFields()
+     *
+     * Ajusta ou retorna quais campos devem ser enviados obrigatoriamente
+     *
+     * @param array $fields
+     * @author Alexandre de Oliveira <chavedomundo@gmail.com>
+     */
+    public function requiredFields($fields = array()){
+        if( !empty($fields) ){
+            $this->requiredFields = $fields;
+        } else {
+            return $this->requiredFields;
+        }
+    }
+
+    /**
      * MÉTODOS DE VERIFICAÇÃO
      */
     /**
@@ -781,6 +896,57 @@ class AuthComponent extends Component
         $this->checkLogin();
         redirect( $this->loginPage() );
         return false;
+    }
+
+    public function _checkSentFields($data = array(), $customRequiredFields = array() ){
+        if( empty($data) )
+            return false;
+
+        /*
+         * Loop por cada model
+         */
+        $numSentFields = 0;
+        foreach( $data as $fieldModel=>$campos ){
+
+            /*
+             * Loop por cada campo do model
+             */
+            foreach( $campos as $campo=>$valor ){
+                if( array_key_exists( $campo, $this->models[$fieldModel]->tableDescribed ) ){
+                    $conditions[] = $fieldModel.'.'.$campo;
+
+                    if( $this->model == $fieldModel )
+                        $conditions[] = $campo;
+                    /*
+                     * Indica quantos campos foram enviados.
+                     */
+                    $numSentFields++;
+                }
+            }
+        }
+
+        if( empty($customRequiredFields) )
+            $requiredFields = $this->requiredFields;
+        else
+            $requiredFields = $customRequiredFields;
+            
+        if( empty($requiredFields) ){
+            if( $numSentFields < $this->_minimumSentFields )
+                return false;
+        } else {
+             if( is_string($requiredFields) ){
+                 $requiredFields = array($requiredFields);
+             }
+
+             foreach( $requiredFields as $campo ){
+                 if( !in_array($campo, $conditions) ){
+                     return false;
+                 }
+             }
+
+        }
+
+        return true;
     }
 }
 ?>
