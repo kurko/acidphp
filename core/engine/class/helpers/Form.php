@@ -361,9 +361,12 @@ class FormHelper extends Helper
             $inputType = "select";
             if( empty($options["select"]) )
                 $options["select"] = array("Opções não definidas");
+
             $selectOptions = $options["select"];
+
             if( !empty($options["selected"]) )
                 $selectOptionsSelected = $options["selected"];
+
             unset($options["select"]);
         }
 
@@ -415,6 +418,21 @@ class FormHelper extends Helper
             $between = $options["between"];
             unset($options["between"]);
         }
+
+        /**
+         * ["autoSelected"]
+         *
+         * Selected automático se for edição. Toma dados do DB e seleciona item
+         * no <select> automaticamente.
+         */
+        if( array_key_exists("autoSelected", $options) ){
+            $autoSelected = $options["autoSelected"];
+            unset($options["autoSelected"]);
+        } else {
+            $autoSelected = true;
+        }
+
+
         // fim análise $options
         
 
@@ -672,9 +690,21 @@ class FormHelper extends Helper
             /**
              * Opções a serem mostradas
              */
-            $selectOptions = $selectOptions;
             $conteudo.= '<div class="input_field input_select">';
             $conteudo.= '<select name="'.$inputName.'" '.$standardAtrib.'>';
+
+            /*
+             * Edição?
+             *
+             * Ajusta $selected automaticamente de acordo com valor do DB
+             */
+                if( empty($selectOptionsSelected)
+                    AND !empty($fieldTextValue)
+                    AND $autoSelected )
+                {
+                    $selectOptionsSelected = $fieldTextValue;
+                }
+
             /**
              * Loop pelo select criando <options>
              */
