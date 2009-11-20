@@ -14,7 +14,7 @@ class Controller
      *
      * @var TEngine Objeto responsável pela inicialização de todo o sistema
      */
-    private $engine;
+    private $dispatcher;
     /**
      * VARIÁVEIS DE SISTEMA
      */
@@ -150,7 +150,11 @@ class Controller
 
 
     /**
+     *
+     *
      * MÉTODOS
+     *
+     *
      */
     /**
      * __construct();
@@ -165,19 +169,20 @@ class Controller
          * Inicialização de variáveis
          */
         /**
-         * Toma todas as configurações do objeto Engine, responsável pela
+         * Toma todas as configurações do objeto Dispatcher, responsável pela
          * de inicialização do sistema, como análise de URLs, entre outros.
          */
-        $this->engine = $param["engine"];
+        $this->dispatcher = $param["dispatcher"];
+        $this->conn = &$this->dispatcher->conn;
         /**
          * $THIS->PARAMS
          *
          * Configura os parâmetros de sistema
          */
-        $this->params["controller"] = $this->engine->callController;
-        $this->params["action"] = $this->engine->callAction;
-        $this->params["args"] = $this->engine->arguments;
-        $this->params["webroot"] = $this->engine->webroot;
+        $this->params["controller"] = $this->dispatcher->callController;
+        $this->params["action"] = $this->dispatcher->callAction;
+        $this->params["args"] = $this->dispatcher->arguments;
+        $this->params["webroot"] = $this->dispatcher->webroot;
 
         $args = array();
         foreach( $this->params["args"] as $chave=>$valor ){
@@ -187,7 +192,7 @@ class Controller
                 $args[$chave] = $chave.":".$valor;
         }
 
-        $this->params["url"] = $this->engine->webroot.$this->params["controller"]."/".$this->params["action"]."/".implode("/", $args ) ;
+        $this->params["url"] = $this->dispatcher->webroot.$this->params["controller"]."/".$this->params["action"]."/".implode("/", $args ) ;
         /*
          *
          * $THIS->DATA
@@ -335,7 +340,7 @@ class Controller
             }
 
         }
-        $this->webroot = $this->engine->webroot;
+        $this->webroot = $this->dispatcher->webroot;
 
         /**
          * VARIÁVEIS DE AMBIENTE
@@ -418,7 +423,7 @@ class Controller
         /**
          * $action: que ação será chamada neste módulo
          */
-        $this->action = (empty( $this->engine->callAction )) ? 'index' : $this->engine->callAction;
+        $this->action = (empty( $this->dispatcher->callAction )) ? 'index' : $this->dispatcher->callAction;
 
         /**
          * EXECUTA MVC
@@ -455,11 +460,11 @@ class Controller
          * Monta parâmetros para criar os models
          */
         $modelParams = array(
-            'conn' => $this->engine->conn,
-            'dbTables' => $this->engine->dbTables,
-            'modelName' => $modelName,
-            'recursive' => $this->recursive,
-            'params' => &$this->params,
+            'conn' => &$this->dispatcher->conn,
+            //'dbTables' => $this->dispatcher->dbTables,
+            //'modelName' => $modelName,
+            //'recursive' => $this->recursive,
+            //'params' => &$this->params,
         );
 
         include_once(APP_MODEL_DIR.$modelName.".php");
@@ -511,7 +516,8 @@ class Controller
                         $helperParams = array(
                             "params" => &$this->params,
                             "data" => $this->data,
-                            "models" => $this->usedModels,
+                            "models" => &$this->usedModels,
+                            "conn" => &$this->conn,
                             "environment" => $this->environment,
                             // todos helpers têm acesso aos demais helpers
                             "_loadedHelpers" => &$this->_loadedHelpers,
@@ -557,7 +563,7 @@ class Controller
 
         if( $path != false ){
             ob_start();
-            include(APP_VIEW_DIR."".$this->engine->callController."/".$path.".php");
+            include(APP_VIEW_DIR."".$this->dispatcher->callController."/".$path.".php");
             $content_for_layout = ob_get_contents();
             ob_end_clean();
 

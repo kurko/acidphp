@@ -767,6 +767,7 @@ class AuthComponent extends Component
     public function loginFields($loginFields){
         $this->loginFields = $loginFields;
     }
+    
     /**
      * model()
      *
@@ -885,18 +886,6 @@ class AuthComponent extends Component
      * MÉTODOS DE AÇÃO
      *
      */
-    /**
-     * logout()
-     * 
-     * Faz logout do usuário logado.
-     */
-    public function logout(){
-        unset($_SESSION["Sys"]["Auth"]);
-        unset($_SESSION["Sys"]["FormHelper"]["statusMessage"]);
-        $this->checkLogin();
-        redirect( $this->loginPage() );
-        return false;
-    }
 
     public function _checkSentFields($data = array(), $customRequiredFields = array() ){
         if( empty($data) )

@@ -26,9 +26,7 @@ if (!defined('CORE_DIR')) {
  * ENGINE START
  */
 define("ENGINE_DIR", CORE_DIR."engine/");
-define("ENGINE_START", ENGINE_DIR."start.php");
-
-define("CORE_LOADER", ENGINE_DIR."loader.php");
+define("ENGINE_IGNITION", ENGINE_DIR."ignition.php");
 
 define("CORE_CONFIG_DIR", CORE_DIR."config/");
 define("CORE_SUPPORT_DIR", CORE_DIR."support/");

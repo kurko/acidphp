@@ -42,6 +42,25 @@ class FormHelper extends Helper
 
     protected $editable;
 
+    /**
+     * Contains the available field types.
+     *
+     * @var array
+     */
+    public $_availableFieldTypes = array(
+        "text",
+        "hidden",
+        "password",
+        "textarea",
+        "select",
+        "radio",
+        "checkbox",
+        "file",
+        "image",
+        "reset",
+        "submit",
+    );
+
     function __construct($params=""){
         parent::__construct($params);
         
@@ -127,7 +146,7 @@ class FormHelper extends Helper
             if( !empty($globalVars["defaultLoginPage"]["controller"]) ){
                 $options["controller"] = $globalVars["defaultLoginPage"]["controller"];
             }
-                //echo "Oij".$globalVars["defaultLoginPage"]["action"];
+            
             if( !empty($globalVars["defaultLoginPage"]["action"]) )
                 $options["action"] = $globalVars["defaultLoginPage"]["action"];
 
@@ -139,14 +158,6 @@ class FormHelper extends Helper
         if( !empty($modelName) ){
             $this->modelName = $modelName;
         }
-
-        /**
-         * DescribedTables
-         *
-         * Carrega as tabelas descritas deste respectivo Model deste $form
-         */
-        global $describedTables;
-        $this->modelProperties["describedTables"] = $describedTables;
 
         /**
          * APP
@@ -200,7 +211,6 @@ class FormHelper extends Helper
         /**
          * ABRE FORMULÁRIO
          */
-
         /*
          * Tem app?
          */
@@ -274,6 +284,166 @@ class FormHelper extends Helper
      */
 
     /**
+     * _modelTable()
+     *
+     * Returns this model's table described.
+     *
+     * @param <string> $model
+     * @return <array>
+     */
+    public function _modelTable($model){
+
+        return $this->models[$model]->_getTableDescribed();
+
+    }
+
+    public function _fieldModel($fieldName){
+        $dotPos = strpos($fieldName, "." );
+        if( $dotPos === false ){
+            /**
+             * É o model padrão
+             */
+            $modelName = $this->modelName;
+        }
+        /**
+         * Outro Model foi especificado
+         */
+        else {
+            $modelName = substr( $fieldName, 0, $dotPos );
+            $fieldName = substr( $fieldName, $dotPos+1, 100 );
+        }
+
+        return $modelName;
+    }
+
+    public function _fieldName($fieldName){
+        $dotPos = strpos($fieldName, "." );
+        if( $dotPos === false ){ }
+        /**
+         * Model especificado
+         */
+        else {
+            $fieldName = substr( $fieldName, $dotPos+1, 100 );
+        }
+
+        return $fieldName;
+    }
+
+    /**
+     * _fieldType()
+     * 
+     * Retorna o tipo de campo para um $fieldName e um $fieldModel.
+     *
+     * Especifique um $customType se você deseja um tipo específico. O tipo
+     * especificado é verificado junto aos tipos HTML possíveis.
+     * 
+     * @param <string> $fieldName
+     * @param <string> $fieldModel
+     * @param <string> $customType
+     * @return <string> 
+     */
+    public function _fieldType($fieldName, $fieldModel, $customType="" ){
+
+        /*
+         * An accepted custom type was set
+         */
+        if( !empty($customType) &&
+            in_array(strtolower($customType), $this->_availableFieldTypes) )
+        {
+            return strtolower($customType);
+        }
+
+        $thisModelDescribed = $this->_modelTable($fieldModel);
+
+        /*
+         * No custom types set, setting an field type automatically
+         */
+        /*
+         * GETS DB TYPE
+         */
+        if( !empty($thisModelDescribed[$fieldName]["Type"]) )
+        {
+            /**
+             * Verifica descrição da tabela do Model deste campo e está
+             * registrado em $thisModelDescribed[$fieldName]["Type"]
+             */
+             $physicalType = $thisModelDescribed[$fieldName]["Type"];
+             /**
+              * Esta variável com nome gigante tem a posição do primeiro
+              * parêntesis no nome físico deste campo na tabela do banco de
+              * dados. Isto serve para tomar o nome do tipo de dados somente.
+              *
+              * Ex.:
+              *     - varchar() -> pega somente "varchar"
+              *     - tinyint() -> pega somente "tinyint"
+              */
+             $physicalTypeNameParenthesisPos = strpos( $physicalType, "(" );
+             if( $physicalTypeNameParenthesisPos > 0 ){
+                 $physicalType = substr( $physicalType, 0, $physicalTypeNameParenthesisPos );
+             }
+
+             /**
+              * Segundo o tipo de dado físico de cada campo na tabela,
+              * instancia um tipo para um campo do formulário.
+              */
+             switch($physicalType){
+
+                 /*
+                  * Textos pequenos como varchar
+                  */
+                 case "varchar"     : $inputType = "text"; break;
+                 case "char"        : $inputType = "text"; break;
+                 /*
+                  * Textos grandes como text, blob
+                  */
+                 case       "text"  : $inputType = "textarea"; break;
+                 case   "tinytext"  : $inputType = "textarea"; break;
+                 case "mediumtext"  : $inputType = "textarea"; break;
+                 case   "longtext"  : $inputType = "textarea"; break;
+                 case       "blob"  : $inputType = "textarea"; break;
+                 case   "tinyblob"  : $inputType = "textarea"; break;
+                 case "mediumblob"  : $inputType = "textarea"; break;
+                 case   "longblob"  : $inputType = "textarea"; break;
+                 /*
+                  * Números como int
+                  */
+                 case "int"         : $inputType = "text"; break;
+                 /*
+                  * Boolean, tinyint
+                  */
+                 case "bool"        : $inputType = "checkbox"; break;
+                 case "tinyint"     : $inputType = "checkbox"; break;
+                 /*
+                  * Datas e time
+                  */
+                 case "datetime"    : $inputType = "datetime"; break;
+                 case "date"        : $inputType = "date"; break;
+                 case "timestamp"   : $inputType = "timestamp"; break;
+                 case "time"        : $inputType = "time"; break;
+                 case "year"        : $inputType = "year"; break;
+                     
+                 default            : $inputType = "text"; break;
+             }
+            return $inputType;
+        }
+
+        return "text";
+    }
+
+    public function _options( $options = array() ){
+        
+    }
+
+
+    public function _getInputField(){
+
+    }
+
+    /**
+     * input()
+     *
+     * Acessível pelo usuário.
+     *
      * Cria inputs de formulários HTML automaticamente, necessitando somente
      * indicar o nome do campo relacionado na base de dados.
      *
@@ -374,6 +544,7 @@ class FormHelper extends Helper
          */
         if( !empty($options["type"]) ){
             $inputType = $options["type"];
+            $fieldOptions["type"] = $options["type"];
             if( $options["type"] !== "password" AND $options["type"] !== "passw" )
                 $notPassw = true;
             unset($options["type"]);
@@ -427,20 +598,13 @@ class FormHelper extends Helper
         /**
          * Verifica se o Model é padrão ou foi especificado algum outro
          */
-        $dotPos = strpos($fieldName, "." );
-        if( $dotPos === false ){
-            /**
-             * É o model padrão
-             */
-            $modelName = $this->modelName;
-        }
-        /**
-         * Outro Model foi especificado
+        $modelName = $this->_fieldModel($fieldName);
+        $fieldName = $this->_fieldName($fieldName);
+        /*
+         * Toma a descrição da tabela do model do campo atual
          */
-        else {
-            $modelName = substr( $fieldName, 0, $dotPos );
-            $fieldName = substr( $fieldName, $dotPos+1, 100 );
-        }
+        
+
 
         /**
          * VALOR AUTOMÁTICO
@@ -477,90 +641,19 @@ class FormHelper extends Helper
             }
         }
         
-
         /**
-         * @todo - Escrever value digitado anteriormente quando envia formulário
-         * e retorna para ele de volta.
+         * Form Input Name
          */
-
-        /**
-         * Define o nome do input
-         */
-        if( !empty($modelName) ){
+        if( !empty($modelName) )
             $inputName = "data[".$modelName."][".$fieldName."]";
-        } else {
+        else
             $inputName = "data[".$fieldName."]";
-        }
 
-        /**
-         * ANÁLISE DE TIPOS DE CAMPOS
+        /*
+         * Field Type
          */
-        /**
-         * Mostra inputs de acordo com o especificado
-         */
-        /**
-         * Verifica tabela
-         *
-         * Se não há tipos especificados na configuração do $form, verifica qual
-         * o tipo de campo na tabela e mostra o campo <input> de acordo
-         */
-        if( empty($inputType)
-            AND !empty($this->modelProperties["describedTables"][$modelName])
-            AND !empty($this->modelProperties["describedTables"][$modelName][$fieldName]["Type"]) )
-        {
-            /**
-             * Verifica global $describedTables que já está carregado e salvo
-             * em $this->modelProperties[$modelName]["describedTables"]
-             */
-             $physicalType = $this->modelProperties["describedTables"][$modelName][$fieldName]["Type"];
-             /**
-              * Esta variável com nome gigante tem a posição do primeiro
-              * parêntesis no nome físico deste campo na tabela do banco de
-              * dados. Isto serve para tomar o nome do tipo de dados somente.
-              *
-              * Ex.:
-              *     - varchar() -> pega somente "varchar"
-              *     - tinyint() -> pega somente "tinyint"
-              */
-             $physicalTypeNameParenthesisPos = strpos( $physicalType, "(" );
-             if( $physicalTypeNameParenthesisPos > 0 ){
-                 $physicalType = substr( $physicalType, 0, $physicalTypeNameParenthesisPos );
-             }
-
-             /**
-              * Segundo o tipo de dado físico de cada campo na tabela,
-              * instancia um tipo para um campo do formulário.
-              */
-             switch($physicalType){
-                 /**
-                  * Textos pequenos como varchar
-                  */
-                 case "varchar"     : $inputType = "text"; break;
-                 /**
-                  * Textos grandes como text, blob
-                  */
-                 case "text"        : $inputType = "textarea"; break;
-                 case "blob"        : $inputType = "textarea"; break;
-                 /**
-                  * Números como int
-                  */
-                 case "int"         : $inputType = "text"; break;
-                 /**
-                  * Boolean, tinyint
-                  */
-                 case "bool"        : $inputType = "checkbox"; break;
-                 case "tinyint"     : $inputType = "checkbox"; break;
-                 /**
-                  * Datas e time
-                  */
-                 case "datetime"    : $inputType = "text"; break;
-                 case "date"        : $inputType = "text"; break;
-                 case "time"        : $inputType = "text"; break;
-                 default            : $inputType = "text"; break;
-             }
-        } else if( empty($inputType) ) {
-            $inputType = "text";
-        }
+        $customType = ( !empty($fieldOptions["type"]) ) ? $fieldOptions["type"] : '';
+        $inputType = $this->_fieldType($fieldName, $modelName, $customType);
         
         /**
          * Se BEFORE está especificado
@@ -572,21 +665,20 @@ class FormHelper extends Helper
         }
 
         /**
-         * Ajusta o label se não for do tipo checkbox, etc
+         * LABEL
          *
-         * Somente inputs com labels podem ter o atributo between
+         * Ajusta o label se não for do tipo checkbox, etc
          */
         if( !in_array($inputType, array("checkbox","hidden")) ){
-            $conteudo.= '<label for="input-'.$fieldName.'">'.$label.'</label>';
+
+            $conteudo.= $this->label($fieldName, $label);
             
             /**
-             * Se BETWEEN está especificado
+             * Se BETWEEN está especificado (somente se há label)
              */
-            if( !empty($between) ){
-                $conteudo.= '<span class="input_between">';
-                $conteudo.= $between;
-                $conteudo.= '</span>';
-            }
+            if( !empty($between) )
+                $conteudo.= $this->_between($between);
+            
         }
         /**
          * INPUTS
@@ -735,7 +827,7 @@ class FormHelper extends Helper
          * Se AFTER está especificado
          */
         if( !empty($after) ){
-            $conteudo.= $this->_afterField($after);
+            $conteudo.= $this->_after($after);
         }
 
         $conteudo.= '</div>'; // fecha div do .input
@@ -745,33 +837,99 @@ class FormHelper extends Helper
 
     /*
      *
-     *      FIELDS
+     *      HTML ELEMENTS
      *
      */
+    /**
+     * label()
+     *
+     * Returns a HTML label.
+     *
+     * @param <string> $fieldName The real field name.
+     * @param <string> $label     What's meant to be shown.
+     * @return <string>
+     */
+    public function label($fieldName, $label = ""){
+        if( empty($label))
+            $label = $fieldName;
+            
+        return '<label for="input-'.$fieldName.'">'.$label.'</label>';
+    }
+
+    /*
+     *
+     *      FIELDS
+     *
+     * Works like aliases to the input() method, which is universal.
+     *
+     */
+
+    public function text($fieldName, $options=array() ){
+
+    }
+
+    public function hidden($fieldName, $options=array() ){
+
+    }
+
+    public function password($fieldName, $options=array() ){
+
+    }
+
+    public function textarea($fieldName, $options=array() ){
+
+    }
+
+    public function select($fieldName, $options=array() ){
+
+    }
+
+    public function radio($fieldName, $options=array() ){
+
+    }
+    
+    public function checkbox($fieldName, $options=array() ){
+
+    }
+
+    public function reset($fieldName, $options=array() ){
+
+    }
+
+    public function submit($fieldName, $options=array() ){
+
+    }
+
+    public function image($fieldName, $options=array() ){
+
+    }
+
     public function file( $fieldName, $options=array() ){
         $options["type"] = "file";
         return $this->input($fieldName, $options);
     }
 
-    public function hidden(){
-        
-    }
-    
     /*
      *
      *      HTML NON-FIELD ELEMENTS
      *
      */
 
+    public function _between($str){
+        $conteudo.= '<span class="input_between">';
+        $conteudo.= $str;
+        $conteudo.= '</span>';
+    }
+
     /**
-     * _afterField
+     * _after()
      *
      * Mostra conteúdo após o Input field
      *
      * @param string $after
      * @return string
      */
-    public function _afterField($after = ""){
+    public function _after($after = ""){
         
         if( !empty($after) ){
             $conteudo = "";
