@@ -9,8 +9,8 @@
  * @author Alexandre de Oliveira <chavedomundo@gmail.com>
  * @since v0.0.2, 19/07/2009
  */
-/**
- * SESSIONS
+/*
+ * SOBRE SESSIONS
  *
  * A estrutura das sessions para reter informações de FormHelper segue o padrão:
  *      $_SESSION["Sys"]["FormHelper"][$informacao] = $valor;
@@ -36,11 +36,25 @@ class FormHelper extends Helper
      */
     protected $modelProperties;
 
-    protected $destionationUrl;
+    /**
+     *
+     * @var <string> Campo de destino do formulário
+     */
+    public $_formActionUrl;
 
+    /**
+     * Cada formulário tem um id único.
+     *
+     * @var <type> Id do formulário atual
+     */
     protected $formId = 0;
 
-    protected $editable;
+    /**
+     * O formulário é editável?
+     * 
+     * @var <type> 
+     */
+    public $_formEditable;
 
     /**
      * Contains the available field types.
@@ -61,12 +75,25 @@ class FormHelper extends Helper
         "submit",
     );
 
+    /*
+     *
+     * MÉTODO
+     *
+     */
+    /**
+     * __construct()
+     *
+     * Chama a classe pai Helper na construção de si própria.
+     *
+     * @param <array> $params
+     */
     function __construct($params=""){
         parent::__construct($params);
-        
     }
 
     /**
+     * end()
+     *
      * Termina um formulário, inserindo o campo Submit e fechando o bloco de
      * código HTML <form></form>.
      *
@@ -75,8 +102,11 @@ class FormHelper extends Helper
      * @return string Código HTML para finalizar bloco de código <form></form>
      */
     public function end($submitValue = "Enviar", $options = ""){
+
         $conteudo = '';
-        $conteudo.= '<input type="submit" name="formSubmit" value="'.$submitValue.'" class="submit" />';
+        if( !empty($submitValue) )
+            $conteudo.= '<input type="submit" name="formSubmit" value="'.$submitValue.'" class="submit" />';
+
         $conteudo.= '</form>';
 
         return $conteudo;
@@ -93,7 +123,7 @@ class FormHelper extends Helper
          * Exclui as mensagens de campos não-validas das Sessions.
          */
         $this->_deleteUnvalidatedFieldSession();
-    }
+    } // fim afterFilter()
 
     /**
      * create()
@@ -191,9 +221,9 @@ class FormHelper extends Helper
          * Dá um ID único para cada formulário
          */
         if( isset($options["edit"]) AND $options["edit"] == false ){
-            $this->editable = false;
+            $this->_formEditable = false;
         } else
-            $this->editable = true;
+            $this->_formEditable = true;
 
         if( !empty($options["edit"]) ) unset($options["edit"]);
         
@@ -221,7 +251,7 @@ class FormHelper extends Helper
         /*
          * Define 'action' do <form>
          */
-        $this->destionationUrl = WEBROOT.$appUrl.$controller.'/'.$action."/";
+        $this->_formActionUrl = WEBROOT.$appUrl.$controller.'/'.$action."/";
 
         if( !empty($options) AND is_array($options) ){
             foreach($options as $property=>$value){
@@ -231,7 +261,7 @@ class FormHelper extends Helper
 
         // Se não é ajax
         if( !$isAjax )
-            $conteudo.= '<form method="post" action="'.$this->destionationUrl.'" class="formHelper" '.$otherOptions.' >';
+            $conteudo.= '<form method="post" action="'.$this->_formActionUrl.'" class="formHelper" '.$otherOptions.' >';
 
 
 
@@ -276,27 +306,30 @@ class FormHelper extends Helper
         $conteudo.= '<input type="hidden" name="formUrl" value="'.$formUrl.'/" />';
 
         return $conteudo;
-    }
+    } // fim create()
 
     /**
-     * @todo - campos de models relacionados hasMany devem ter uma
-     * nomenclatura do tipo [model][0][campo1], [model][1][campo1], ectes
-     */
-
-    /**
-     * _modelTable()
+     * _getModelTableDescribe()
      *
      * Returns this model's table described.
      *
      * @param <string> $model
      * @return <array>
      */
-    public function _modelTable($model){
+    public function _getModelTableDescribe($model){
 
         return $this->models[$model]->_getTableDescribed();
 
     }
 
+    /**
+     * _fieldModel()
+     *
+     * Retorna o nome do MODEL numa string de padrão 'Model.campo'
+     *
+     * @param <string> $fieldModel
+     * @return <string>
+     */
     public function _fieldModel($fieldName){
         $dotPos = strpos($fieldName, "." );
         if( $dotPos === false ){
@@ -316,6 +349,14 @@ class FormHelper extends Helper
         return $modelName;
     }
 
+    /**
+     * _fieldName()
+     *
+     * Retorna o nome do CAMPO numa string de padrão 'Model.campo'
+     *
+     * @param <string> $fieldName
+     * @return <string>
+     */
     public function _fieldName($fieldName){
         $dotPos = strpos($fieldName, "." );
         if( $dotPos === false ){ }
@@ -353,7 +394,7 @@ class FormHelper extends Helper
             return strtolower($customType);
         }
 
-        $thisModelDescribed = $this->_modelTable($fieldModel);
+        $thisModelDescribed = $this->_getModelTableDescribe($fieldModel);
 
         /*
          * No custom types set, setting an field type automatically
@@ -475,7 +516,7 @@ class FormHelper extends Helper
              *
              * Por padrão, é permitida.
              */
-            if($this->editable == true){
+            if($this->_formEditable == true){
 
                 /**
                  * Carrega as informações sobre o determinado ID
@@ -483,7 +524,7 @@ class FormHelper extends Helper
                 $this->data = $this->models[$this->modelName]->find($fieldValue, "first");
 
                 $_SESSION["Sys"]["addToThisData"][$this->formId][$this->modelName]["id"] = $fieldValue;
-                $_SESSION["Sys"]["options"]["addToThisData"][$this->formId]["destLocation"] = $this->destionationUrl;
+                $_SESSION["Sys"]["options"]["addToThisData"][$this->formId]["destLocation"] = $this->_formActionUrl;
                 if( !empty($options["show"])
                     AND is_array($options)
                     AND $options["show"] == true )
@@ -600,11 +641,6 @@ class FormHelper extends Helper
          */
         $modelName = $this->_fieldModel($fieldName);
         $fieldName = $this->_fieldName($fieldName);
-        /*
-         * Toma a descrição da tabela do model do campo atual
-         */
-        
-
 
         /**
          * VALOR AUTOMÁTICO
