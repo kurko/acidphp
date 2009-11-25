@@ -1,0 +1,117 @@
+== MODELS ==
+
+Models são responsáveis por abstrair as tabelas do banco de dados.
+
+== Métodos CRUD ==
+
+=== save( array $data, [array $options] ) ===
+
+
+=== update( array $toUpdate, [mixed $conditions] ) ===
+
+Argumentos:
+
+<array> $toUpdate: array contendo array com chave e valor representando campo e
+                 valor a serem atualizados no banco de dados.
+
+<mixed> $conditions: condições para update. Especifique o id do registro ou uma
+                 array com chave e valor representando campo e valor.
+
+
+=== find( [array $options], [string $mode="all"] ) ===
+
+
+=== paginate( [array $options], [string $mode="all"] ) ===
+
+Idêntico a Model::find() na forma de ser chamado, exceto que ajusta variáveis
+para que se use Helper::Paginator, que automatiza o processo de paginação.
+
+Se você não vai usar paginação, não use Model::paginate() porque ele será mais
+lento que Model::find() (mesmo que seja pouca a diferença).
+
+=== delete( [mixed $idOrConditions], [array $options] ) ===
+
+Exclui um ou mais registros de uma tabela do banco de dados.
+
+Argumentos:
+
+<mixed> idOrConditions: _id_ do registro (int), ids dos registros (array), campo
+                        e valor do registro (ex. array("pais_id"=>"33") ).
+
+
+=== deleteAll( [mixed $idOrConditions], [array $options] ) ===
+
+Exclui um ou mais registros de uma tabela do banco de dados, excluindo também
+todos os registros de tabelas relacionadas.
+
+Leva em consideração hasMany e hasOne.
+
+Argumentos:
+
+<mixed> idOrConditions:* _id_ do registro (int) ou ids dos registros (array).
+
+
+=== query( string $sql, [string $options] ) ===
+
+=== countRows( mixed $options ) ===
+
+Argumentos:
+
+<mixed> $options: _id_ do registro (int) para saber se um registro existe ou
+                  opções de busca para (array).
+
+
+=== validate( mixed $data, [bool $sub] ) ===
+
+Valida os dados enviados de um formulário de acordo com as regras do model.
+Esta função é chamada automaticamente nos métodos que salvam dados na base de
+dados, como model::saveAll().
+
+
+== Validações ==
+
+É possível validar automaticamente qualquer campo de um formulário enviado
+com FormHelper. Se um campo não passou pela validação, o usuário é redirecionado
+para a página do formulário e é mostrada uma mensagem sob o campo com erro.
+
+Para usar validações automáticas, basta configurar, dentro do arquivo do Model
+que você quer validar, a seguinte propriedade:
+
+<pre>
+<?php
+class User extends AppModel {
+    public $useTable = "users";
+
+    /*
+     * configure a validação abaixo
+     */
+    var $validation = array(
+        "nome" => array( // nome do campo
+            "rule" => "notEmpty", // regra a ser usada
+            "message" => "Este campo não pode ser vazio", // mensagem de erro
+        ),
+        "email" => array( // você pode usar duas regras para um campo
+            array(
+                "rule" => "notEmpty", // regra notEmpty
+                "m" => "Email não pode ser vazio"  // message, m para abreviar
+            ),
+            array( // segunda regra do campo email
+                "rule" => "email", // o campo deve ser um email válido
+                "m" => "digite um email válido" // mensagem, m para abreviar
+            ),
+        ),
+    );
+?>
+</pre>
+
+A seguir, as validações possíveis:
+
+> *notEmpty:*
+> *email:*
+> *alphaNumeric:*
+> *numeric:*
+> *alpha:*
+> *max:* Valida se a string não for maior que o máximo permitido.
+> *min:* Valida se a string não for menor que o mínimo permitido.
+> *cpf:*
+> *cnpj:*

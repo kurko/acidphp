@@ -5,7 +5,7 @@
  * @since v0.1 18/07/2009
  */
 
-class SiteController extends AppController
+class Site2Controller extends AppController
 {
 
     var $uses = array("Usuario"); // change this to whatever models you have
@@ -14,10 +14,6 @@ class SiteController extends AppController
     function index(){
         $this->pageTitle = "Página principal";
 
-    }
-
-    function test(){
-        $this->auth->logout();
     }
 
     function login(){

@@ -12,13 +12,13 @@
 /**
  * translateUrl() traduz uma URL
  *
- * @global Object $engine Objeto inicializador do sistema
+ * @global Object $dispatcher Objeto inicializador do sistema
  * @param mixed $mixed Configuração de Url para criação de string final
  * @return string Retorna um endereço Url válido
  */
 function translateUrl($mixed, $isFile = false){
 
-    global $engine;
+    global $dispatcher;
     /**
      * $mixed é array
      */
@@ -51,7 +51,7 @@ function translateUrl($mixed, $isFile = false){
             if( $app == "/" )
                 $app = "";
         } else {
-            $rootDir = $engine->webroot;
+            $rootDir = $dispatcher->webroot;
         }
 
         $url = $rootDir.$app.$controller.$action.$args;
@@ -95,14 +95,14 @@ function translateUrl($mixed, $isFile = false){
             if( empty($action) )
                 $action = "index";
 
-            $url = $engine->webroot.$controller."/".$action."/".implode("/", $args);
+            $url = $dispatcher->webroot.$controller."/".$action."/".implode("/", $args);
         }
         /*
          * A URL é para um arquivo (css, js, imagem, etc)
          */
         else if( $isFile ){
 
-            $url = $engine->webroot.$mixed;
+            $url = $dispatcher->webroot.$mixed;
 
         } else {
             $url = $mixed;

@@ -1,17 +1,17 @@
 <?php
 /**
- * CLASSE ENGINE
+ * DISPATCHER
  *
  * Responsável por inicializar a configuração de todo
  * o sistema, carregando URLs, indicando Controller
  * e Actions e serem chamados.
  *
  * @package Core
- * @name Engine
+ * @name Dispatcher
  * @author Alexandre de Oliveira <chavedomundo@gmail.com>
  * @since v0.1, 15/07/2009
  */
-class Engine
+class Dispatcher
 {
     /**
      * CONTROLLERS

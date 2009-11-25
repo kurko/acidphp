@@ -16,7 +16,7 @@ class SQLObject {
     protected $conexao;
 
     function __construct(){
-        
+        return true;
     }
 
     /**
@@ -59,9 +59,9 @@ class SQLObject {
          *
          * Ajusta Left Joins de acordo com relacionamentos dos models
          */
-        $hasOne = $mainModel->hasOne;
-        $hasMany = $mainModel->hasMany;
-        $belongsTo = $mainModel->belongsTo;
+        $hasOne = ( !is_array($mainModel->hasOne) ) ? array() : $mainModel->hasOne;
+        $hasMany = ( !is_array($mainModel->hasMany) ) ? array() : $mainModel->hasMany;
+        $belongsTo = ( !is_array($mainModel->belongsTo) ) ? array() : $mainModel->belongsTo;
         $has = array();
         $has = array_merge( $hasOne , $hasMany, $belongsTo );
         foreach( $has as $model=>$info ){
@@ -132,6 +132,7 @@ class SQLObject {
          * Fields: Se nenhum campo foi indicado
          */
         if( empty($options['fields']) ){
+            
             foreach($usedModels as $model){
                 /**
                  * Loop por cada campo da tabela para montar Fields
@@ -141,6 +142,7 @@ class SQLObject {
                         $fields[] = get_class( $model ).".".$campo." AS '".get_class( $model ).$separadorModelCampo.$campo."'";
                     }
                 }
+
             }
         }
         /**

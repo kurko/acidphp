@@ -66,6 +66,11 @@ class Helper
          */
         $this->params = ( empty($params["params"]) ) ? array() : $params["params"];
         /**
+         * $this->conn
+         */
+        $this->conn = ( empty($params["conn"]) ) ? array() : $params["conn"];
+
+        /**
          * $this->models
          */
         $this->models = ( empty($params["models"]) ) ? array() : $params["models"];
