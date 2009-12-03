@@ -308,177 +308,7 @@ class FormHelper extends Helper
         return $conteudo;
     } // fim create()
 
-    /**
-     * _getModelTableDescribe()
-     *
-     * Returns this model's table described.
-     *
-     * @param <string> $model
-     * @return <array>
-     */
-    public function _getModelTableDescribe($model){
 
-        return $this->models[$model]->_getTableDescribed();
-
-    }
-
-    /**
-     * _fieldModel()
-     *
-     * Retorna o nome do MODEL numa string de padrão 'Model.campo'
-     *
-     * @param <string> $fieldModel
-     * @return <string>
-     */
-    public function _fieldModel($fieldName){
-        $dotPos = strpos($fieldName, "." );
-        if( $dotPos === false ){
-            /**
-             * É o model padrão
-             */
-            $modelName = $this->modelName;
-        }
-        /**
-         * Outro Model foi especificado
-         */
-        else {
-            $modelName = substr( $fieldName, 0, $dotPos );
-            $fieldName = substr( $fieldName, $dotPos+1, 100 );
-        }
-
-        return $modelName;
-    }
-
-    /**
-     * _fieldName()
-     *
-     * Retorna o nome do CAMPO numa string de padrão 'Model.campo'
-     *
-     * @param <string> $fieldName
-     * @return <string>
-     */
-    public function _fieldName($fieldName){
-        $dotPos = strpos($fieldName, "." );
-        if( $dotPos === false ){ }
-        /**
-         * Model especificado
-         */
-        else {
-            $fieldName = substr( $fieldName, $dotPos+1, 100 );
-        }
-
-        return $fieldName;
-    }
-
-    /**
-     * _fieldType()
-     * 
-     * Retorna o tipo de campo para um $fieldName e um $fieldModel.
-     *
-     * Especifique um $customType se você deseja um tipo específico. O tipo
-     * especificado é verificado junto aos tipos HTML possíveis.
-     * 
-     * @param <string> $fieldName
-     * @param <string> $fieldModel
-     * @param <string> $customType
-     * @return <string> 
-     */
-    public function _fieldType($fieldName, $fieldModel, $customType="" ){
-
-        /*
-         * An accepted custom type was set
-         */
-        if( !empty($customType) &&
-            in_array(strtolower($customType), $this->_availableFieldTypes) )
-        {
-            return strtolower($customType);
-        }
-
-        $thisModelDescribed = $this->_getModelTableDescribe($fieldModel);
-
-        /*
-         * No custom types set, setting an field type automatically
-         */
-        /*
-         * GETS DB TYPE
-         */
-        if( !empty($thisModelDescribed[$fieldName]["Type"]) )
-        {
-            /**
-             * Verifica descrição da tabela do Model deste campo e está
-             * registrado em $thisModelDescribed[$fieldName]["Type"]
-             */
-             $physicalType = $thisModelDescribed[$fieldName]["Type"];
-             /**
-              * Esta variável com nome gigante tem a posição do primeiro
-              * parêntesis no nome físico deste campo na tabela do banco de
-              * dados. Isto serve para tomar o nome do tipo de dados somente.
-              *
-              * Ex.:
-              *     - varchar() -> pega somente "varchar"
-              *     - tinyint() -> pega somente "tinyint"
-              */
-             $physicalTypeNameParenthesisPos = strpos( $physicalType, "(" );
-             if( $physicalTypeNameParenthesisPos > 0 ){
-                 $physicalType = substr( $physicalType, 0, $physicalTypeNameParenthesisPos );
-             }
-
-             /**
-              * Segundo o tipo de dado físico de cada campo na tabela,
-              * instancia um tipo para um campo do formulário.
-              */
-             switch($physicalType){
-
-                 /*
-                  * Textos pequenos como varchar
-                  */
-                 case "varchar"     : $inputType = "text"; break;
-                 case "char"        : $inputType = "text"; break;
-                 /*
-                  * Textos grandes como text, blob
-                  */
-                 case       "text"  : $inputType = "textarea"; break;
-                 case   "tinytext"  : $inputType = "textarea"; break;
-                 case "mediumtext"  : $inputType = "textarea"; break;
-                 case   "longtext"  : $inputType = "textarea"; break;
-                 case       "blob"  : $inputType = "textarea"; break;
-                 case   "tinyblob"  : $inputType = "textarea"; break;
-                 case "mediumblob"  : $inputType = "textarea"; break;
-                 case   "longblob"  : $inputType = "textarea"; break;
-                 /*
-                  * Números como int
-                  */
-                 case "int"         : $inputType = "text"; break;
-                 /*
-                  * Boolean, tinyint
-                  */
-                 case "bool"        : $inputType = "checkbox"; break;
-                 case "tinyint"     : $inputType = "checkbox"; break;
-                 /*
-                  * Datas e time
-                  */
-                 case "datetime"    : $inputType = "datetime"; break;
-                 case "date"        : $inputType = "date"; break;
-                 case "timestamp"   : $inputType = "timestamp"; break;
-                 case "time"        : $inputType = "time"; break;
-                 case "year"        : $inputType = "year"; break;
-                     
-                 default            : $inputType = "text"; break;
-             }
-            return $inputType;
-        }
-
-        return "text";
-    }
-
-    public function _options( $options = array() ){
-        
-    }
-
-
-    public function _getInputField(){
-
-    }
 
     /**
      * input()
@@ -782,7 +612,7 @@ class FormHelper extends Helper
          */
         else if( $inputType == "checkbox" ){
             $conteudo.= '<div class="input_field input_checkbox">';
-            $conteudo.= '<input type="checkbox" name="'.$inputName.'" '.$standardAtrib.' />';
+            $conteudo.= '<input type="checkbox" name="'.$inputName.'" '.$standardAtrib.' /> ';
             $conteudo.= '<label for="input-'.$fieldName.'">'.$label.'</label>';
         }
         /**
@@ -981,6 +811,14 @@ class FormHelper extends Helper
      *
      */
 
+    /**
+     * _between()
+     *
+     * Mostra conteúdo antes do Input field
+     *
+     * @param string $str
+     * @return string
+     */
     public function _between($str){
         $conteudo.= '<span class="input_between">';
         $conteudo.= $str;
@@ -1009,7 +847,179 @@ class FormHelper extends Helper
     }
 
 
+    /**
+     * _getModelTableDescribe()
+     *
+     * Returns this model's table described.
+     *
+     * @param <string> $model
+     * @return <array>
+     */
+    public function _getModelTableDescribe($model){
+        return $this->models[$model]->_getTableDescribed();
+    }
 
+    /**
+     * _fieldModel()
+     *
+     * Retorna o nome do MODEL numa string de padrão 'Model.campo'
+     *
+     * @param <string> $fieldModel
+     * @return <string>
+     */
+    public function _fieldModel($fieldName){
+        $dotPos = strpos($fieldName, "." );
+        if( $dotPos === false ){
+            /**
+             * É o model padrão
+             */
+            $modelName = $this->modelName;
+        }
+        /**
+         * Outro Model foi especificado
+         */
+        else {
+            $modelName = substr( $fieldName, 0, $dotPos );
+            $fieldName = substr( $fieldName, $dotPos+1, 100 );
+        }
+
+        return $modelName;
+    }
+
+    /**
+     * _fieldName()
+     *
+     * Retorna o nome do CAMPO numa string de padrão 'Model.campo'
+     *
+     * @param <string> $fieldName
+     * @return <string>
+     */
+    public function _fieldName($fieldName){
+        $dotPos = strpos($fieldName, "." );
+        if( $dotPos === false ){ }
+        /**
+         * Model especificado
+         */
+        else {
+            $fieldName = substr( $fieldName, $dotPos+1, 100 );
+        }
+
+        return $fieldName;
+    }
+
+    /**
+     * _fieldType()
+     *
+     * Retorna o tipo de campo para um $fieldName e um $fieldModel.
+     *
+     * Especifique um $customType se você deseja um tipo específico. O tipo
+     * especificado é verificado junto aos tipos HTML possíveis.
+     *
+     * @param <string> $fieldName
+     * @param <string> $fieldModel
+     * @param <string> $customType
+     * @return <string>
+     */
+    public function _fieldType($fieldName, $fieldModel, $customType="" ){
+
+        /*
+         * An accepted custom type was set
+         */
+        if( !empty($customType) &&
+            in_array(strtolower($customType), $this->_availableFieldTypes) )
+        {
+            return strtolower($customType);
+        }
+
+        $thisModelDescribed = $this->_getModelTableDescribe($fieldModel);
+
+        /*
+         * No custom types set, setting an field type automatically
+         */
+        /*
+         * GETS DB TYPE
+         */
+        if( !empty($thisModelDescribed[$fieldName]["Type"]) )
+        {
+            /**
+             * Verifica descrição da tabela do Model deste campo e está
+             * registrado em $thisModelDescribed[$fieldName]["Type"]
+             */
+             $physicalType = $thisModelDescribed[$fieldName]["Type"];
+             /**
+              * Esta variável com nome gigante tem a posição do primeiro
+              * parêntesis no nome físico deste campo na tabela do banco de
+              * dados. Isto serve para tomar o nome do tipo de dados somente.
+              *
+              * Ex.:
+              *     - varchar() -> pega somente "varchar"
+              *     - tinyint() -> pega somente "tinyint"
+              */
+             $physicalTypeNameParenthesisPos = strpos( $physicalType, "(" );
+             if( $physicalTypeNameParenthesisPos > 0 ){
+                 $physicalType = substr( $physicalType, 0, $physicalTypeNameParenthesisPos );
+             }
+
+             /**
+              * Segundo o tipo de dado físico de cada campo na tabela,
+              * instancia um tipo para um campo do formulário.
+              */
+             switch($physicalType){
+
+                 /*
+                  * Textos pequenos como varchar
+                  */
+                 case "varchar"     : $inputType = "text"; break;
+                 case "char"        : $inputType = "text"; break;
+                 /*
+                  * Textos grandes como text, blob
+                  */
+                 case       "text"  : $inputType = "textarea"; break;
+                 case   "tinytext"  : $inputType = "textarea"; break;
+                 case "mediumtext"  : $inputType = "textarea"; break;
+                 case   "longtext"  : $inputType = "textarea"; break;
+                 case       "blob"  : $inputType = "textarea"; break;
+                 case   "tinyblob"  : $inputType = "textarea"; break;
+                 case "mediumblob"  : $inputType = "textarea"; break;
+                 case   "longblob"  : $inputType = "textarea"; break;
+                 /*
+                  * Números como int
+                  */
+                 case "int"         : $inputType = "text"; break;
+                 /*
+                  * Boolean, tinyint
+                  */
+                 case "bool"        : $inputType = "checkbox"; break;
+                 case "tinyint"     : $inputType = "checkbox"; break;
+                 /*
+                  * Datas e time
+                  */
+                 case "datetime"    : $inputType = "datetime"; break;
+                 case "date"        : $inputType = "date"; break;
+                 case "timestamp"   : $inputType = "timestamp"; break;
+                 case "time"        : $inputType = "time"; break;
+                 case "year"        : $inputType = "year"; break;
+
+                 default            : $inputType = "text"; break;
+             }
+            return $inputType;
+        }
+
+        return "text";
+    }
+
+    /*
+     *
+     * MESSAGES
+     *
+     */
+    /**
+     * statusMessage()
+     *
+     * Escreve uma mensagem de status
+     *
+     * @return <string>
+     */
     public function statusMessage(){
         /**
          * Se de fato existe alguma mensagem de status

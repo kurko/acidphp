@@ -463,8 +463,8 @@ class Controller
             'conn' => &$this->dispatcher->conn,
             //'dbTables' => $this->dispatcher->dbTables,
             //'modelName' => $modelName,
-            //'recursive' => $this->recursive,
-            //'params' => &$this->params,
+            'recursive' => $this->recursive,
+            'params' => &$this->params,
         );
 
         include_once(APP_MODEL_DIR.$modelName.".php");

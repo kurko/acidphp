@@ -97,7 +97,7 @@ class Model
          *
          * @var array
          */
-        private $dbTables;
+        private $tables;
 
         public $sqlObject;
 
@@ -163,7 +163,6 @@ class Model
          * Configura a conexão com a base de dados
          */
         $this->conn = ( empty($params["conn"]) ) ? '' : $params["conn"];
-        $this->dbTables = ( empty($params["dbTables"]) ) ? array() : $params["dbTables"];
         
         /**
          * DEFINE A TABELA A SER USADA
@@ -182,7 +181,7 @@ class Model
         } else {
             $this->tableDescribed = $this->conn->tables[ get_class($this) ];
         }
-
+        $this->tables = ( empty($this->conn->tables) ) ? array() : $this->conn->tables;
 
         /**
          * CRIA RELACIONAMENTOS
@@ -419,9 +418,9 @@ class Model
                         } // fim chamada subModel
 
                         /*
-                         * Se a tabela atual existe de fato.
+                         * Se a tabela do model atual já foi descrito.
                          */
-                        if( in_array($tabela, $this->dbTables) ){
+                        if( array_key_exists($model, $this->tables) ){
                             /**
                              * Loop por cada campo e seus valores para gerar uma
                              * string com os campos a serem incluidos.
@@ -707,17 +706,30 @@ class Model
              * NÂO VALIDOU
              */
             else {
-                $_SESSION["Sys"]["addToThisData"][ $this->params["post"]["formId"] ] = $data;
-                if( !empty($this->params["post"]["formUrl"]) ){
-                    $_SESSION["Sys"]["options"]["addToThisData"][ $this->params["post"]["formId"] ]["destLocation"] = $this->params["post"]["formUrl"];
-                }
-
-                redirect($this->params["post"]["formUrl"]);
+                $this->_saveDidntValidate($data);
             }
         }
 
         return false;
     } // FIM SAVE()
+
+    /**
+     * _saveDidntValidate()
+     *
+     * Se uma requisição para salvar dados não foi validada.
+     *
+     * @param <array> $data
+     */
+    public function _saveDidntValidate($data){
+        if( !empty($this->params["post"]["formId"]) ){
+            $_SESSION["Sys"]["addToThisData"][ $this->params["post"]["formId"] ] = $data;
+        }
+        if( !empty($this->params["post"]["formUrl"]) ){
+            $_SESSION["Sys"]["options"]["addToThisData"][ $this->params["post"]["formId"] ]["destLocation"] = $this->params["post"]["formUrl"];
+        }
+
+        redirect($this->params["post"]["formUrl"]);
+    }
 
     /**
      * UPDATE()
