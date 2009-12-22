@@ -16,7 +16,7 @@ class SQLObject {
     protected $conexao;
 
     function __construct(){
-        return true;
+        
     }
 
     /**
@@ -59,9 +59,12 @@ class SQLObject {
          *
          * Ajusta Left Joins de acordo com relacionamentos dos models
          */
-        $hasOne = ( !is_array($mainModel->hasOne) ) ? array() : $mainModel->hasOne;
-        $hasMany = ( !is_array($mainModel->hasMany) ) ? array() : $mainModel->hasMany;
-        $belongsTo = ( !is_array($mainModel->belongsTo) ) ? array() : $mainModel->belongsTo;
+
+        //echo "<br>".get_class($mainModel);
+        $hasOne = $mainModel->hasOne;
+        $hasMany = $mainModel->hasMany;
+        $belongsTo = $mainModel->belongsTo;
+        //pr($options);
         $has = array();
         $has = array_merge( $hasOne , $hasMany, $belongsTo );
         foreach( $has as $model=>$info ){
@@ -132,7 +135,6 @@ class SQLObject {
          * Fields: Se nenhum campo foi indicado
          */
         if( empty($options['fields']) ){
-            
             foreach($usedModels as $model){
                 /**
                  * Loop por cada campo da tabela para montar Fields
@@ -142,7 +144,6 @@ class SQLObject {
                         $fields[] = get_class( $model ).".".$campo." AS '".get_class( $model ).$separadorModelCampo.$campo."'";
                     }
                 }
-
             }
         }
         /**
@@ -190,47 +191,51 @@ class SQLObject {
                         }
                     }
                 }
+                
+                if(!empty($fieldModelUsed)){
 
-                /*
-                 * Sempre carrega junto o id e o foreignKey das tabelas
-                 * relacionadas
-                 */
-                foreach($fieldModelUsed as $model){
-
-                    $regex = "/('". $model.$separadorModelCampo."id')/";
-
-                    $loadingIdAlready = false;
-                    foreach( $fields as $soughtField ){
-                        if( preg_match($regex, $soughtField) )
-                            $loadingIdAlready = true;
-                    }
-
-                    if( !$loadingIdAlready ){
-
-                        /**
-                         * 'id' do registro
-                         */
-                        $fields[] = $model.".id AS '".$model.$separadorModelCampo."id'";
-                    }
-                    
-                    /**
-                     * foreignKey da tabela relacionada
+                    /*
+                     * Sempre carrega junto o id e o foreignKey das tabelas
+                     * relacionadas
                      */
-                    if( $model != get_class($mainModel) ){
+                    foreach($fieldModelUsed as $model){
+
+                        $regex = "/('". $model.$separadorModelCampo."id')/";
+
+                        $loadingIdAlready = false;
+                        foreach( $fields as $soughtField ){
+                            if( preg_match($regex, $soughtField) )
+                                $loadingIdAlready = true;
+                        }
+
+                        if( !$loadingIdAlready ){
+
+                            /**
+                             * 'id' do registro
+                             */
+                            $fields[] = $model.".id AS '".$model.$separadorModelCampo."id'";
+                        }
 
                         /**
-                         * hasOne
+                         * foreignKey da tabela relacionada
                          */
-                        if( array_key_exists($model, $mainModel->hasOne) ){
-                            $fields[] = $model.".".$mainModel->hasOne[$model]["foreignKey"]." AS '".$model.$separadorModelCampo.$mainModel->hasOne[$model]["foreignKey"]."'";
-                        }
-                        /**
-                         * hasMany
-                         */
-                        else if( array_key_exists($model, $mainModel->hasMany) ){
-                            $fields[] = $model.".".$mainModel->hasMany[$model]["foreignKey"]." AS '".$model.$separadorModelCampo.$mainModel->hasMany[$model]["foreignKey"]."'";
+                        if( $model != get_class($mainModel) ){
+
+                            /**
+                             * hasOne
+                             */
+                            if( array_key_exists($model, $mainModel->hasOne) ){
+                                $fields[] = $model.".".$mainModel->hasOne[$model]["foreignKey"]." AS '".$model.$separadorModelCampo.$mainModel->hasOne[$model]["foreignKey"]."'";
+                            }
+                            /**
+                             * hasMany
+                             */
+                            else if( array_key_exists($model, $mainModel->hasMany) ){
+                                $fields[] = $model.".".$mainModel->hasMany[$model]["foreignKey"]." AS '".$model.$separadorModelCampo.$mainModel->hasMany[$model]["foreignKey"]."'";
+                            }
                         }
                     }
+
                 }
             }
             /**
@@ -472,6 +477,7 @@ class SQLObject {
      */
     function conditions($conditions, $options=""){
         //pr($options);
+        //pr($conditions);
         /**
          * Passa cada condição e cria operações lógicas SQL
          */
@@ -488,7 +494,7 @@ class SQLObject {
              * $cond: se não for array, certifica-se de se tornar uma
              */
             $cond = ( !is_array($cond) ) ? array($modo => $cond) : $cond;
-
+            //pr($cond);
             $rules = array();
 
             /**
@@ -498,7 +504,8 @@ class SQLObject {
 
                 $emptyCampo = false;
                 if( empty($campo)
-                    OR is_int($campo) )
+                    //OR is_int($campo)
+                        )
                 {
                     $campo = "";
                     $emptyCampo = true;
@@ -540,6 +547,7 @@ class SQLObject {
                 /**
                  * Verifica se o campo é array ou não
                  */
+
                 $loopQuery = false;
                 if( !is_array($valor) ){
                     /**
@@ -556,7 +564,10 @@ class SQLObject {
                     foreach($valor as $subvalores){
                         if( is_array( $subvalores ) ){
                             $subOptions = $options;
-                            $subOptions["modo"] = "NOTOR";
+
+                            if( $modo == 'NOTOR' )
+                                $subOptions["modo"] = "NOTOR";
+                            
                             $valor = $this->conditions($cond, $subOptions );
                             unset($subOptions);
                             $loopQuery = true;

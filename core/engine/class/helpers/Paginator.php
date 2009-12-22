@@ -144,6 +144,15 @@ class PaginatorHelper extends Helper
         }
 
 
+        if( $pag['last'] == 1
+            AND (
+                empty($options["always"])
+                OR $options["always"] == false
+                )
+            )
+        {
+            return false;
+        }
 
         /**
          * AMOSTRAGEM DE MENU DE PAGINAÇÃO

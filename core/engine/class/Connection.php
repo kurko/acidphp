@@ -14,7 +14,7 @@
  * @author Alexandre de Oliveira <chavedomundo@gmail.com>
  * @since v0.1, 15/07/2009
  */
-class Connection {
+class Conexao {
     /**
      *
      * @var bool Conectado?
@@ -30,38 +30,28 @@ class Connection {
      * @var Resource Possui a conexão com o DB
      */
 	public $conn;
+    /**
+     *
+     * @var <type> ????????????????????????
+     */
+    private $db;
 
     /**
      *
-     * @var array Contém toda a configuração de acesso à base de dados
+     * @var <type> Contém toda a configuração de acesso à base de dados
      */
-    public $dbConfig;
+    protected $dbConfig;
 
-
-    public $tables = array();
-    /*
-     * CONFIGURAÇÕES INTERNAS
-     */
-    /*
-     * Método de debug da classe
-     */
     private $debugLevel = 0;
 
-    /*
-     *
-     * MÉTODOS
-     *
-     */
+
     /**
-     * __construct()
-     *
-     * Cria conexão com bases de dados. Faz integração de conexões se PDO existe
-     * ou não.
+     * Cria conexão com o DB. Faz integração de conexões se PDO existe ou não.
      *
      * @param array $conexao Contém parâmetros de conexão ao DB
      */
     function __construct($dbConfig){
-        
+            
         $this->dbConfig = $dbConfig;
 
         if( !empty($dbConfig) ){
@@ -81,13 +71,9 @@ class Connection {
                 $this->DbConnect($dbConfig);
             }
         }
-
-        //$this->describeTables();
     }
 
     /**
-     * PdoInit()
-     *
      * Efetua conexão via PDO.
      * 
      * Esta função é executada somente se a extensão 'PDO' estiver ativada.
@@ -153,6 +139,7 @@ class Connection {
         $conn = mysql_connect($conexao['server'], $conexao['username'], $conexao['password']) or die('Erro ao encontrar servidor');
         if(mysql_select_db($conexao['database'], $conn)){
             $this->DBExiste = TRUE;
+            $this->db = $db;
             $this->conn = $conn;
             $this->connected = true;
         } else {
@@ -197,8 +184,7 @@ class Connection {
              * Verifica que tipo de instrução SQL é esta
              */
                 $instructionType = strpos($sql, " ");
-                $sqlType = substr( $sql, 0, $instructionType );
-
+                $sqlType = trim( substr( $sql, 0, $instructionType ) );
             /**
              * Tipo de instrução SQL, se deve retornar dados ou não
              */
@@ -391,82 +377,62 @@ class Connection {
         return $this->conn->lastInsertId();
     }
 
-    /*
-     *
-     * DATABASE SETUP
-     *
-     * Reads some tables
-     *
-     */
-
     /**
-     * _getTables
-     *
-     * Retorna a lista de tabelas existentes na base de dados.
+     * Retorna a lista de tabelas existentes
      *
      * @param string $db Banco de dados
      * @return array Retorna a lista de tabelas
      */
-    public function _getTables(){
+    public function listaTabelasDoDBParaArray($db = '' ){
+
+        /**
+         * Ajusta o DB (se nenhum especificado, usa o padrão do sistema)
+         */
+        $db = ( empty($db) ) ? $this->dbConfig['db'] : $db;
+
+        /**
+         * SQL para mostrar as tabelas da base de dados selecionada
+         */
+        $sql = "SHOW TABLES";
 
         /**
          * Carrega as tabelas, verifica a quantidade e ajusta uma array com elas
          * para retornar.
          */
-        $query = $this->query("SHOW TABLES");
+        $query = $this->query($sql);
         $qntd_tabelas = count($query);
-        
         if($qntd_tabelas > 0){
             foreach ( $query as $chave=>$valor ){
-                $tables[] = reset($valor);
+                $arraytmp[] = $valor[0];
             }
-            return $tables;
-        } else {
-            return false;
         }
+        return $arraytmp;
 
     }
 
     /**
-     * describeTables()
+     * Retorna array com os campos da tabela selecionada
      *
-     * Descreve as tabelas do banco de dados atual
-     *
-     * @param <string> $tableRequired
-     * @param <string> $alias [optional] Nome do índice da array que será
-     *                          gerada. Esta opção é útil para Models, assim o
-     *                          índice da array fica com o nome do Model e não
-     *                          da tabela descrita.
-     * @return <type>
+     * @param string $tabela
+     * @return array Array contendo todos os campos da tabela escolhida,
+     * juntamente com informações como tipo e chaves.
      */
-    public function describeTables( $tableRequired = "", $alias = "" ){
+    public function listaCampos( $tabela ){
+        $sql = "DESCRIBE ". $tabela;
 
-        if( empty($tableRequired) )
-            $tablesList = $this->_getTables();
-        else if( is_string($tableRequired) )
-            $tablesList[0] = $tableRequired;
-        else if( is_array($tableRequired) )
-            $tablesList = $tableRequired;
-        else
-            return false;
+        $query = $this->query($sql);
 
-        if( empty($alias) )
-            $alias = $tableRequired;
-        
-        foreach( $tablesList as $table )
-        {
-            foreach( $this->query('DESCRIBE ' . $table) as $field )
-            {
-                $thisTable[ $field['Field'] ] = $field;
-                $this->tables[ $alias ][$field['Field']] = $field;
-            }
+        /**
+         * Loop pelos campos ajustando para o português os índices da array
+         * de retorno.
+         */
+        foreach($query as $chave=>$valor){
+            $query[$chave]['campo'] = $valor['Field'];
+            $query[$chave]['tipo'] = $valor['Type'];
         }
-
-        if( empty($thisTable) )
-            return false;
-            
-        return $thisTable;
         
+        return $query;
+
     }
 
     /**

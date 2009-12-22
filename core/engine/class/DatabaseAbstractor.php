@@ -56,6 +56,61 @@ class DatabaseAbstractor extends DataAbstractor {
     /**
      * MÉTODOS DE SUPORTE
      */
+
+    public function generateSql($options, $mode = "all"){
+
+        $findStartTime = microtime(true);
+        /**
+         * Configuração inicial
+         */
+        /**
+         * Models
+         */
+        $mainModel = $options["mainModel"];
+        //echo get_class($mainModel);
+
+        /**
+         * VERIFICA $OPTIONS
+         *
+         * Faz verificações para saber que tipo de busca deve ser feita
+         */
+        /**
+         * LIMIT
+         *
+         * Verificação: Se SQL Limit definido
+         */
+        if( !empty($options["limit"]) ){
+            /**
+             * hasMany
+             *
+             * Desativa relacionamentos hasMany para buscá-los separadamente
+             */
+            $hasManyTemp = $mainModel->hasMany;
+            //$options["mainModel"]->hasMany = array();
+            /**
+             * @todo - é necessário hiddenHasMany?
+             */
+            $options["hiddenHasMany"] = $hasManyTemp;
+            //$options["hasMany"] = $hasManyTemp;
+
+            /**
+             * Toma os códigos SQL gerados por sqlObject para o Model principal
+             */
+            $sql = $this->sqlObject->select($options);
+            //pr($sql);
+
+        }
+        /**
+         * LIMIT desligado
+         */
+        else {
+            $sql = $this->sqlObject->select($options);
+        }
+
+        return reset($sql);
+
+    }
+
     /**
      * FIND()
      *
@@ -108,13 +163,18 @@ class DatabaseAbstractor extends DataAbstractor {
              * Desativa relacionamentos hasMany para buscá-los separadamente
              */
             $hasManyTemp = $mainModel->hasMany;
-            $options["mainModel"]->hasMany = array();
+            //$options["mainModel"]->hasMany = array();
+            /**
+             * @todo - é necessário hiddenHasMany?
+             */
             $options["hiddenHasMany"] = $hasManyTemp;
+            //$options["hasMany"] = $hasManyTemp;
 
             /**
              * Toma os códigos SQL gerados por sqlObject para o Model principal
              */
             $sql = $this->sqlObject->select($options);
+            //pr($sql);
 
             /**
              * Carrega os dados da tabela principal
@@ -169,6 +229,8 @@ class DatabaseAbstractor extends DataAbstractor {
                             $model.".".$properties["foreignKey"] => $mainIds,
                         )
                     );
+                    $subOptions['conditions'] = array_merge_recursive( $subOptions['conditions'], $options['conditions'] );
+
                     //$subOptions["order"] = ( empty($options["order"]) ) ? "" : $options["order"];
                     $subOptions["order"] = "";
                     $sql = array_merge($sql, $this->sqlObject->select($subOptions) );
@@ -183,7 +245,6 @@ class DatabaseAbstractor extends DataAbstractor {
         else {
             $sql = $this->sqlObject->select($options);
         }
-
 
         $loopStartTime = microtime(true);
 

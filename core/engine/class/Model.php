@@ -7,11 +7,8 @@
  * @author Alexandre de Oliveira <chavedomundo@gmail.com>
  * @since v0.1, 19/07/2009
  */
- 
 class Model
 {
-
-    
     /**
      * CONFIGURAÇÕES
      */
@@ -29,24 +26,20 @@ class Model
          */
         public $id;
         /**
-         * Behavior
-         *
          * Contém informações sobre os Behaviors que devem ser carregados.
          *
          * @var array 
          */
         public $actsAs = array();
-
-
     /*
      * INFORMAÇÕES DE TRANSAÇÕES
      */
-        /**
-         * lastInsertId
-         *
-         * @var int Contém o id do último campo inserido
-         */
-        var $lastInsertId;
+    /**
+     * lastInsertId
+     *
+     * @var int Contém o id do último campo inserido
+     */
+    var $lastInsertId;
 
     /**
      * CONFIGURAÇÕES INTERNAS
@@ -97,7 +90,7 @@ class Model
          *
          * @var array
          */
-        private $tables;
+        private $dbTables;
 
         public $sqlObject;
 
@@ -124,21 +117,18 @@ class Model
      *      "conn" object : conexão com o db;
      */
     function  __construct($params) {
-        
+        // Seta o nome deste model
         $this->modelName = get_class($this);
         
         /**
          * RECURSIVE
          */
-        $this->recursive =
-            (empty($params["recursive"]))
-                ? 1
-                : $params["recursive"];
-                
-        $this->currentRecursive =
-            ( empty($params["currentRecursive"]) )
-                ? 0
-                : $params["currentRecursive"];
+        $this->recursive = $params["recursive"];
+        if( empty($params["currentRecursive"]) ){
+            $this->currentRecursive = 0;
+        } else {
+            $this->currentRecursive = $params["currentRecursive"];
+        }
 
 
         /**
@@ -147,15 +137,11 @@ class Model
              /*
               * params
               */
-            $this->params = (empty($params["params"]))
-                            ? array()
-                            : $params["params"];
+            $this->params = &$params["params"];
             /*
              * $data
              */
-            $this->data = (empty($params["data"]))
-                          ? array()
-                          : $params["params"];
+            $this->data = &$params["data"];
 
         /**
          * CONEXÃO
@@ -163,6 +149,7 @@ class Model
          * Configura a conexão com a base de dados
          */
         $this->conn = ( empty($params["conn"]) ) ? '' : $params["conn"];
+        $this->dbTables = ( empty($params["dbTables"]) ) ? array() : $params["dbTables"];
         
         /**
          * DEFINE A TABELA A SER USADA
@@ -175,30 +162,27 @@ class Model
          * Com global $describedTables, sabemos quais já foram descritas e não
          * repetimos o processo.
          */
-        //global $describedTables;
-        if( !array_key_exists( get_class($this), $this->conn->tables ) ){
-            $this->tableDescribed = $this->conn->describeTables($this->useTable, get_class($this) );
+        global $describedTables;
+        if( !array_key_exists( get_class($this), $describedTables) ){
+            $this->describeTable();
         } else {
-            $this->tableDescribed = $this->conn->tables[ get_class($this) ];
+            $this->tableDescribed = $describedTables[ get_class($this) ];
         }
-        $this->tables = ( empty($this->conn->tables) ) ? array() : $this->conn->tables;
-
+        
         /**
          * CRIA RELACIONAMENTOS
          */
         /*
          * Prepara Recursive + 1
          */
-        $this->currentRecursive = $this->currentRecursive + 1;
-        $params["currentRecursive"] = $this->currentRecursive;
-        
+        $params["currentRecursive"] = $this->currentRecursive+1;
         /**
          * hasOne
          */
         if( !empty($this->hasOne) ){
             foreach( $this->hasOne as $model=>$propriedades ){
 
-                if( $this->currentRecursive <= $this->recursive ){
+                if( $params["currentRecursive"] <= $params["recursive"] ){
                     include_once(APP_MODEL_DIR.$model.".php");
                     $this->{$model} = new $model($params);
                     $this->modelsLoaded[] = $model;
@@ -211,7 +195,7 @@ class Model
          */
         if( !empty($this->hasMany) ){
             foreach( $this->hasMany as $model=>$propriedades ){
-                if( $this->currentRecursive <= $this->recursive ){
+                if( $params["currentRecursive"] <= $params["recursive"] ){
                     include_once(APP_MODEL_DIR.$model.".php");
                     $this->{$model} = new $model($params);
                     $this->modelsLoaded[] = $model;
@@ -224,7 +208,7 @@ class Model
          */
         if( !empty($this->belongsTo) ){
             foreach( $this->belongsTo as $model=>$propriedades ){
-                if( $this->currentRecursive <= $this->recursive ){
+                if( $params["currentRecursive"] <= $params["recursive"] ){
                     include_once(APP_MODEL_DIR.$model.".php");
                     $this->{$model} = new $model($params);
                     $this->modelsLoaded[] = $model;
@@ -260,7 +244,6 @@ class Model
         */
         $this->_initBehaviors();
 
-        return true;
     } // fim __construct()
 
     /**
@@ -418,9 +401,9 @@ class Model
                         } // fim chamada subModel
 
                         /*
-                         * Se a tabela do model atual já foi descrito.
+                         * Se a tabela atual existe de fato.
                          */
-                        if( array_key_exists($model, $this->tables) ){
+                        if( in_array($tabela, $this->dbTables) ){
                             /**
                              * Loop por cada campo e seus valores para gerar uma
                              * string com os campos a serem incluidos.
@@ -706,30 +689,17 @@ class Model
              * NÂO VALIDOU
              */
             else {
-                $this->_saveDidntValidate($data);
+                $_SESSION["Sys"]["addToThisData"][ $this->params["post"]["formId"] ] = $data;
+                if( !empty($this->params["post"]["formUrl"]) ){
+                    $_SESSION["Sys"]["options"]["addToThisData"][ $this->params["post"]["formId"] ]["destLocation"] = $this->params["post"]["formUrl"];
+                }
+
+                redirect($this->params["post"]["formUrl"]);
             }
         }
 
         return false;
     } // FIM SAVE()
-
-    /**
-     * _saveDidntValidate()
-     *
-     * Se uma requisição para salvar dados não foi validada.
-     *
-     * @param <array> $data
-     */
-    public function _saveDidntValidate($data){
-        if( !empty($this->params["post"]["formId"]) ){
-            $_SESSION["Sys"]["addToThisData"][ $this->params["post"]["formId"] ] = $data;
-        }
-        if( !empty($this->params["post"]["formUrl"]) ){
-            $_SESSION["Sys"]["options"]["addToThisData"][ $this->params["post"]["formId"] ]["destLocation"] = $this->params["post"]["formUrl"];
-        }
-
-        redirect($this->params["post"]["formUrl"]);
-    }
 
     /**
      * UPDATE()
@@ -1051,7 +1021,17 @@ class Model
         if( $options["page"] < 1 )
             $options["page"] = 1;
 
-        $totalRows = $this->countRows();
+
+        $options["mainModel"] = $this;
+        $options["tableAlias"] = $this->tableAlias;
+        foreach( $options["tableAlias"] as $model=>$valor ){
+            if( get_class($this) != $model ){
+                $options["models"][$model] = $this->{$model};
+            }
+        }
+        //pr( );
+
+        $totalRows = $this->countRows($options);
 
         $startLimit = $options["limit"] * ($options["page"] - 1);
 
@@ -1109,12 +1089,7 @@ class Model
             /**
              * Se foi especificado um id
              */
-            if( (is_int($idOrConditions)
-                    OR is_string($idOrConditions)
-                )
-                AND $idOrConditions > 0 )
-            {
-                
+            if( (is_int($idOrConditions) or is_string($idOrConditions)) and $idOrConditions > 0 ){
                 $sql[] = array( "id='".$idOrConditions."'" );
 
                 $currentId = $idOrConditions;
@@ -1306,22 +1281,41 @@ class Model
         }
         /**
          * @todo - implementar
+         *
+         * Já foi feito para que o countRows use o SQL que o model principal
+         * usa. Entretanto, deve ser criado um padrão de uso do método.
          */
         else if( is_array($options) ) {
 
-            if( !empty($options["conditions"] ) ){
+            /*
+             * Se é uma query customizada
+             */
+            if( !empty($options["conditions"] )
+                OR !empty($options["limit"] )
+                OR !empty($options["order"] )
+                OR !empty($options["fields"] )
+                OR !empty($options["join"] )
+                )
+            {
 
+
+                /*
                 if( is_array($options["conditions"]) ){
                     foreach( $options["conditions"] as $chave=>$valor ){
                         $condition[] = $chave."='".$valor."'";
                     }
                     $where = implode('AND', $condition);
                 }
-
                 $count = $this->query(  "SELECT COUNT(*) as count ".
                                         "FROM ".$this->useTable." AS ".get_class($this)." ".
                                         "WHERE ".$where
                                     );
+                */
+                if( !empty($options["limit"]) )
+                    unset($options["limit"]);
+                $options["fields"] = array('COUNT(*) as count');
+
+                $count = $this->query( $this->databaseAbstractor->generateSql($options) );
                 return $count[0]["count"];
             }
             /**
@@ -1549,6 +1543,28 @@ class Model
      * MÉTODOS INTERNOS (PRIVATE)
      *
      */
+    /**
+     * Descreve as tabelas
+     *
+     * @global array $describedTables
+     * @param array $params
+     */
+    private function describeTable($params = ""){
+        $conn = ( empty($params["conn"]) ) ? $this->conn : $params["conn"];
+        
+        if( !empty($conn->connected) ){
+            global $describedTables;
+            /**
+             * Retorna todos os campos das tabelas
+             */
+            $describeSql = 'DESCRIBE '.$this->useTable;
+
+            foreach($conn->query($describeSql, "ASSOC") as $tabela=>$info){
+                $this->tableDescribed[$info['Field']] = $info;
+                $describedTables[ get_class($this) ][$info['Field']] = $info;
+            }
+        }
+    }
 
     /*
      *
@@ -1673,7 +1689,7 @@ class Model
         return true;
     }
 
-    /*
+    /**
      *
      *
      * ALIASES
@@ -1687,16 +1703,6 @@ class Model
     public function loadBehavior($behaviorName , $config = array()){
         $this->attach($behaviorName, $config);
     }
-
-    /*
-     *
-     * INTERNAL PROCESSING
-     */
-
-    public function _getTableDescribed(){
-        return $this->tableDescribed;
-    }
-
 
 }
 ?>
