@@ -84,11 +84,15 @@ class SQLObject {
                  */
                 /**
                  * Se o Model atual está na regra belongsTo, ajusta a sintaxe ON
-                 * da regra SQL Left Join de forma diferente
+                 * da regra SQL Left Join de forma diferente. O id do model principal
+                 * fica do outro lado da comparação.
+                 *
                  */
                 /**
                  * LeftJoin ON:
                  *      - BelongsTo
+                 *
+                 * ex. ModelPrincipal.'foreignkey'=ModelSecundario.id
                  */
                 if( array_key_exists($model, $belongsTo) )
                     $leftJoinOnSyntax = "ON ". get_class( $mainModel ).".".$info["foreignKey"]."=".$model.".id";
@@ -96,9 +100,21 @@ class SQLObject {
                  * LeftJoin ON:
                  *      - hasOne
                  *      - hasMany
+                 *
+                 * ex. ModelPrincipal.id=ModelSecundario.'foreignkey'
                  */
-                else
+                else {
                     $leftJoinOnSyntax = "ON ". get_class( $mainModel ).".id=".$model.".".$info["foreignKey"];
+                    /*
+                     * Outras Join Conditions
+                     * 
+                     * Se houver outras condições definidas.
+                     */
+                    if( !empty($info['conditions']) ){
+                        $leftJoinOnSyntax.= ' AND '.implode(' AND ', $this->conditions($info['conditions']) );
+                        //pr($this->conditions($info['conditions']));
+                    }
+                }
 
                 /**
                  *
@@ -107,7 +123,7 @@ class SQLObject {
                  */
                 $leftJoinTemp[] = $leftJoinSyntax." ".$leftJoinOnSyntax;
             }
-                        
+            //pr($leftJoinOnSyntax."<br><br>");
         }
         /**
          * $join -> Left Join, Right Join, Inner Join, etc
@@ -415,7 +431,7 @@ class SQLObject {
              */
             $rules = $this->conditions($conditions, $options);
         }
-        //pr($rules);
+        //pr($options);
         
         /**
          *
@@ -476,6 +492,7 @@ class SQLObject {
      * @return string
      */
     function conditions($conditions, $options=""){
+        //echo '<br>----<br>';
         //pr($options);
         //pr($conditions);
         /**
@@ -495,6 +512,7 @@ class SQLObject {
              */
             $cond = ( !is_array($cond) ) ? array($modo => $cond) : $cond;
             //pr($cond);
+            //pr($modo);
             $rules = array();
 
             /**

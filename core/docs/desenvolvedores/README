@@ -1,0 +1,56 @@
+EXPLICAÇÃO DOS DIRETÓRIOS APP/ E CORE/
+
+O Acid é composto por basicamente dois diretórios, o app/ e o core/.
+
+Cada pasta contém um arquivo README, quando necessário, com informações sobre
+os arquivos que estão lá.
+
+== O Core ==
+
+Em core/engine/ estão todas as funcionalidades de inicialização do sistema e o
+motor por trás do framework.
+
+Obs.: o core/engine/ não inicializa sozinho, quem faz isto é a aplicação (app/).
+Falaremos sobre isto adiante.
+
+Obs2.: o local ideal para adquirir conhecimento sobre os arquivos é neles
+mesmos, pois estão bem comentados, principalmente seus cabeçalhos.
+
+Na raiz de core/engine/, você encontra os arquivos loader.php e start.php e os
+diretórios class/ e functions/. A seguir, detalhes sobre cada um deles:
+
+
+* loader.php - como o nome indica, carrega as bibliotecas necessárias para
+o funcionamento do sistema, como classes de conexão com o banco de dados,
+entre outras. Você raramente precisará editar este arquivo, somente se vai
+criar um funcionalidade estrutural no Acid. Todo o carregamento MVC e URLs já
+estão prontos. Helpers, Components e Behaviors são carregados dentro dos
+controllers.
+
+* start.php - é o inicializador do mecanismo. Este mecanismo inicial é chamado
+de Engine. Ele analisa a URL atual e diz qual o controller deve ser instanciado.
+O código que instancia isto está em start.php. O Engine é uma classe em class/.
+
+* class/ - aqui está o cérebro do Acid, ou as partes do cérebro. Aqui você
+encontra todas as classes do sistema. As principais (até agora) são
+Connection.php, Controller.php, Model.php e DatabaseAbstractor.php.
+
+Você encontra ainda, as classes de components e helpers. Classes de helpers do
+sistema devem ser criados dentro do respectivo diretório, no formato correto.
+Eles são carregados automaticamente.
+
+* functions/ - funções do sistema que não pertencem a nenhum outro local. Aqui
+está a função que verifica se a url é verdadeira, por exemplo.
+
+Estes são os principais locais de trabalho. Obviamento, à medida do
+desenvolvimento, isto será expandido.
+
+== app/ ==
+
+Aqui é sua aplicação. Você vai criar seus controllers, models e views aqui.
+
+Em app/public/ estão os arquivos públicos. É o app/public/index.php o
+responsável por chamar core/engine/.
+
+Você pode criar outros aplicativos, bastando copiar app/. Por exemplo, você terá
+no raiz, core/, app/ e app2/. Duas aplicações, um mesmo core.
