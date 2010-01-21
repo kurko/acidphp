@@ -492,9 +492,7 @@ class SQLObject {
      * @return string
      */
     function conditions($conditions, $options=""){
-        //echo '<br>----<br>';
-        //pr($options);
-        //pr($conditions);
+
         /**
          * Passa cada condição e cria operações lógicas SQL
          */
@@ -574,10 +572,10 @@ class SQLObject {
                     $valor = array($valor);
                 } else {
                     /**
-                     * NOVO LOOP?
+                     * NOVO LOOP RECURSIVO?
                      *
-                     * Verifica se há necessidade de um novo loop e chama
-                     * $this->conditions novamente.
+                     * Verifica se há necessidade de um novo loop recursivo
+                     * e chama $this->conditions novamente.
                      */
                     foreach($valor as $subvalores){
                         if( is_array( $subvalores ) ){
@@ -632,6 +630,8 @@ class SQLObject {
                             }
                         }
 
+
+
                     }
                     /**
                      * Se está tudo OK com as verificações do campo
@@ -667,6 +667,7 @@ class SQLObject {
                 } else {
                     $rules[] = implode('\', \'', $valor);
                 }
+
 
                 unset($glue);
             }
