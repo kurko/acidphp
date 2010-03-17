@@ -14,7 +14,7 @@
  * @author Alexandre de Oliveira <chavedomundo@gmail.com>
  * @since v0.1, 15/07/2009
  */
-class Conexao {
+class Connection {
     /**
      *
      * @var bool Conectado?

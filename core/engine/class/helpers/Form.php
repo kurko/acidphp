@@ -856,7 +856,11 @@ class FormHelper extends Helper
      * @return <array>
      */
     public function _getModelTableDescribe($model){
-        return $this->models[$model]->_getTableDescribed();
+        /**
+         * @todo - verificar integridade dos dados
+         * abaixo
+         */
+        return $this->models[$model]->tableDescribed;
     }
 
     /**
