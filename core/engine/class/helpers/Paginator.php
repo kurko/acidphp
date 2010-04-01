@@ -173,34 +173,36 @@ class PaginatorHelper extends Helper
                  * Formata páginas
                  */
                 $first = false;
+                $pages = '';
                 $conteudo = "";
                 $conteudo.= '<span class="paginator">';
                 foreach( $pag["pages"] as $pageN ){
 
                     if( !$first ){
                         if( $pag["first"] + 1 != $pageN AND $pag["first"] != $pageN ){
-                            $conteudo.= " ...";
+                            $pages.= " ...";
                         }
                         $first = true;
                     }
-
+                    
                     if( $page == $pageN ){
-                        $conteudo.= '<span class="paginator_actualpage">';
-                        $conteudo.= " ".$pageN."";
-                        $conteudo.= "</span>";
+                        $pages.= '<span class="paginator_actualpage">';
+                        $pages.= " ".$pageN."";
+                        $pages.= "</span>";
                     } else {
-                        $conteudo.= ' <span class="paginator_page">';
-                        $conteudo.= '<a href="'.substituteUrlTerm("/page:".$urlGivenPage, "/page:".$pageN, $this->params["url"]).'">';
-                        $conteudo.= " ".$pageN."";
-                        $conteudo.= '</a>';
-                        $conteudo.= "</span>";
+                        $pages.= ' <span class="paginator_page">';
+                        $pages.= '<a href="'.substituteUrlTerm("/page:".$urlGivenPage, "/page:".$pageN, $this->params["url"]).'">';
+                        $pages.= " ".$pageN."";
+                        $pages.= '</a>';
+                        $pages.= "</span>";
                     }
 
+                    
                     $last = $pageN;
                 }
 
                 $toFormat = array("&page&","&total&" ,"&last&"    ,"&first&"    ,"&pages&");
-                $newFormat = array($page  ,$totalRows,$pag["last"],$pag["first"],$conteudo);
+                $newFormat = array($page  ,$totalRows,$pag["last"],$pag["first"],$pages);
 
                 $conteudo.= str_replace($toFormat, $newFormat, $format);
 
