@@ -534,6 +534,12 @@ class Controller
                         $this->set( strtolower($valor), $$valor);
                     }
                 }
+        /*
+         * ELEMENTS
+         */
+         //include_once(CORE_CLASS_DIR.'Elements.php');
+         $elements = Elements::getInstance();
+         $this->set('elements', &$elements);
 
         /**
          *

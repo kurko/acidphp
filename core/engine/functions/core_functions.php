@@ -60,7 +60,8 @@ function showWarning($str){
  * @param <type> $str
  */
 function showError($str){
-    if( Config::read("debug") > 0 ){
+    $debugMode = Config::read("debug");
+    if( Config::read("debug") > 0 OR empty($debugMode) ){
         trigger_error( $str , E_USER_ERROR);
     }
 }

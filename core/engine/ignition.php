@@ -132,6 +132,23 @@
  * LOADING CLASSES AND LIBS
  * 
  */
+    /*
+     * Class auto-load
+     */
+        function __autoload($class){
+            if( is_file(CORE_CLASS_DIR.$class.".php") ){
+                include_once(CORE_CLASS_DIR.$class.".php");
+            } else if( is_file(CORE_HELPERS_DIR.$class.".php") ){
+                include_once(CORE_HELPERS_DIR.$class.".php");
+            } else if( is_file(CORE_COMPONENTS_DIR.$class.".php") ){
+                include_once(CORE_COMPONENTS_DIR.$class.".php");
+            } else if( is_file(CORE_BEHAVIOR_DIR.$class.".php") ){
+                include_once(CORE_BEHAVIOR_DIR.$class.".php");
+            } else {
+                return false;
+            }
+        }
+
     /**
      * CLASSES CRÍTICAS
      *
@@ -283,7 +300,7 @@ if( !$useDB ){
     $dbConn = array();
     $conn = false;
 } else {
-    $conn = new Connection($dbConn);
+    $conn = Connection::getInstance();
 }
 
 /**
@@ -292,7 +309,7 @@ if( !$useDB ){
  * Engine é o responsável pela inicialização do sistema.
  */
 $dispatcher = new Dispatcher(array(
-        'conn' => $conn,
+        'conn' => Connection::getInstance(),
     )
 );
 
