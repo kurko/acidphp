@@ -10,16 +10,6 @@
 class SQLObject {
 
     /**
-     *
-     * @var class Classe responsável pela conexão com o banco de dados
-     */
-    protected $conexao;
-
-    function __construct(){
-        
-    }
-
-    /**
      * SELECT()
      *
      * Transforma um pedido em código SQL
@@ -28,7 +18,7 @@ class SQLObject {
      * @return string Código SQL
      */
     public function select($options){
-        
+
         /**
          * AJUSTA MODEL PRINCIPAL
          */
@@ -150,6 +140,7 @@ class SQLObject {
         /**
          * Fields: Se nenhum campo foi indicado
          */
+        $fields = array();
         if( empty($options['fields']) ){
             foreach($usedModels as $model){
                 /**

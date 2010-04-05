@@ -148,26 +148,36 @@ class Model
          *
          * Configura a conexão com a base de dados
          */
-        $this->conn = ( empty($params["conn"]) ) ? '' : $params["conn"];
+        $this->conn = Connection::getInstance();
         $this->dbTables = ( empty($params["dbTables"]) ) ? array() : $params["dbTables"];
         
         /**
          * DEFINE A TABELA A SER USADA
          */
-        $this->useTable = ( empty($this->useTable) ) ? $params["modelName"] : $this->useTable;
+        if( !empty($params['useTable']) )
+            $this->useTable = $params['useTable'];
+        else if( empty($this->useTable) )
+            $this->useTable = $params["modelName"];
+
+        if( empty($this->useTable) ){
+            showError("<em>useTable</em> não configurada em <em>".get_class($this)."</em>.");
+        }
 
         /**
          * DESCRIBE NA TABELA
          *
-         * Com global $describedTables, sabemos quais já foram descritas e não
-         * repetimos o processo.
          */
-        global $describedTables;
+        $this->_describeTable();
+        /*
+        if( empty($describedTables) )
+            $describedTables = array();
         if( !array_key_exists( get_class($this), $describedTables) ){
-            $this->describeTable();
+            $this->_describeTable();
         } else {
             $this->tableDescribed = $describedTables[ get_class($this) ];
         }
+         * 
+         */
         
         /**
          * CRIA RELACIONAMENTOS
@@ -1549,21 +1559,22 @@ class Model
      * @global array $describedTables
      * @param array $params
      */
-    private function describeTable($params = ""){
-        $conn = ( empty($params["conn"]) ) ? $this->conn : $params["conn"];
+    public function _describeTable($params = ""){
+        $conn = Connection::getInstance();
         
         if( !empty($conn->connected) ){
-            global $describedTables;
+            //global $describedTables;
             /**
              * Retorna todos os campos das tabelas
              */
             $describeSql = 'DESCRIBE '.$this->useTable;
-
             foreach($conn->query($describeSql, "ASSOC") as $tabela=>$info){
                 $this->tableDescribed[$info['Field']] = $info;
-                $describedTables[ get_class($this) ][$info['Field']] = $info;
+                //$describedTables[ get_class($this) ][$info['Field']] = $info;
             }
         }
+
+        return $this->tableDescribed;
     }
 
     /*

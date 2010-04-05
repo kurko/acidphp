@@ -38,7 +38,7 @@ class Connection {
 
     /**
      *
-     * @var <type> Contém toda a configuração de acesso à base de dados
+     * @var <array> Contém toda a configuração de acesso à base de dados
      */
     protected $dbConfig;
 
@@ -50,16 +50,16 @@ class Connection {
      *
      * @param array $conexao Contém parâmetros de conexão ao DB
      */
-    function __construct($dbConfig){
+    function __construct($dbConfig = ''){
             
-        $this->dbConfig = $dbConfig;
+        $this->dbConfig = DATABASE_CONFIG::$default;
 
-        if( !empty($dbConfig) ){
+        if( !empty($this->dbConfig) ){
             /**
              * Se a extensão PDO, usada para conexão com vários tipos de bases de dados
              */
             if($this->PdoExtension()){
-                $this->PdoInit($dbConfig);
+                $this->PdoInit($this->dbConfig);
                 if($this->debugLevel == 1){
                     $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
                 }
@@ -68,9 +68,25 @@ class Connection {
              * conexão comum
              */
             else {
-                $this->DbConnect($dbConfig);
+                $this->DbConnect($this->dbConfig);
             }
         }
+    }
+
+    /**
+     * getInstance()
+     *
+     * @staticvar <object> $instance
+     * @return <object>
+     */
+    public function getInstance(){
+        static $instance;
+
+        if( empty($instance[0]) ){
+            $instance[0] = new Connection;
+        }
+
+        return $instance[0];
     }
 
     /**

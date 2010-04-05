@@ -16,15 +16,5 @@ class SiteController extends AppController
 
     }
 
-    function test(){
-        $this->auth->logout();
-    }
-
-    function login(){
-
-        
-
-    }
-
 }
 ?>

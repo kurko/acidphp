@@ -1,17 +1,15 @@
 <?php
 /**
- * Configurações de acesso ao Banco de Dados
+ * Variável de conexão com banco de dados
  *
+ * Contém $dbConn
  */
-$useDB = true;
-/**
- * Conexão local de acesso ao DB com conteúdos
- */
+//require_once "app/config/database.php";
 class DATABASE_CONFIG
 {
     static $default = array(
         'server' => 'localhost',
-        'database' => 'aust',
+        'database' => 'acid_tests',
         'username' => 'root',
         'password' => '',
         'encoding' => 'utf8',
