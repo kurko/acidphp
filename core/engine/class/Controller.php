@@ -730,6 +730,15 @@ class Controller
             $this->$component->afterBeforeFilter();
         }
 
+		/*
+		 * Argumentos nomeados não entram nas funções.
+		 */
+		$argumentParams = array();
+		foreach( $this->params["args"] as $argumentType=>$argument ){
+			if( is_int($argumentType) )
+				$argumentParams[] = $argument;
+		}
+		
         /**
          * Se o action existe
          */
@@ -737,7 +746,7 @@ class Controller
             /**
              * Chama a action requerida com seus respectivos argumentos.
              */
-            call_user_func_array( array($this, $param['action'] ), $this->params["args"] );
+            call_user_func_array( array($this, $param['action'] ), $argumentParams );
 
         }
         /**
