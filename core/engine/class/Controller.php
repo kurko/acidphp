@@ -461,7 +461,7 @@ class Controller
          */
         $modelParams = array(
             'conn' => &$this->dispatcher->conn,
-            //'dbTables' => $this->dispatcher->dbTables,
+            'dbTables' => $this->dispatcher->dbTables,
             //'modelName' => $modelName,
             'recursive' => $this->recursive,
             'params' => &$this->params,
@@ -539,7 +539,11 @@ class Controller
          */
          //include_once(CORE_CLASS_DIR.'Elements.php');
          $elements = Elements::getInstance();
-         $this->set('elements', &$elements);
+		/**
+		 * @todo - verificar se não é necessário enviar $elements 
+		 * como referência '&'.
+		 */
+        $this->set('elements', $elements);
 
         /**
          *

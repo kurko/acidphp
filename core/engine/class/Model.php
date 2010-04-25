@@ -531,7 +531,7 @@ class Model
                          * Ops.. Alguma tabela não existe
                          */
                         else {
-                            showError("Alguma tabela especificada não existe");
+                            showError("A tabela especificada <em>".$tabela."</em> não existe");
                         }
                     } // fim modelFather==true
 
@@ -1055,7 +1055,6 @@ class Model
 
         if( empty($this->params["args"]["page"]) )
             $this->params["args"]["page"] = "";
-
         $this->params["paginator"][get_class($this)] = array(
             "class" => get_class($this),
             "totalRows" => $totalRows,
@@ -1382,7 +1381,6 @@ class Model
                      * Campos de um formulário enviado
                      */
                     foreach( $campos as $campo=>$valor ){
-
                         /**
                          * Se o campo possui regras de validação
                          */

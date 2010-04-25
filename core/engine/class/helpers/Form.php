@@ -385,7 +385,10 @@ class FormHelper extends Helper
          *
          * Se Label não foi especificado
          */
-        if( empty($options["label"]) ){
+		if( $options["label"] === false ){
+			$label = false;
+		}
+        else if( empty($options["label"]) ){
             $label = $argFieldName;
         } else {
             $label = $options["label"];
@@ -746,7 +749,10 @@ class FormHelper extends Helper
      * @return <string>
      */
     public function label($fieldName, $label = ""){
-        if( empty($label))
+		if( $label === false ){
+			return "";
+		}
+        else if( empty($label) )
             $label = $fieldName;
             
         return '<label for="input-'.$fieldName.'">'.$label.'</label>';
