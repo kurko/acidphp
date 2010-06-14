@@ -54,7 +54,6 @@ class PaginatorHelper extends Helper
             $page = $this->params["paginator"][$pagClass]["page"];
             $urlGivenPage = $this->params["paginator"][$pagClass]["urlGivenPage"];
             $limit = $this->params["paginator"][$pagClass]["limit"];
-
             /**
              * Ajusta "limit" se não especificado
              */
@@ -82,7 +81,18 @@ class PaginatorHelper extends Helper
          */
         $pag["first"] = 1;
         $pag["page"] = $page;
+		// last só pode ser vista depois das verificações página por página
+        $pagOffset = $totalRows/$limit - number_format($totalRows/$limit, 0, "","");
         $pag["last"] = number_format($totalRows/$limit, 0, "","");
+		//pr( "primeiro last: ". $pag["last"] );
+		if( $pagOffset > 0 AND $pagOffset < 1 ){
+			//pr("if: last_offset maior que 0 e menor que 1: ". $pag["last"]);
+			$pag["last"]++;
+		}
+		//pr( "last calculado: ". $pag["last"] );
+			
+		//pr("last_offset: ". $pagOffset);
+
 
 
         /**
@@ -125,14 +135,15 @@ class PaginatorHelper extends Helper
              * Define a página atual.
              */
             $actualPage = ($tmp) * $limit;
-
+			//pr( $actualPage." (". ($actualPage-$limit) .") ". $totalRows );
             /**
              * Se passou do limite, quebra o loop
              */
-            if( $actualPage > $totalRows ){
+            if( $actualPage-$limit >= $totalRows ){
                 $loop = false;
             } else {
                 $pag["pages"][ $tmp ] = $tmp;
+	        	$pag["last"] = number_format($i+1, 0, "","");
                 $tmp++;
             }
             $last = $tmp;
@@ -142,7 +153,6 @@ class PaginatorHelper extends Helper
                 $loop = false;
             }
         }
-
 
         if( $pag['last'] == 1
             AND (
