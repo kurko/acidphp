@@ -462,7 +462,7 @@ class Controller
         $modelParams = array(
             'conn' => &$this->dispatcher->conn,
             'dbTables' => $this->dispatcher->dbTables,
-            //'modelName' => $modelName,
+            'modelName' => $modelName,
             'recursive' => $this->recursive,
             'params' => &$this->params,
         );
@@ -539,11 +539,7 @@ class Controller
          */
          //include_once(CORE_CLASS_DIR.'Elements.php');
          $elements = Elements::getInstance();
-		/**
-		 * @todo - verificar se não é necessário enviar $elements 
-		 * como referência '&'.
-		 */
-        $this->set('elements', $elements);
+         $this->set('elements', $elements);
 
         /**
          *
@@ -750,7 +746,7 @@ class Controller
             /**
              * Chama a action requerida com seus respectivos argumentos.
              */
-            call_user_func_array( array($this, $param['action'] ), $argumentParams );
+            call_user_func_array( array($this, $param['action'] ), $this->params["args"] );
 
         }
         /**

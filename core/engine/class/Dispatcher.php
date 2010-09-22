@@ -144,6 +144,7 @@ class Dispatcher
          */
         foreach($mysql as $chave=>$dados){
             $this->dbTables[] = $dados[0];
+			$this->conn->dbTables[] = $dados[0];
         }
     }
 
