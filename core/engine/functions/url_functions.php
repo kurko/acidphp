@@ -34,8 +34,11 @@ function translateUrl($mixed, $isFile = false){
             $app = "";
         }
 
-        $controller = ( empty($mixed["controller"]) ) ? "" : $mixed["controller"]."/";
+        $controller = ( empty($mixed["controller"]) ) ? "" : $mixed["controller"];
         $action = ( empty($mixed["action"]) OR empty($controller) ) ? "" : $mixed["action"];
+		if( !empty($action) )
+			$action = '/'.$action;
+		
         $args = ( empty($mixed[0]) OR empty($action) ) ? "" : $mixed[0];
 
         if( isset($args[0]) AND $args[0] != "/" ){
@@ -54,7 +57,7 @@ function translateUrl($mixed, $isFile = false){
             $rootDir = $dispatcher->webroot;
         }
 
-        $url = $rootDir.$app.$controller.$action.$args;
+        $url = str_replace("//", "/", $rootDir.$app.$controller.$action.$args);
     }
     /**
      * $mixed é string
@@ -92,10 +95,12 @@ function translateUrl($mixed, $isFile = false){
             /*
              * Se não foi especificado um action
              */
-            if( empty($action) )
-                $action = "index";
+            if( !empty($action) )
+                $action = "/".$action;
+			else
+				$action = '';
 
-            $url = $dispatcher->webroot.$controller."/".$action."/".implode("/", $args);
+            $url = $dispatcher->webroot.$controller.$action.implode("/", $args);
         }
         /*
          * A URL é para um arquivo (css, js, imagem, etc)
@@ -108,9 +113,8 @@ function translateUrl($mixed, $isFile = false){
             $url = $mixed;
         }
     }
-    return $url;
 
-    return false;
+    return $url;
 }
 
 /**
