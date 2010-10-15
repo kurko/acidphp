@@ -191,8 +191,8 @@ class Controller
             else
                 $args[$chave] = $chave.":".$valor;
         }
-
-        $this->params["url"] = $this->dispatcher->webroot.$this->params["controller"]."/".$this->params["action"]."/".implode("/", $args ) ;
+		
+        $this->params["url"] = $_SERVER['REQUEST_URI'];
         /*
          *
          * $THIS->DATA

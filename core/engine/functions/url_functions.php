@@ -18,7 +18,7 @@
  */
 function translateUrl($mixed, $isFile = false){
 
-    global $dispatcher;
+    $dispatcher = Dispatcher::getInstance();
     /**
      * $mixed é array
      */
@@ -74,6 +74,11 @@ function translateUrl($mixed, $isFile = false){
         )
         {
 
+			/* Strips webroot off the beginning of the url */
+			$pos = strpos($mixed, $dispatcher->webroot);
+			if( $pos === 0 )
+				$mixed = substr($mixed, mb_strlen($dispatcher->webroot) );
+				
             $url = explode("/", $mixed);
             $args = array();
             $i = 0;
@@ -92,6 +97,7 @@ function translateUrl($mixed, $isFile = false){
                 }
             }
 
+			
             /*
              * Se não foi especificado um action
              */
@@ -100,7 +106,7 @@ function translateUrl($mixed, $isFile = false){
 			else
 				$action = '';
 
-            $url = $dispatcher->webroot.$controller.$action.implode("/", $args);
+            $url = $dispatcher->webroot.$controller.$action.'/'.implode("/", $args);
         }
         /*
          * A URL é para um arquivo (css, js, imagem, etc)
@@ -113,6 +119,7 @@ function translateUrl($mixed, $isFile = false){
             $url = $mixed;
         }
     }
+    $url = str_replace("//", "/", $url);
 
     return $url;
 }
@@ -129,9 +136,7 @@ function redirect($url){
     /**
      * Segurança: se $url for array
      */
-    if( is_array($url) ){
-        $url = translateUrl($url);
-    }
+    $url = translateUrl($url);
 
     /**
      * Redireciona

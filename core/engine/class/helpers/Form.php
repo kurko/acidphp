@@ -298,12 +298,8 @@ class FormHelper extends Helper
         /**
          * Qual o endereço do formulário
          */
-            $formUrl = translateUrl( array(
-                "controller" => $this->params["controller"],
-                "action" => $this->params["action"],
-                implode("/", $this->params["args"])
-            ));
-        $conteudo.= '<input type="hidden" name="formUrl" value="'.$formUrl.'/" />';
+            $formUrl = $this->params['url'];
+        $conteudo.= '<input type="hidden" name="formUrl" value="'.$formUrl.'" />';
 
         return $conteudo;
     } // fim create()

@@ -62,7 +62,7 @@ class Dispatcher
         /**
          * AJUSTA CONEXÃO SE EXISTIR
          */
-        $this->conn = ( empty($params["conn"]) ) ? NULL : $params["conn"];
+        $this->conn = Connection::getInstance();
         /**
          * Verifica tabelas
          */
@@ -74,6 +74,23 @@ class Dispatcher
         }
         
     }
+
+    /**
+     * getInstance()
+     *
+     * @staticvar <object> $instance
+     * @return <object>
+     */
+    public function getInstance(){
+        static $instance;
+
+        if( empty($instance[0]) ){
+            $instance[0] = new Dispatcher(array());
+        }
+
+        return $instance[0];
+    }
+
 
     /**
      * Traduz a URL para que seja possível carregar os controllers e actions
@@ -261,7 +278,7 @@ class Dispatcher
          * Finaliza tratamento de argumentos
          */
         $this->arguments = $url;
-
+		
     }
 }
 ?>
