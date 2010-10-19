@@ -298,12 +298,8 @@ class FormHelper extends Helper
         /**
          * Qual o endereço do formulário
          */
-            $formUrl = translateUrl( array(
-                "controller" => $this->params["controller"],
-                "action" => $this->params["action"],
-                implode("/", $this->params["args"])
-            ));
-        $conteudo.= '<input type="hidden" name="formUrl" value="'.$formUrl.'/" />';
+            $formUrl = $this->params['url'];
+        $conteudo.= '<input type="hidden" name="formUrl" value="'.$formUrl.'" />';
 
         return $conteudo;
     } // fim create()
@@ -334,11 +330,13 @@ class FormHelper extends Helper
          */
 
         global $describedTables;
-        if( $fieldName == "id"  AND !empty($describedTables[$this->modelName]) ){
+
+        if( $fieldName == "id"  AND !empty($this->models[$this->modelName]->tableDescribed) ){
             
-            if( is_int($options) OR is_string($options) )
+            if( is_int($options) OR is_string($options) ){
                 $fieldValue = $options;
-            else if( !empty($options["value"]) )
+				$options = array();
+            } else if( !empty($options["value"]) )
                 $fieldValue = $options["value"];
 
             /**
@@ -392,7 +390,9 @@ class FormHelper extends Helper
             $label = $argFieldName;
         } else {
             $label = $options["label"];
-            unset($options["label"]);
+			
+			if( is_array($options) )
+            	unset( $options["label"] );
         }
 
         /**
@@ -864,8 +864,11 @@ class FormHelper extends Helper
     public function _getModelTableDescribe($model){
         /**
          * @todo - verificar integridade dos dados
-         * abaixo
+         * abaixo.
          */
+		if( empty($this->models[$model]->tableDescribed) )
+			return false;
+		
         return $this->models[$model]->tableDescribed;
     }
 

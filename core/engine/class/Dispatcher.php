@@ -49,7 +49,6 @@ class Dispatcher
          * Carrega os routes do sistema
          */
         $this->routes = Config::read("routes");
-                //pr( $this->routes );
 
         /**
          * URL
@@ -63,7 +62,7 @@ class Dispatcher
         /**
          * AJUSTA CONEXÃO SE EXISTIR
          */
-        $this->conn = ( empty($params["conn"]) ) ? NULL : $params["conn"];
+        $this->conn = Connection::getInstance();
         /**
          * Verifica tabelas
          */
@@ -77,13 +76,29 @@ class Dispatcher
     }
 
     /**
+     * getInstance()
+     *
+     * @staticvar <object> $instance
+     * @return <object>
+     */
+    public function getInstance(){
+        static $instance;
+
+        if( empty($instance[0]) ){
+            $instance[0] = new Dispatcher(array());
+        }
+
+        return $instance[0];
+    }
+
+
+    /**
      * Traduz a URL para que seja possível carregar os controllers e actions
      * certos.
      */
     private function translateUrl(){
         
         if( !empty($_GET["url"]) ){
-            //pr($_GET);
             $url = explode("/", $_GET["url"]);
 
 
@@ -144,6 +159,7 @@ class Dispatcher
          */
         foreach($mysql as $chave=>$dados){
             $this->dbTables[] = $dados[0];
+			$this->conn->dbTables[] = $dados[0];
         }
     }
 
@@ -154,32 +170,84 @@ class Dispatcher
      */
     public function defineRoutes($url){
 
+		$sliceFromUrl = 2;
+		$extendedUrl = '/'.implode('/', $url);
+		foreach( $this->routes as $pattern=>$def ){
+			
+			unset($lastLookup);
+			$lastLookup = $pattern;
+			$subject = str_replace("\\","\\\\",$extendedUrl);
+			$pattern = str_replace("/","\/",$pattern);
+			$pattern = str_replace(":controller",'(?P<controller>\w+)',$pattern);
+			$pattern = str_replace(":action",'(?P<action>\w+)',$pattern);
+			$pattern = str_replace(":arg",'(?P<arg>\w+(.*))',$pattern);
+			
+			preg_match('/'.$pattern.'/i', $subject, $matches);
+			
+			if( !empty($matches) )
+				break;
+		}
+		
+		/*
+		 * Matches Routing Pattern
+		 */
+		if( !empty($matches) ){
+
+			// Adjusts 'Controller'
+			if( $this->routes[$lastLookup]['controller'] == ':controller' ||
+			 	empty($this->routes[$lastLookup]['controller']) )
+			{
+				$this->callController = $matches['controller'];
+			} else
+				$this->callController = $this->routes[$lastLookup]['controller'];
+			
+			$this->callControllerClass = ucwords($this->callController);
+			
+			// Adjusts 'Action'
+			if( $this->routes[$lastLookup]['action'] == ':action' ||
+			 	empty($this->routes[$lastLookup]['action']) )
+			{
+				$this->callAction = $matches['action'];
+			} else
+				$this->callAction = $this->routes[$lastLookup]['action'];
+			
+			// When matching a pattern, it will slice off the number
+			// of the matching elements
+			
+		}
+
+		/*
+		 * No matching pattern
+		 */
         /**
          * APP_DIR e Controller
          */
-        if( !empty($url[0]) ){
-            $this->callController = $url[0];
-            $this->callControllerClass = ucwords($this->callController);
-        } else {
-            $this->callController = "site";
-        }
+		if( empty($this->callController) ){
+	        if( !empty($url[0]) ){
+	            $this->callController = $url[0];
+	            $this->callControllerClass = ucwords($this->callController);
+	        } else {
+	            $this->callController = "site";
+	        }
+		}
         /**
          * Action
          */
-        if( !empty($url[1]) ){
-            $this->callAction = $url[1];
-        }
-        /**
-         * Se não há actions chamado, pede por "index"
-         */
-        else {
-            $this->callAction = "index";
-        }
+		if( empty($this->callAction) ){
+	        if( !empty($url[1]) ){
+	            $this->callAction = $url[1];
+	        }
+	        /**
+	         * Se não há actions chamado, pede por "index"
+	         */
+	        else {
+	            $this->callAction = "index";
+	        }
+		}
 
         /**
          * Verifica o resto da URL por argumentos $_GET
          */
-        //echo '0'.implode("/", $url).'0';
         $this->webroot = str_replace( implode("/", $url), "", $_SERVER["REQUEST_URI"] );
         if( !defined( "WEBROOT"))
             define("WEBROOT", $this->webroot);
@@ -191,9 +259,10 @@ class Dispatcher
          */
         $webRoot = array_reverse( array_values(array_filter( explode("/", WEBROOT) )) );
 
-        array_shift($url);
-        array_shift($url);
-
+		$url = array();
+		if( !empty($matches['arg']) )
+			$url = explode("/", $matches['arg']);
+			
         /**
          * URLS com argumentos com :
          */
@@ -209,6 +278,7 @@ class Dispatcher
          * Finaliza tratamento de argumentos
          */
         $this->arguments = $url;
+		
     }
 }
 ?>

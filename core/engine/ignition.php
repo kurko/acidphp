@@ -308,10 +308,7 @@ if( !$useDB ){
  *
  * Engine é o responsável pela inicialização do sistema.
  */
-$dispatcher = new Dispatcher(array(
-        'conn' => Connection::getInstance(),
-    )
-);
+$dispatcher = Dispatcher::getInstance();
 
 /**
  * CONFIGURAÇÕES DO SISTEMA
