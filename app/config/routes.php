@@ -1,25 +1,29 @@
 <?php
 /**
- * Possui configurações de redirecionamento de URLs.
- *
- * @package Config
- * @name Routes
- * @author Alexandre de Oliveira <chavedomundo@gmail.com>
- * @since v0.1 16/07/2009
- */
-
-/**
  * ROUTES
  *
  * Configurações de redirecionamento de URL.
  *
  * Por padrão, o sistema procura por qualquer endereço escrito no índice de
  * array $routes e redireciona tudo.
+ *
+ *
+ * Os Routes são lidos na ordem. O sistema vai usar o primeiro item que
+ * coincidir com o padrão.
+ *
  */
+
 $routes = array(
-    "/" => array(
-        "controller" => "site", "action" => "index"
-    )
+	
+	// este é o padrão de posicionamento dos elementos na URL
+	"/:controller/:action/:arg" => array(
+	    "controller" => ":controller", "action" => ":action", ":arg"
+	),
+	
+	// este deve ser o último,
+	"/" => array(
+	    "controller" => "site", "action" => "index"
+	),
 );
 
 /**

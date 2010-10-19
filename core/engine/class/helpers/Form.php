@@ -383,10 +383,7 @@ class FormHelper extends Helper
          *
          * Se Label não foi especificado
          */
-		if( $options["label"] === false ){
-			$label = false;
-		}
-        else if( empty($options["label"]) ){
+        if( empty($options["label"]) AND !isset($options["label"]) ){
             $label = $argFieldName;
         } else {
             $label = $options["label"];

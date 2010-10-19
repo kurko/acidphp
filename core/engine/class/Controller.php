@@ -746,7 +746,7 @@ class Controller
             /**
              * Chama a action requerida com seus respectivos argumentos.
              */
-            call_user_func_array( array($this, $param['action'] ), $argumentParams );
+            call_user_func_array( array($this, $param['action'] ), $this->params["args"] );
 
         }
         /**
