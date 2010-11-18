@@ -105,8 +105,12 @@ function translateUrl($mixed, $isFile = false){
                 $action = "/".$action;
 			else
 				$action = '';
+				
+			$argsStr = implode("/", $args);
+            if( !empty($argsStr) )
+                $argsStr = "/".$argsStr;
 
-            $url = $dispatcher->webroot.$controller.$action.'/'.implode("/", $args);
+            $url = $dispatcher->webroot.$controller.$action.$argsStr;
         }
         /*
          * A URL é para um arquivo (css, js, imagem, etc)
@@ -137,7 +141,6 @@ function redirect($url){
      * Segurança: se $url for array
      */
     $url = translateUrl($url);
-
     /**
      * Redireciona
      */

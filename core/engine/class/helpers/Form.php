@@ -214,6 +214,9 @@ class FormHelper extends Helper
         $action = (empty($options["action"])) ? 'save' : $options["action"];
         if( !empty($options["action"]) ) unset($options["action"]);
 
+        $urlSuffix = (empty($options["urlSuffix"])) ? '' : $options["urlSuffix"];
+        if( !empty($options["urlSuffix"]) ) unset($options["urlSuffix"]);
+
 
         /**
          * formId
@@ -251,7 +254,7 @@ class FormHelper extends Helper
         /*
          * Define 'action' do <form>
          */
-        $this->_formActionUrl = WEBROOT.$appUrl.$controller.'/'.$action."/";
+        $this->_formActionUrl = WEBROOT.$appUrl.$controller.'/'.$action."/".$urlSuffix;
 
         if( !empty($options) AND is_array($options) ){
             foreach($options as $property=>$value){

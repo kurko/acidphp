@@ -110,6 +110,7 @@ class Dispatcher
          * ser carregado
          */
         else {
+			$url = '';
             /**
              * URL PADRÃO
              *
@@ -122,11 +123,12 @@ class Dispatcher
                  * Ajusta Controllers e Actions a serem carregados
                  */
                 //if( empty() )
+                $this->defineRoutes($url);
+				return true;
                 $url[0] = ( empty($this->routes["/"]["controller"])) ? "site" : $this->routes["/"]["controller"];
-                $url[1] = ( empty($this->routes["/"]["action"])) ? "index222" : $this->routes["/"]["action"];
-
+                $url[1] = ( empty($this->routes["/"]["action"])) ? "index" : $this->routes["/"]["action"];
+				
                 if( !empty($url[0]) AND !empty($url[1]) ){
-                    $this->defineRoutes($url);
                 }
                 
             }
@@ -169,9 +171,13 @@ class Dispatcher
      * @param array $url URL atual para definir qual controller carregar
      */
     public function defineRoutes($url){
-
 		$sliceFromUrl = 2;
-		$extendedUrl = '/'.implode('/', $url);
+		
+		$urlStr = '';
+		if( !empty($url) )
+			$urlStr = implode('/', $url);
+		
+		$extendedUrl = '/'.$urlStr;
 		foreach( $this->routes as $pattern=>$def ){
 			
 			unset($lastLookup);
@@ -248,7 +254,11 @@ class Dispatcher
         /**
          * Verifica o resto da URL por argumentos $_GET
          */
-        $this->webroot = str_replace( implode("/", $url), "", $_SERVER["REQUEST_URI"] );
+		$webrootTrash = '';
+		if( !empty($url) )
+			$webrootTrash = implode("/", $url);
+		
+        $this->webroot = str_replace( $webrootTrash, "", $_SERVER["REQUEST_URI"] );
         if( !defined( "WEBROOT"))
             define("WEBROOT", $this->webroot);
 

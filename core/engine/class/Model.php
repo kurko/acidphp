@@ -531,6 +531,7 @@ class Model
                          * Ops.. Alguma tabela não existe
                          */
                         else {
+	
 						    $debugMode = Config::read("debug");
 						    if( Config::read("debug") > 0 OR empty($debugMode) ){
 						        trigger_error( "Alguma tabela especificada não existe" , E_USER_ERROR);
