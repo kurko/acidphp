@@ -253,9 +253,10 @@
     /*
      * CONFIGURAÇÕES DE BANCO DE DADOS
      */
-    if( is_file(APP_CONFIG_DATABASE) )
+
+    if( is_file(APP_CONFIG_DATABASE) ){
         include(APP_CONFIG_DATABASE);
-    else {
+    } else {
         $useDB = false;
         if( Config::read("debug") > 0 ){
             /**
@@ -362,5 +363,6 @@ if( Config::read("debug") >= 1 )
 
 //echo $endTime-$startTime;
 
-
+$conn = Connection::getInstance();
+$conn->destroy();
 ?>

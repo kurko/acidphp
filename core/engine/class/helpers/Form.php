@@ -217,6 +217,12 @@ class FormHelper extends Helper
         $urlSuffix = (empty($options["urlSuffix"])) ? '' : $options["urlSuffix"];
         if( !empty($options["urlSuffix"]) ) unset($options["urlSuffix"]);
 
+        $hash = (empty($options["hash"])) ? '' : $options["hash"];
+        if( !empty($options["hash"]) ) {
+			unset($options["hash"]);
+			$hash = '#'.$hash;
+		}
+
 
         /**
          * formId
@@ -254,7 +260,7 @@ class FormHelper extends Helper
         /*
          * Define 'action' do <form>
          */
-        $this->_formActionUrl = WEBROOT.$appUrl.$controller.'/'.$action."/".$urlSuffix;
+        $this->_formActionUrl = WEBROOT.$appUrl.$controller.'/'.$action."/".$urlSuffix . $hash;
 
         if( !empty($options) AND is_array($options) ){
             foreach($options as $property=>$value){
