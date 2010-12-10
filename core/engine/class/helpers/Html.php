@@ -121,6 +121,49 @@ class HtmlHelper extends Helper
     }
 
     /**
+     * favicon()
+     *
+     * @param string $url Endereço da imagem
+     * @param array $options
+     * @return string HTML
+     */
+    public function favicon($url, array $options = array() ){
+
+        /*
+         * OPÇÕES RESERVADAS
+         */
+        $reservedWords = array(
+            ""
+        );
+
+        if( !empty($url) ){
+
+            $conteudo = "";
+
+            $inlineProperties = "";
+
+            if( is_array($options) ){
+                foreach( $options as $chave=>$valor ){
+                    /*
+                     * Somente palavras não reservadas
+                     */
+                    if( !in_array($chave, $reservedWords) )
+                        $inlineProperties.= " ".$chave.'="'.$valor.'"';
+                }
+            }
+            //<link rel="icon" type="image/gif" href="../../view/public/images/layout/animated_favicon1.gif" >
+            $conteudo.= '<link rel="shortcut icon" href="'.translateUrl(APP_IMAGES_DIR.$url, true).'" '.$inlineProperties.' />';
+
+            return $conteudo;
+        } else {
+            /*
+             * @todo - retornar erro
+             */
+            showError("Não foi especificado o endereço da imagem para HtmlHelper::favicon()");
+        }
+    }
+
+    /**
      * Cria e retorna o código HTML para carregar um arquivo CSS
      *
      * @param string $path Caminho para o arquivo CSS

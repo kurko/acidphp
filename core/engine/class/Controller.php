@@ -191,8 +191,8 @@ class Controller
             else
                 $args[$chave] = $chave.":".$valor;
         }
-
-        $this->params["url"] = $this->dispatcher->webroot.$this->params["controller"]."/".$this->params["action"]."/".implode("/", $args ) ;
+		
+        $this->params["url"] = $_SERVER['REQUEST_URI'];
         /*
          *
          * $THIS->DATA
@@ -461,8 +461,8 @@ class Controller
          */
         $modelParams = array(
             'conn' => &$this->dispatcher->conn,
-            //'dbTables' => $this->dispatcher->dbTables,
-            //'modelName' => $modelName,
+            'dbTables' => $this->dispatcher->dbTables,
+            'modelName' => $modelName,
             'recursive' => $this->recursive,
             'params' => &$this->params,
         );
@@ -539,7 +539,7 @@ class Controller
          */
          //include_once(CORE_CLASS_DIR.'Elements.php');
          $elements = Elements::getInstance();
-         $this->set('elements', &$elements);
+         $this->set('elements', $elements);
 
         /**
          *
@@ -730,6 +730,15 @@ class Controller
             $this->$component->afterBeforeFilter();
         }
 
+		/*
+		 * Argumentos nomeados não entram nas funções.
+		 */
+		$argumentParams = array();
+		foreach( $this->params["args"] as $argumentType=>$argument ){
+			if( is_int($argumentType) )
+				$argumentParams[] = $argument;
+		}
+		
         /**
          * Se o action existe
          */

@@ -214,6 +214,15 @@ class FormHelper extends Helper
         $action = (empty($options["action"])) ? 'save' : $options["action"];
         if( !empty($options["action"]) ) unset($options["action"]);
 
+        $urlSuffix = (empty($options["urlSuffix"])) ? '' : $options["urlSuffix"];
+        if( !empty($options["urlSuffix"]) ) unset($options["urlSuffix"]);
+
+        $hash = (empty($options["hash"])) ? '' : $options["hash"];
+        if( !empty($options["hash"]) ) {
+			unset($options["hash"]);
+			$hash = '#'.$hash;
+		}
+
 
         /**
          * formId
@@ -251,7 +260,7 @@ class FormHelper extends Helper
         /*
          * Define 'action' do <form>
          */
-        $this->_formActionUrl = WEBROOT.$appUrl.$controller.'/'.$action."/";
+        $this->_formActionUrl = WEBROOT.$appUrl.$controller.'/'.$action."/".$urlSuffix . $hash;
 
         if( !empty($options) AND is_array($options) ){
             foreach($options as $property=>$value){
@@ -298,12 +307,8 @@ class FormHelper extends Helper
         /**
          * Qual o endereço do formulário
          */
-            $formUrl = translateUrl( array(
-                "controller" => $this->params["controller"],
-                "action" => $this->params["action"],
-                implode("/", $this->params["args"])
-            ));
-        $conteudo.= '<input type="hidden" name="formUrl" value="'.$formUrl.'/" />';
+            $formUrl = $this->params['url'];
+        $conteudo.= '<input type="hidden" name="formUrl" value="'.$formUrl.'" />';
 
         return $conteudo;
     } // fim create()
@@ -334,11 +339,13 @@ class FormHelper extends Helper
          */
 
         global $describedTables;
-        if( $fieldName == "id"  AND !empty($describedTables[$this->modelName]) ){
+
+        if( $fieldName == "id"  AND !empty($this->models[$this->modelName]->tableDescribed) ){
             
-            if( is_int($options) OR is_string($options) )
+            if( is_int($options) OR is_string($options) ){
                 $fieldValue = $options;
-            else if( !empty($options["value"]) )
+				$options = array();
+            } else if( !empty($options["value"]) )
                 $fieldValue = $options["value"];
 
             /**
@@ -385,11 +392,13 @@ class FormHelper extends Helper
          *
          * Se Label não foi especificado
          */
-        if( empty($options["label"]) ){
+        if( empty($options["label"]) AND !isset($options["label"]) ){
             $label = $argFieldName;
         } else {
             $label = $options["label"];
-            unset($options["label"]);
+			
+			if( is_array($options) )
+            	unset( $options["label"] );
         }
 
         /**
@@ -746,7 +755,10 @@ class FormHelper extends Helper
      * @return <string>
      */
     public function label($fieldName, $label = ""){
-        if( empty($label))
+		if( $label === false ){
+			return "";
+		}
+        else if( empty($label) )
             $label = $fieldName;
             
         return '<label for="input-'.$fieldName.'">'.$label.'</label>';
@@ -858,8 +870,11 @@ class FormHelper extends Helper
     public function _getModelTableDescribe($model){
         /**
          * @todo - verificar integridade dos dados
-         * abaixo
+         * abaixo.
          */
+		if( empty($this->models[$model]->tableDescribed) )
+			return false;
+		
         return $this->models[$model]->tableDescribed;
     }
 

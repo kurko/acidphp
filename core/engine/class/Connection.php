@@ -36,6 +36,8 @@ class Connection {
      */
     private $db;
 
+	public $usingPdo;
+
     /**
      *
      * @var <array> Contém toda a configuração de acesso à base de dados
@@ -105,7 +107,9 @@ class Connection {
 
         $dbConfig['driver'] = (empty($dbConfig['driver'])) ? 'mysql' : $dbonfig['driver'];
         $charset = ( empty($dbConfig["encoding"])) ? "" : ";charset=".$dbConfig["encoding"];
-
+		
+		$this->usingPdo = true;
+		
         try {
             $this->conn = new PDO(
                             $dbConfig['driver'].':host='.$dbConfig['server'].';'
@@ -136,7 +140,6 @@ class Connection {
         if( $this->conn){
             $this->DBExiste = true;
         }
-        $this->pdo = $this->conn;
 
         //$this->con = $dbConfig[]':host=localhost;dbname=test';
     }
@@ -152,6 +155,8 @@ class Connection {
      */
     protected function DbConnect($dbConfig){
         $conexao = $dbConfig;
+		$this->usingPdo = false;
+
         $conn = mysql_connect($conexao['server'], $conexao['username'], $conexao['password']) or die('Erro ao encontrar servidor');
         if(mysql_select_db($conexao['database'], $conn)){
             $this->DBExiste = TRUE;
@@ -162,6 +167,22 @@ class Connection {
             $this->DBExiste = FALSE;
         }
     }
+
+	/**
+	 * destroy()
+	 *
+	 * Destrói uma conexão atual
+	 */
+	public function destroy(){
+		
+		if( $this->usingPdo ){
+			$this->conn = null;
+		} else {
+			
+		}
+		
+		return true;
+	}
 
     /**
      * CRUD

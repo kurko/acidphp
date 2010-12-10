@@ -44,6 +44,13 @@ uma lista de resultados na mesma página.
                     - "&pages&" : mostra a lista das páginas com link;
                     - "&first&" : número da primeira página possível;
                     - "&last&"  : número da última página possível;
+                    - "&interval&"  : 
+						em vez de 1, 2, 3, 4, fica com o intervalo, do tipo
+						1...50, 51...100, 101...151.
+						
+						se você usar interval, adicione a $optionsa seguinte chave:
+						
+						'interval': int com intervalo. No exemplo acima, seria 50.
 
 Veja o exemplo a seguir para compreender como fazer isto na prática.
 

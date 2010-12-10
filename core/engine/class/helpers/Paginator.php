@@ -54,7 +54,7 @@ class PaginatorHelper extends Helper
             $page = $this->params["paginator"][$pagClass]["page"];
             $urlGivenPage = $this->params["paginator"][$pagClass]["urlGivenPage"];
             $limit = $this->params["paginator"][$pagClass]["limit"];
-
+			$format = '';
             /**
              * Ajusta "limit" se não especificado
              */
@@ -64,8 +64,13 @@ class PaginatorHelper extends Helper
             if( !isset($options["show"]) ){
                 $options["show"] = true;
             }
+
             if( !empty($options["format"]) ){
                 $format = $options["format"];
+            }
+
+            if( !empty($options["interval"]) ){
+                $interval = $options["interval"];
             }
 
             /**
@@ -83,7 +88,6 @@ class PaginatorHelper extends Helper
         $pag["first"] = 1;
         $pag["page"] = $page;
         $pag["last"] = number_format($totalRows/$limit, 0, "","");
-
 
         /**
          * Primeira página da lista de páginas
@@ -106,7 +110,7 @@ class PaginatorHelper extends Helper
              * Ajusta numeração intermediária com relação ao início
              */
             if( $tmp <= 0){
-                $tmp = 1;
+                $tmp = 0;
             }
 
         /**
@@ -132,8 +136,8 @@ class PaginatorHelper extends Helper
             if( $actualPage > $totalRows ){
                 $loop = false;
             } else {
-                $pag["pages"][ $tmp ] = $tmp;
                 $tmp++;
+                $pag["pages"][ $tmp ] = $tmp;
             }
             $last = $tmp;
             
@@ -142,7 +146,6 @@ class PaginatorHelper extends Helper
                 $loop = false;
             }
         }
-
 
         if( $pag['last'] == 1
             AND (
@@ -176,7 +179,17 @@ class PaginatorHelper extends Helper
                 $pages = '';
                 $conteudo = "";
                 $conteudo.= '<span class="paginator">';
+
+				$withInterval = false;
+				if( strstr($format, '&interval&') )
+					$withInterval = true;
+				
                 foreach( $pag["pages"] as $pageN ){
+
+					$pageStr = $pageN;
+					if( $withInterval ){
+						$pageStr = (($pageN*$limit)-$limit+1).'...'.(($pageN*$limit));
+					}
 
                     if( !$first ){
                         if( $pag["first"] + 1 != $pageN AND $pag["first"] != $pageN ){
@@ -187,12 +200,12 @@ class PaginatorHelper extends Helper
                     
                     if( $page == $pageN ){
                         $pages.= '<span class="paginator_actualpage">';
-                        $pages.= " ".$pageN."";
+                        $pages.= " ".$pageStr."";
                         $pages.= "</span>";
                     } else {
                         $pages.= ' <span class="paginator_page">';
                         $pages.= '<a href="'.substituteUrlTerm("/page:".$urlGivenPage, "/page:".$pageN, $this->params["url"]).'">';
-                        $pages.= " ".$pageN."";
+                        $pages.= " ".$pageStr."";
                         $pages.= '</a>';
                         $pages.= "</span>";
                     }
@@ -201,8 +214,8 @@ class PaginatorHelper extends Helper
                     $last = $pageN;
                 }
 
-                $toFormat = array("&page&","&total&" ,"&last&"    ,"&first&"    ,"&pages&");
-                $newFormat = array($page  ,$totalRows,$pag["last"],$pag["first"],$pages);
+                $toFormat = array("&page&","&total&" ,"&last&", "&first&", "&pages&", "&interval&");
+                $newFormat = array($page  ,$totalRows,$pag["last"],$pag["first"],$pages, $pages);
 
                 $conteudo.= str_replace($toFormat, $newFormat, $format);
 

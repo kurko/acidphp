@@ -531,7 +531,11 @@ class Model
                          * Ops.. Alguma tabela não existe
                          */
                         else {
-                            showError("Alguma tabela especificada não existe");
+	
+						    $debugMode = Config::read("debug");
+						    if( Config::read("debug") > 0 OR empty($debugMode) ){
+						        trigger_error( "Alguma tabela especificada não existe" , E_USER_ERROR);
+						    }
                         }
                     } // fim modelFather==true
 
@@ -983,7 +987,6 @@ class Model
          * Define model principal
          */
         $options["mainModel"] = $this;
-
         /**
          * GERA SQL
          *
@@ -1325,6 +1328,7 @@ class Model
                     unset($options["limit"]);
                 $options["fields"] = array('COUNT(*) as count');
 
+				$options['mainModel'] = $this;
                 $count = $this->query( $this->databaseAbstractor->generateSql($options) );
                 return $count[0]["count"];
             }
