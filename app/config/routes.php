@@ -20,6 +20,11 @@ $routes = array(
 	    "controller" => ":controller", "action" => ":action", ":arg"
 	),
 	
+	// este é o padrão de posicionamento dos elementos na URL
+	"/:controller/:action" => array(
+	    "controller" => ":controller", "action" => ":action"
+	),
+
 	// este deve ser o último,
 	"/" => array(
 	    "controller" => "site", "action" => "index"
