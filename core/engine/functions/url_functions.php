@@ -141,6 +141,7 @@ function redirect($url){
      * Segurança: se $url for array
      */
     $url = translateUrl($url);
+
     /**
      * Redireciona
      */

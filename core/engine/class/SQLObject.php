@@ -510,8 +510,9 @@ class SQLObject {
             foreach($cond as $campo=>$valor){
 
                 $emptyCampo = false;
+
                 if( empty($campo)
-                    //OR is_int($campo)
+                    OR is_int($campo)
                         )
                 {
                     $campo = "";

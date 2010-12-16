@@ -96,6 +96,11 @@ class Helper
     function afterFilter(){
         
     }
+
+    function afterRenderFilter(){
+        
+    }
+
     /**
      * MÉTODOS DE INFORMAÇÕES SOBRE CLASSE
      */
