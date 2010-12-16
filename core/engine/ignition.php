@@ -16,6 +16,7 @@
  * Initializes the main paths of the system
  *
  */
+date_default_timezone_set('America/Sao_Paulo');
 
     /*
      *
@@ -253,10 +254,9 @@
     /*
      * CONFIGURAÇÕES DE BANCO DE DADOS
      */
-
-    if( is_file(APP_CONFIG_DATABASE) ){
+    if( is_file(APP_CONFIG_DATABASE) )
         include(APP_CONFIG_DATABASE);
-    } else {
+    else {
         $useDB = false;
         if( Config::read("debug") > 0 ){
             /**
