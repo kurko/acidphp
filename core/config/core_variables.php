@@ -33,6 +33,7 @@ define("CORE_SUPPORT_DIR", CORE_DIR."support/");
 
 define("CORE_FUNCTIONS_DIR", CORE_DIR."engine/functions/");
 define("CORE_FUNCTIONS_FILE", CORE_FUNCTIONS_DIR."core_functions.php");
+define("HELPERS_FUNCTIONS_FILE", CORE_FUNCTIONS_DIR."helpers.php");
 define("URL_FUNCTIONS_FILE", CORE_FUNCTIONS_DIR."url_functions.php");
 define("TOOLS_FUNCTIONS_FILE", CORE_FUNCTIONS_DIR."tools_functions.php");
 

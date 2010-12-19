@@ -631,6 +631,12 @@ class AuthComponent extends Component
             $_SESSION["Sys"]["Auth"]["autoRedirect"] = $this->params["url"];
             redirect($newUrl);
         } else {
+			/*
+			$target = str_replace(WEBROOT, '', translateUrl( $this->loginPage() ) );
+			$dispatcher = Dispatcher::getInstance();
+			$url  = str_replace(WEBROOT, '', $dispatcher->url );
+			*/
+
             return true;
         }
 

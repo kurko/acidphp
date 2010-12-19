@@ -163,7 +163,8 @@ date_default_timezone_set('America/Sao_Paulo');
         /**
          * FUNÇÕES
          */
-        include(CORE_FUNCTIONS_FILE);
+	    include(CORE_FUNCTIONS_FILE);
+		include(HELPERS_FUNCTIONS_FILE);
         include(URL_FUNCTIONS_FILE);
         include(TOOLS_FUNCTIONS_FILE);
 

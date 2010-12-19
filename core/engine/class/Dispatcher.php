@@ -39,6 +39,11 @@ class Dispatcher
     public $arguments;
     public $webroot;
 
+    /**
+     *
+     * @var string URL atual
+     */
+    public $url;
 
     public $conn;
     public $dbTables;
@@ -288,6 +293,7 @@ class Dispatcher
          * Finaliza tratamento de argumentos
          */
         $this->arguments = $url;
+        $this->url = $_SERVER['REQUEST_URI'];
 		
     }
 }
