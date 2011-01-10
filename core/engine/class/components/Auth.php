@@ -454,6 +454,7 @@ class AuthComponent extends Component
                             "class" => "incorrect",
                             "message" => $this->incorrectLoginMessage
                         );
+
                     }
                 }
             }
@@ -616,7 +617,6 @@ class AuthComponent extends Component
                 $newUrl = $this->params["webroot"].$this->params["controller"].'/'.$action;
             }
         }
-
 
         /**
          * Se proibido e há uma $newUrl estipulada

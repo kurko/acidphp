@@ -409,6 +409,8 @@ class Controller
          */
         $this->action = (empty( $this->dispatcher->callAction )) ? 'index' : $this->dispatcher->callAction;
 
+		$this->cleanNotice();
+
         /**
          * EXECUTA MVC
          *
@@ -644,6 +646,25 @@ class Controller
             
         }
     }
+
+    /**
+     * cleanNotice()
+     * 
+     * @todo - há um bug esquisito, onde sempre roda o unset(), mas
+	 * debuggando não há evidência de que está de fato entrando no if.
+     *
+     */
+	function cleanNotice(){
+		$dispatcher = Dispatcher::getInstance();
+		
+		if( !empty($_SESSION['notice']) &&
+		 	$dispatcher->url != $_SESSION['notice']['url'] )
+		{
+			unset($_SESSION['notice']);
+		}
+
+		return true;
+	}
 
     /**
      * EVENTOS
