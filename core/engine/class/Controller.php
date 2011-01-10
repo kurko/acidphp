@@ -255,6 +255,13 @@ class Controller
                 }
             }
 
+            /*
+             * $_GET
+             */
+            if( !empty($_GET) ){
+                $this->params["get"] = $_GET;
+            }
+
             if( !empty($formattedFilesData) ){
                 if( !empty($this->data) ){
                     $this->data = array_merge_recursive($this->data, $formattedFilesData);

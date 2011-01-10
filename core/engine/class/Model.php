@@ -1607,16 +1607,24 @@ class Model
      */
     public function _describeTable($params = ""){
         $conn = Connection::getInstance();
+
+		/*
+		 * Describe já ocorreu
+		 */
+		if( !empty($conn->describedTables[ $this->useTable ]) ){
+            $this->tableDescribed = $conn->describedTables[ $this->useTable ];
+			return $conn->describedTables[ $this->useTable ];
+		}
         
         if( !empty($conn->connected) ){
-            //global $describedTables;
+
             /**
              * Retorna todos os campos das tabelas
              */
             $describeSql = 'DESCRIBE '.$this->useTable;
             foreach($conn->query($describeSql, "ASSOC") as $tabela=>$info){
                 $this->tableDescribed[$info['Field']] = $info;
-                //$describedTables[ get_class($this) ][$info['Field']] = $info;
+				$conn->describedTables[ $this->useTable ][$info['Field']] = $info;
             }
         }
 

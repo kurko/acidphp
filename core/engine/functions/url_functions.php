@@ -203,4 +203,55 @@ function substituteUrlTerm($oldTerm, $newTerm, $url){
     return "/".$newUrl;
 }
 
+
+function parseUrl($mixed){
+	
+    $dispatcher = Dispatcher::getInstance();
+
+	/* Strips webroot off the beginning of the url */
+	$pos = strpos($mixed, "#");
+	if( $pos !== 0 )
+		$mixed = str_replace("#", "/", $mixed );
+	
+	/* Strips webroot off the beginning of the url */
+	$pos = strpos($mixed, $dispatcher->webroot);
+	if( $pos === 0 )
+		$mixed = substr($mixed, mb_strlen($dispatcher->webroot) );
+		
+    $url = explode("/", $mixed);
+    $args = array();
+    $i = 0;
+    foreach( $url as $chave=>$valor ){
+        if( empty($valor) ){
+            unset($url[$chave]);
+        } else {
+            if( $i == 0 ){
+                $controller = $valor;
+            } else if( $i == 1 ){
+                $action = $valor;
+            } else {
+                $args[] = $valor;
+            }
+            $i++;
+        }
+    }
+
+	
+    /*
+     * Se não foi especificado um action
+     */
+    if( empty($action) )
+		$action = '';
+		
+	$argsStr = implode("/", $args);
+    if( !empty($argsStr) )
+        $argsStr = "/".$argsStr;
+
+	$result = array(
+		'controller' => $controller,
+		'action' => $action,
+	);
+	return $result;
+}
+
 ?>

@@ -29,12 +29,22 @@ class ImageRendererComponent extends Component
 	 */
 	function render($options){
 		
+		/* if from model */
      	$model = ( empty($options["model"]) ) ? false : $options["model"];
-     	$crop = ( empty($options["crop"]) ) ? false : $options["crop"];
      	$id = ( empty($options["id"]) ) ? false : $options["id"];
+		
+		/* if from file */
+     	$path = ( empty($options["path"]) ) ? false : $options["path"];
+
+		/* formatting options */
+     	$crop = ( empty($options["crop"]) ) ? false : $options["crop"];
+     	$quality = ( empty($options["quality"]) ) ? 100 : $options["quality"];
+     	$watermark = ( empty($options["watermark"]) ) ? false : $options["watermark"];
 
 		$optionsForRendering = array(
-			'crop' => $crop,
+			'crop' 		=> $crop,
+			'quality'	=> $quality,
+			'watermark' => $watermark,
 		);
 		
 		if( empty($options["xsize"]) || empty($options["xsize"]) ){
@@ -49,8 +59,10 @@ class ImageRendererComponent extends Component
 		if( $model && $id ){
 			$image = $this->renderFromModel($options);
 			$optionsForRendering['type'] = $image['file_type'];
+		} else if( $path ){
+			$image = $this->renderFromFile($options);
+			$optionsForRendering['type'] = $image['file_type'];
 		}
-
 
 		$imageData = $this->resampleImage($image['data'], $optionsForRendering);
         header("Content-Type: ".$image["file_type"]);
@@ -98,6 +110,30 @@ class ImageRendererComponent extends Component
 		);
 	}
 	
+	function renderFromFile($options){
+
+     	$path = ( empty($options["path"]) ) ? false : $options["path"];
+
+     	$fieldType = ( empty($options["fieldType"]) ) ? 'file_type' : $options["fieldType"];
+
+		if( !file_exists($path) )
+			return false;
+		
+		$data = $path;
+		
+		return array(
+			'file_type' => mime_content_type($path),
+			'data' => $data
+		);
+	}
+	
+	/**
+	 * resampleImage()
+	 *
+	 * Retorna imagem no formato binário
+	 *
+	 * @param $fileContent string Endereço físico até a imagem
+	 */
 	function resampleImage($fileContent, $options = array()){
 		
 		if( !empty($options["maxxsize"]) || !empty($options["maxxsize"]) ){
@@ -150,17 +186,25 @@ class ImageRendererComponent extends Component
             return true;
         }
 
-		
-		if( $options['type'] == 'image/png' )
+		$quality = 100;
+		if( $options['type'] == 'image/png' ){
 	        $im = imagecreatefrompng($fileContent); //criar uma amostra da imagem original
-		else if( $options['type'] == 'image/gif' )
+			$quality = floor($options['quality']/10);
+			if( $quality >= 10 ) $quality = 9;
+			if( $quality < 0 ) $quality = 1;
+			
+		} else if( $options['type'] == 'image/gif' ){
  	        $im = imagecreatefromgif($fileContent); //criar uma amostra da imagem original
-		else
+		} else {
 	        $im = imagecreatefromjpeg($fileContent); //criar uma amostra da imagem original
+			$quality = $options['quality'];
+		}
 
         $largurao = imagesx($im);// pegar a largura da amostra
         $alturao = imagesy($im);// pegar a altura da amostra
 		$prop = $largurao/$alturao;
+		$yMargin = 0;
+		$xMargin = 0;
 
 		/*
 		 * CROP
@@ -183,6 +227,16 @@ class ImageRendererComponent extends Component
 			$leftOffset = ($largurad-$maxxsize)/2;//(200 - $largurao/2);
 			$topOffset = ($alturad-$maxysize)/2;
 
+			if( $topOffset > 0 )
+				$yMargin = -$topOffset;
+
+			if( $leftOffset > 0 )
+				$xMargin = -$leftOffset;
+//			if( )
+//			echo $topOffset . ' - '. $maxysize;
+//			echo '<br>';
+//			echo '<br>';
+			
 			$x_mid = $largurad/2;  //horizontal middle
 			$y_mid = $alturad/2; //vertical middle
 
@@ -258,21 +312,22 @@ class ImageRendererComponent extends Component
 			echo 'x';
 			echo $topOffset;
 			echo '<br>';
-			echo 'new: ';
+			echo 'created_image: ';
 			echo $newimage_w;
 			echo 'x';
 			echo $newimage_h;
 			echo '<br>';
-			echo 'o: ';
+			echo 'original size: ';
 			echo $largurao;
 			echo 'x';
 			echo $alturao;
 			echo '<br>';
-			echo 'd: ';
+			echo 'new_size: ';
 			echo $largurad;
 			echo 'x';
 			echo $alturad;
 			echo '<br>';
+			echo 'required image: ';
 			echo $x;
 			echo 'x';
 			echo $y;
@@ -292,20 +347,30 @@ class ImageRendererComponent extends Component
 			imagefilledrectangle($nova, 0, 0, $largurad, $alturad, $transparent);
 		}
 
+        imagecopyresampled($nova,$im, $xMargin, $yMargin , $leftOffset,$topOffset,$largurad,$alturad,$largurao,$alturao);//copiar sobre a imagem em branco a amostra diminuindo conforma as especificações da miniatura
 
-        if(empty($quality)) $quality = 3;
-        if($quality > 5) $quality = 3;
+        /* Watermark */
+        if( $options['watermark'] ){
+            $watermark = imagecreatefrompng( $options['watermark'] );
+            $watermark_width = imagesx($watermark);  
+            $watermark_height = imagesy($watermark);
+            $dest_x = $largurad - $watermark_width - 35;
+            $dest_y = $alturad - $watermark_height - 10;
 
-        imagecopyresampled($nova,$im,0,0, $leftOffset,$topOffset,$largurad,$alturad,$largurao,$alturao);//copiar sobre a imagem em branco a amostra diminuindo conforma as especificações da miniatura
+            imagecopy($nova, $watermark, $dest_x, $dest_y, 0, 0, $watermark_width, $watermark_height);
+			imagesavealpha($nova, true);
+
+            imagedestroy($watermark);            
+		}
 
         ob_start();
 
 			if( $options['type'] == 'image/png' )
-	        	imagepng($nova);
+	        	imagepng($nova, null, $quality);
 			else if( $options['type'] == 'image/gif' )
 	    		imagegif($nova);
 			else
-	        	imagejpeg($nova, null, 100);
+	        	imagejpeg($nova, null, $quality);
 
             $content = ob_get_contents();
 

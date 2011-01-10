@@ -46,6 +46,8 @@ class Connection {
 
     private $debugLevel = 0;
 
+	public $describedTables = array();
+
 
     /**
      * Cria conexão com o DB. Faz integração de conexões se PDO existe ou não.
