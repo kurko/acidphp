@@ -121,8 +121,18 @@ class ImageRendererComponent extends Component
 		
 		$data = $path;
 		
+		$extension = array_reverse( explode(".", $path) );
+		$extension = $extension[0];
+		
+		if( $extension == "png" )
+			$mimeType = 'image/png';
+		else if( $extension == "gif" )
+			$mimeType = 'image/gif';
+		else
+			$mimeType = 'image/jpg';
+		
 		return array(
-			'file_type' => mime_content_type($path),
+			'file_type' => $mimeType,
 			'data' => $data
 		);
 	}
@@ -187,6 +197,7 @@ class ImageRendererComponent extends Component
         }
 
 		$quality = 100;
+
 		if( $options['type'] == 'image/png' ){
 	        $im = imagecreatefrompng($fileContent); //criar uma amostra da imagem original
 			$quality = floor($options['quality']/10);
