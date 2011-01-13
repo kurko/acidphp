@@ -55,7 +55,7 @@ class ImageRendererComponent extends Component
 		
      	$optionsForRendering['xsize'] = ( empty($options["xsize"]) ) ? '' : $options["xsize"];
      	$optionsForRendering['ysize'] = ( empty($options["ysize"]) ) ? '' : $options["ysize"];
-     	
+
 		if( $model && $id ){
 			$image = $this->renderFromModel($options);
 			$optionsForRendering['type'] = $image['file_type'];
@@ -205,6 +205,11 @@ class ImageRendererComponent extends Component
 			if( $quality < 0 ) $quality = 1;
 			
 		} else if( $options['type'] == 'image/gif' ){
+			// PHP as of 5.3 doesn't support animation in GIFs
+			
+	        header("Content-Type: image/gif");
+			echo file_get_contents($fileContent);
+			exit();
  	        $im = imagecreatefromgif($fileContent); //criar uma amostra da imagem original
 		} else {
 	        $im = imagecreatefromjpeg($fileContent); //criar uma amostra da imagem original
