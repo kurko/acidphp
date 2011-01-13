@@ -355,7 +355,6 @@ class Controller
         /**
          * Variáveis de ambiente são ajustadas no método controller::_trigger();
          */
-
         /**
          * MODELS
          *
@@ -369,7 +368,7 @@ class Controller
              */
             foreach($this->uses as $valor){
                 $className = $valor;
-                
+
                 $this->loadModel($className);
             }
         }
@@ -456,6 +455,7 @@ class Controller
             'conn' => &$this->dispatcher->conn,
             'dbTables' => $this->dispatcher->dbTables,
             'modelName' => $modelName,
+            'controller' => &$this,
             'recursive' => $this->recursive,
             'params' => &$this->params,
         );

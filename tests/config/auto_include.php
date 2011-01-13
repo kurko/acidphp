@@ -16,15 +16,18 @@ function __autoload($className) {
         'core/engine/class/helpers/'.$className.'.php',
         'core/engine/class/components/'.$className.'.php',
         'core/engine/class/behaviors/'.$className.'.php',
+        'core/'.$className.'.php',
     );
 
     $found = false;
     foreach( $classDirs as $dir ){
-        if( is_file('core/engine/class/'.$className.'.php') ){
-            require_once 'core/engine/class/'.$className.'.php';
+        if( is_file($dir) ){
+            require_once $dir;
             continue;
         }
     }
 
 }
+spl_autoload_register('__autoload');
+
 ?>

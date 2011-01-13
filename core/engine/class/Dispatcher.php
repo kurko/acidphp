@@ -13,6 +13,8 @@
  */
 class Dispatcher
 {
+ 	public $app = '';
+ 	public $appPublicDir = '';
     /**
      * CONTROLLERS
      */
@@ -61,7 +63,7 @@ class Dispatcher
          * Verifica URL e decifra que controller
          * e action deve ser aberto.
          */
-        $this->translateUrl();
+//        $this->translateUrl();
 
 
         /**
@@ -101,12 +103,10 @@ class Dispatcher
      * Traduz a URL para que seja possível carregar os controllers e actions
      * certos.
      */
-    private function translateUrl(){
+    public function translateUrl(){
         
         if( !empty($_GET["url"]) ){
-            $url = explode("/", $_GET["url"]);
-
-
+			$url = $_GET["url"];
             $this->defineRoutes($url);
         }
         /**
@@ -177,6 +177,35 @@ class Dispatcher
      */
     public function defineRoutes($url){
 		$sliceFromUrl = 2;
+		
+		if( !is_array($url) ){
+			$stringUrl = $_GET["url"];
+            $url = explode("/", $stringUrl);
+		}
+		
+		if( is_file( $this->appPublicDir.$stringUrl ) ){
+			$file = $this->appPublicDir.$stringUrl;
+			$ext = reset( array_reverse(explode(".", $file)) );
+			
+			if( $ext == 'css' ) header('Content-type: text/css');
+			else if( $ext == 'js' ) header('Content-type: application/js');
+			readfile($file);
+			exit();
+		}
+		
+//		pr($_SERVER['REQUEST_URI']);
+//		pr( $url );
+/*		
+//		$app = App
+		pr( $this->app );
+		pr( $this->appPublicDir );
+		pr( $stringUrl );
+		var_dump( is_file( $this->appPublicDir.$stringUrl ) );
+		echo "<br>";
+		echo "<br>";
+//		pr( getcwd());
+*/		
+		
 		
 		$urlStr = '';
 		if( !empty($url) )

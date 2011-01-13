@@ -44,6 +44,7 @@ class Component
          * Inicialização de variáveis
          */
      	$this->controller = ( empty($params["controller"]) ) ? array() : $params["controller"];
+
 		$this->models = $this->controller->usedModels;
         /**
          * $this->params

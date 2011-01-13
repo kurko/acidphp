@@ -24,10 +24,8 @@ $startTime = microtime(true);
 define("THIS_PATH_TO_ROOT", "../../");
 
 define("CORE_DIR", THIS_PATH_TO_ROOT."core/");
-define("CORE_CONFIG_VARIABLES", CORE_DIR."config/core_variables.php");
-define("APP_CONFIG_VARIABLES", CORE_DIR."config/app_variables.php");
-
-include(CORE_CONFIG_VARIABLES);
+define("ENGINE_DIR", CORE_DIR."engine/");
+define("ENGINE_IGNITION", ENGINE_DIR."ignition.php");
 
 include(ENGINE_IGNITION);
 ?>
