@@ -140,7 +140,6 @@ class HtmlHelper extends Helper
                         $inlineProperties.= " ".$chave.'="'.$valor.'"';
                 }
             }
-
             $conteudo.= '<img src="'.translateUrl(APP_IMAGES_DIR.$url, true).'" '.$inlineProperties.' />';
 
             return $conteudo;
