@@ -4,7 +4,7 @@ class ImageRendererComponent extends Component
     function __construct($params = ""){
         parent::__construct($params);
 
-//		$this->controller->setAjax();
+		$this->controller->setAjax();
 		$this->controller->render(false);
     }
 	
@@ -55,7 +55,7 @@ class ImageRendererComponent extends Component
 		
      	$optionsForRendering['xsize'] = ( empty($options["xsize"]) ) ? '' : $options["xsize"];
      	$optionsForRendering['ysize'] = ( empty($options["ysize"]) ) ? '' : $options["ysize"];
-     	
+
 		if( $model && $id ){
 			$image = $this->renderFromModel($options);
 			$optionsForRendering['type'] = $image['file_type'];
@@ -121,8 +121,18 @@ class ImageRendererComponent extends Component
 		
 		$data = $path;
 		
+		$extension = array_reverse( explode(".", $path) );
+		$extension = $extension[0];
+		
+		if( $extension == "png" )
+			$mimeType = 'image/png';
+		else if( $extension == "gif" )
+			$mimeType = 'image/gif';
+		else
+			$mimeType = 'image/jpg';
+		
 		return array(
-			'file_type' => mime_content_type($path),
+			'file_type' => $mimeType,
 			'data' => $data
 		);
 	}
@@ -187,6 +197,7 @@ class ImageRendererComponent extends Component
         }
 
 		$quality = 100;
+
 		if( $options['type'] == 'image/png' ){
 	        $im = imagecreatefrompng($fileContent); //criar uma amostra da imagem original
 			$quality = floor($options['quality']/10);
@@ -194,6 +205,11 @@ class ImageRendererComponent extends Component
 			if( $quality < 0 ) $quality = 1;
 			
 		} else if( $options['type'] == 'image/gif' ){
+			// PHP as of 5.3 doesn't support animation in GIFs
+			
+	        header("Content-Type: image/gif");
+			echo file_get_contents($fileContent);
+			exit();
  	        $im = imagecreatefromgif($fileContent); //criar uma amostra da imagem original
 		} else {
 	        $im = imagecreatefromjpeg($fileContent); //criar uma amostra da imagem original
