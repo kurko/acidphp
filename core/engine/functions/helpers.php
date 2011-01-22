@@ -14,10 +14,4 @@ function price($str = '', $currency = 'br'){
 	return $price;
 }
 
-function notice(){
-	if( !empty($_SESSION['notice']) ){
-		return $_SESSION['notice']['message'];
-	}
-}
-
 ?>

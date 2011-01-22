@@ -258,6 +258,13 @@ class HtmlHelper extends Helper
         /**
          * $metas contém todas as metatags configuradas no controller
          */
+	
+		/**
+		 * @todo - metaTags não está funcionando
+		 */
+		if( empty($this->environment["metaTags"]) )
+			return false;
+			
         $metas = $this->environment["metaTags"];
 
         /**

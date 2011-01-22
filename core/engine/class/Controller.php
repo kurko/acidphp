@@ -179,7 +179,8 @@ class Controller
          *
          * Configura os parâmetros de sistema
          */
-        $this->params["controller"] = $this->dispatcher->callController;
+		$this->params["app"] = $this->dispatcher->callApp;
+		$this->params["controller"] = $this->dispatcher->callController;
         $this->params["action"] = $this->dispatcher->callAction;
         $this->params["args"] = $this->dispatcher->arguments;
         $this->params["webroot"] = $this->dispatcher->webroot;
@@ -355,7 +356,6 @@ class Controller
         /**
          * Variáveis de ambiente são ajustadas no método controller::_trigger();
          */
-
         /**
          * MODELS
          *
@@ -369,7 +369,7 @@ class Controller
              */
             foreach($this->uses as $valor){
                 $className = $valor;
-                
+
                 $this->loadModel($className);
             }
         }
@@ -405,6 +405,45 @@ class Controller
             }
         }
 
+        /**
+         * HELPERS
+         *
+         * Cria helpers solicitados
+         */
+            if( !empty($this->helpers) ){
+                /**
+                 * Loop por cada helper requisitado.
+                 *
+                 * Carrega classe do Helper, instancia e envia para o View
+                 */
+                foreach($this->helpers as $valor){
+                    include_once( CORE_HELPERS_DIR.$valor.".php" );
+                    $helperName = $valor.HELPER_CLASSNAME_SUFFIX;
+
+                    $helperParams = array(
+                        "params" => &$this->params,
+                        "data" => $this->data,
+                        "models" => &$this->usedModels,
+                        "conn" => &$this->conn,
+                        "environment" => &$this->environment,
+                        // todos helpers têm acesso aos demais helpers
+                        "_loadedHelpers" => &$this->_loadedHelpers,
+                    );
+                    $$valor = new $helperName($helperParams);
+
+                    /*
+                     * Salva a instância do Helper atual
+                     */
+                    $this->_loadedHelpers[$valor] = &$$valor;
+                    $this->{$valor} = &$$valor;
+					
+					
+                    /**
+                     * Envia Helper para o view
+                     */
+                    $this->set( strtolower($valor), $$valor);
+                }
+            }
 
         /**
          * VARIÁVEIS GLOBAIS
@@ -415,8 +454,6 @@ class Controller
          * $action: que ação será chamada neste módulo
          */
         $this->action = (empty( $this->dispatcher->callAction )) ? 'index' : $this->dispatcher->callAction;
-
-		$this->cleanNotice();
 
         /**
          * EXECUTA MVC
@@ -448,7 +485,6 @@ class Controller
      * @return bool
      */
     public function loadModel($modelName){
-
         /**
          * Monta parâmetros para criar os models
          */
@@ -456,6 +492,7 @@ class Controller
             'conn' => &$this->dispatcher->conn,
             'dbTables' => $this->dispatcher->dbTables,
             'modelName' => $modelName,
+            'controller' => &$this,
             'recursive' => $this->recursive,
             'params' => &$this->params,
         );
@@ -532,42 +569,6 @@ class Controller
                 $this->set("siteTitle", $this->siteTitle);
                 $this->set("pageTitle", $this->pageTitle);
 
-            /**
-             * HELPERS
-             *
-             * Cria helpers solicitados
-             */
-                if( !empty($this->helpers) ){
-                    /**
-                     * Loop por cada helper requisitado.
-                     *
-                     * Carrega classe do Helper, instancia e envia para o View
-                     */
-                    foreach($this->helpers as $valor){
-                        include_once( CORE_HELPERS_DIR.$valor.".php" );
-                        $helperName = $valor.HELPER_CLASSNAME_SUFFIX;
-
-                        $helperParams = array(
-                            "params" => &$this->params,
-                            "data" => $this->data,
-                            "models" => &$this->usedModels,
-                            "conn" => &$this->conn,
-                            "environment" => $this->environment,
-                            // todos helpers têm acesso aos demais helpers
-                            "_loadedHelpers" => &$this->_loadedHelpers,
-                        );
-                        $$valor = new $helperName($helperParams);
-
-                        /*
-                         * Salva a instância do Helper atual
-                         */
-                        $this->_loadedHelpers[$valor] = &$$valor;
-                        /**
-                         * Envia Helper para o view
-                         */
-                        $this->set( strtolower($valor), $$valor);
-                    }
-                }
         /*
          * ELEMENTS
          */
@@ -653,25 +654,6 @@ class Controller
             
         }
     }
-
-    /**
-     * cleanNotice()
-     * 
-     * @todo - há um bug esquisito, onde sempre roda o unset(), mas
-	 * debuggando não há evidência de que está de fato entrando no if.
-     *
-     */
-	function cleanNotice(){
-		$dispatcher = Dispatcher::getInstance();
-		
-		if( !empty($_SESSION['notice']) &&
-		 	$dispatcher->url != $_SESSION['notice']['url'] )
-		{
-			unset($_SESSION['notice']);
-		}
-
-		return true;
-	}
 
     /**
      * EVENTOS

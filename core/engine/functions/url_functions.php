@@ -134,24 +134,13 @@ function translateUrl($mixed, $isFile = false){
  * Se $url é uma array, trata-a para um endereço válido
  *
  * @param string $url Endereço Url válido a ser aberto
- * @param mixed $options Se string, é um notice. Caso contrário, é array com
- * 						várias opções
  * @return boolean Retorna falso se não conseguir redirecionar
  */
-function redirect($url, $options = ""){
+function redirect($url){
     /**
      * Segurança: se $url for array
      */
     $url = translateUrl($url);
-
-	if( !empty($options) &&
-		is_string($options) )
-	{
-		$_SESSION['notice'] = array(
-			'message' => $options,
-			'url' => $url
-		);
-	}
 
     /**
      * Redireciona

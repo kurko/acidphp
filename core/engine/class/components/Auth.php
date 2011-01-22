@@ -235,7 +235,10 @@ class AuthComponent extends Component
         $actionCommand = "";
 
 		if( empty($this->models[$this->model()]) ){
+			
+			pr( $this->model() );
 			$this->models[$this->model()] = $this->controller->loadModel($this->model());
+			exit();
 		}
 		
         /*

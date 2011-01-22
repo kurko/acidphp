@@ -25,11 +25,10 @@ if (!defined('CORE_DIR')) {
 /**
  * ENGINE START
  */
-define("ENGINE_DIR", CORE_DIR."engine/");
-define("ENGINE_IGNITION", ENGINE_DIR."ignition.php");
 
 define("CORE_CONFIG_DIR", CORE_DIR."config/");
 define("CORE_SUPPORT_DIR", CORE_DIR."support/");
+define("CORE_ENGINE_DIR", CORE_DIR."engine/");
 
 define("CORE_FUNCTIONS_DIR", CORE_DIR."engine/functions/");
 define("CORE_FUNCTIONS_FILE", CORE_FUNCTIONS_DIR."core_functions.php");
