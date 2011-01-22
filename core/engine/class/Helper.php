@@ -56,7 +56,7 @@ class Helper
     public $_loadedHelpers;
 
 
-    function __construct($params = ""){
+    function __construct(&$params = ""){
 
         /**
          * Inicialização de variáveis
