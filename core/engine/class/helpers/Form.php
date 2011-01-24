@@ -101,7 +101,7 @@ class FormHelper extends Helper
      * @param array $options Opções de amostragem e configurações
      * @return string Código HTML para finalizar bloco de código <form></form>
      */
-    public function end($submitValue = "Enviar", $options = ""){
+    public function end($submitValue = "", $options = ""){
 
         $conteudo = '';
         if( !empty($submitValue) )
@@ -117,7 +117,7 @@ class FormHelper extends Helper
      *
      * Acontece sempre após toda a execução do código.
      */
-    public function afterFilter(){
+    public function afterRenderFilter(){
 
         /*
          * Exclui as mensagens de campos não-validas das Sessions.

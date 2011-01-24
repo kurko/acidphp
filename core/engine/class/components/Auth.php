@@ -186,6 +186,7 @@ class AuthComponent extends Component
     function __construct($params = ""){
         parent::__construct($params);
 
+
         $this->forbidden = false;
 
         $this->checkLogin();
@@ -233,6 +234,13 @@ class AuthComponent extends Component
 
         $actionCommand = "";
 
+		if( empty($this->models[$this->model()]) ){
+			
+			pr( $this->model() );
+			$this->models[$this->model()] = $this->controller->loadModel($this->model());
+			exit();
+		}
+		
         /*
          * 
          * EXPIRE TIME
@@ -414,33 +422,8 @@ class AuthComponent extends Component
                         AND count($result) > 0
                         AND $processStatus )
                     {
-                        $this->logged = true;
 
-                        $_SESSION["Sys"]["Auth"]["logged"] = true;
-                        $_SESSION["Sys"]["Auth"]["startMicrotime"] = microtime(true);
-
-                        /*
-                         * Carrega dados do usuário e guarda em $auth->user
-                         */
-                        if( $this->userModels === false ){
-                            $_SESSION["Sys"]["Auth"]["user"] = array();
-                        } else if( empty($this->userModels) ){
-                            $_SESSION["Sys"]["Auth"]["user"] =
-                                $result[$tempResult[0]];
-                        } else {
-                            if( is_array($this->userModels) ){
-                                foreach( $this->userModels as $modelToLoad){
-                                    if( !empty($result[$tempResult[0]][$modelToLoad]) ){
-                                        $_SESSION["Sys"]["Auth"]["user"][$modelToLoad] =
-                                            $result[$tempResult[0]][$modelToLoad];
-                                    }
-                                }
-                            } else {
-                                $_SESSION["Sys"]["Auth"]["user"][$this->model()] =
-                                    $result[$tempResult[0]][$this->model()];
-                            }
-                        }
-
+						$this->login( reset($result) );
 
                         
                         /*
@@ -474,6 +457,7 @@ class AuthComponent extends Component
                             "class" => "incorrect",
                             "message" => $this->incorrectLoginMessage
                         );
+
                     }
                 }
             }
@@ -650,11 +634,48 @@ class AuthComponent extends Component
             $_SESSION["Sys"]["Auth"]["autoRedirect"] = $this->params["url"];
             redirect($newUrl);
         } else {
+			/*
+			$target = str_replace(WEBROOT, '', translateUrl( $this->loginPage() ) );
+			$dispatcher = Dispatcher::getInstance();
+			$url  = str_replace(WEBROOT, '', $dispatcher->url );
+			*/
+
             return true;
         }
 
     } // fim afterBeforeFilter()
 
+
+	public function login($result){
+
+        $this->logged = true;
+
+        $_SESSION["Sys"]["Auth"]["logged"] = true;
+        $_SESSION["Sys"]["Auth"]["startMicrotime"] = microtime(true);
+
+        /*
+         * Carrega dados do usuário e guarda em $auth->user
+         */
+        if( $this->userModels === false ){
+            $_SESSION["Sys"]["Auth"]["user"] = array();
+        } else if( empty($this->userModels) ){
+            $_SESSION["Sys"]["Auth"]["user"] =
+                $result;
+        } else {
+            if( is_array($this->userModels) ){
+                foreach( $this->userModels as $modelToLoad){
+                    if( !empty($result[$modelToLoad]) ){
+                        $_SESSION["Sys"]["Auth"]["user"][$modelToLoad] =
+                            $result[$modelToLoad];
+                    }
+                }
+            } else {
+                $_SESSION["Sys"]["Auth"]["user"][$this->model()] =
+                    $result[$this->model()];
+            }
+        }
+		
+	}
     /**
      * logout()
      *
@@ -825,6 +846,14 @@ class AuthComponent extends Component
             return $this->autoRedirect;
         }
     }
+
+	function lastPage($page = ''){
+		if( empty($page) )
+			return false;
+		
+		$_SESSION["Sys"]["Auth"]["autoRedirect"] = $page;
+		return true;
+	}
 
     /**
      * expireTime()

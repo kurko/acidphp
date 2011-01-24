@@ -61,6 +61,19 @@ Argumentos:
                   opções de busca para (array).
 
 
+=== invalidate( mixed $data, [array $error], [bool $redirect=true] ) ===
+
+Se redirect for true, redireciona para o formulário. Caso contrário,
+apenas adiciona $error à _session, caso exista.
+
+O formato de $error deve ser:
+	array(
+		'model' => array(
+			'field_1' => 'error_message',
+			'field_2' => 'error_message',
+		)
+	)
+
 === validate( mixed $data, [bool $sub] ) ===
 
 Valida os dados enviados de um formulário de acordo com as regras do model.

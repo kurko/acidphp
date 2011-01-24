@@ -73,7 +73,7 @@ class Model
      *
      * @var object Contém a conexão com a base de dados
      */
-    private $conn;
+    public $conn;
     
     /**
      *
@@ -98,6 +98,7 @@ class Model
         public $tableAlias = array();
 
         public $validation = array();
+        public $invalidated = false;
 
         public $params;
         
@@ -283,8 +284,6 @@ class Model
             $updateInstruction = false;
 
             $doUpdate = ( empty($options["doUpdate"]) ) ? false : $options["doUpdate"];
-
-            unset( $_SESSION["Sys"]["FormHelper"]["notValidated"] );
 
             /**
              * VALIDATE
@@ -703,12 +702,7 @@ class Model
              * NÂO VALIDOU
              */
             else {
-                $_SESSION["Sys"]["addToThisData"][ $this->params["post"]["formId"] ] = $data;
-                if( !empty($this->params["post"]["formUrl"]) ){
-                    $_SESSION["Sys"]["options"]["addToThisData"][ $this->params["post"]["formId"] ]["destLocation"] = $this->params["post"]["formUrl"];
-                }
-
-                redirect($this->params["post"]["formUrl"]);
+				$this->invalidate($data);
             }
         }
 
@@ -1347,6 +1341,44 @@ class Model
     /**
      * MÉTODOS DE SUPORTE
      */
+
+	/**
+	 * invalidate()
+	 *
+	 * Invalida um campo.
+	 *
+	 * @param $data array Nada mais é do que $this->data
+	 * @param $fields array Campos e definição de mensagem de erros
+	 * @param $redirect bool Se true, redireciona automaticamente
+	 */
+	function invalidate($data, $fields = array(), $redirect = true){
+
+		$this->invalidated = true;
+		$_SESSION["Sys"]["addToThisData"][ $this->params["post"]["formId"] ] = $data;
+		if( !empty($this->params["post"]["formUrl"]) ){
+			$_SESSION["Sys"]["options"]["addToThisData"][ $this->params["post"]["formId"] ]["destLocation"] = $this->params["post"]["formUrl"];
+		}
+
+		if( !empty($fields) ){
+			foreach( $fields as $model=>$eachField ){
+				if( !is_array( $eachField ) )
+					continue;
+				
+				foreach( $eachField as $fieldName=>$message ){
+					if( empty($fieldName) || empty($message) )
+						continue;
+					
+	    			$_SESSION["Sys"]["FormHelper"]["notValidated"][$model][$fieldName]["message"] = $message;
+				}
+			}
+		}
+
+		if( $redirect )
+	    	redirect($this->params["post"]["formUrl"]);
+		
+		return true;
+	}
+
     /**
      * VALIDATE()
      *
@@ -1360,10 +1392,16 @@ class Model
      */
     public function validate($data, $sub = false){
 
+		/**
+		 * @todo - verificar $sub
+		 * 
+		 * Se $this->invalidate() já foi chamado, não limpa session.
+		 */
         /**
          * Limpa Session
          */
-        if( !$sub )
+
+        if( !$sub && !$this->invalidated )
             unset($_SESSION["Sys"]["FormHelper"]["notValidated"]);
 
         /**
@@ -1542,6 +1580,10 @@ class Model
         /**
          * $vE: Validations Errors
          */
+		/* se já houve invalidações manuais com $this->invalidate() */
+		if( $this->invalidated )
+			return false;
+		
         /**
          * Se validou, retorna true
          */
@@ -1550,7 +1592,7 @@ class Model
         } else {
             return true;
         }
-    }
+    } // validate()
 
     /**
      * 
@@ -1565,16 +1607,24 @@ class Model
      */
     public function _describeTable($params = ""){
         $conn = Connection::getInstance();
+
+		/*
+		 * Describe já ocorreu
+		 */
+		if( !empty($conn->describedTables[ $this->useTable ]) ){
+            $this->tableDescribed = $conn->describedTables[ $this->useTable ];
+			return $conn->describedTables[ $this->useTable ];
+		}
         
         if( !empty($conn->connected) ){
-            //global $describedTables;
+
             /**
              * Retorna todos os campos das tabelas
              */
             $describeSql = 'DESCRIBE '.$this->useTable;
             foreach($conn->query($describeSql, "ASSOC") as $tabela=>$info){
                 $this->tableDescribed[$info['Field']] = $info;
-                //$describedTables[ get_class($this) ][$info['Field']] = $info;
+				$conn->describedTables[ $this->useTable ][$info['Field']] = $info;
             }
         }
 
