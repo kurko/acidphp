@@ -235,8 +235,7 @@ class AuthComponent extends Component
         $actionCommand = "";
 
 		if( empty($this->models[$this->model()]) ){
-			
-			pr( $this->model() );
+			echo 'Erro #12386: contate o administrador.';
 			$this->models[$this->model()] = $this->controller->loadModel($this->model());
 			exit();
 		}

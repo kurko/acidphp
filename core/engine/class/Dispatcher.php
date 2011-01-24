@@ -93,22 +93,7 @@ class Dispatcher
         	define("APP_DIR", THIS_PATH_TO_ROOT.$this->app."/");
 		}
 
-		
 		$this->setAbsoluteWebroot();
-
-        /**
-         * AJUSTA CONEXÃO SE EXISTIR
-         */
-//        $this->conn = Connection::getInstance();
-        /**
-         * Verifica tabelas
-         */
-        if( $this->conn ){
-            $this->checkTables( array(
-                    'conn' => $this->conn
-                )
-            );
-        }
         
     }
 
@@ -215,36 +200,6 @@ class Dispatcher
                 }
                 
             }
-        }
-    }
-
-    /**
-     * Verifica quais as tabelas existentes na base de dados.
-     *
-     * É usado SHOW_TABLES
-     *
-     * @param array $params Configurações adicionais
-     *      - 'conn' [opcional] : objeto conexão
-     */
-    public function checkTables($params = ""){
-        /**
-         * Admite uma conexão (configurada ou padrão)
-         */
-        $conn = ( empty($params["conn"]) ) ? $this->conn : $params["conn"];
-
-        /**
-         * Carrega todas as tabelas do DB
-         */
-        $mysql = $conn->query('SHOW TABLES', "BOTH");
-        /**
-         * Salva as tabelas encontradas
-         * 
-         * Loop por todas as tabelas do DB, salvando as informações sobre as
-         * tabelas de forma organizada
-         */
-        foreach($mysql as $chave=>$dados){
-            $this->dbTables[] = $dados[0];
-			$this->conn->dbTables[] = $dados[0];
         }
     }
 

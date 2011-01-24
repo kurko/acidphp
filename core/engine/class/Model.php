@@ -150,7 +150,7 @@ class Model
          * Configura a conexão com a base de dados
          */
         $this->conn = Connection::getInstance();
-        $this->dbTables = ( empty($params["dbTables"]) ) ? array() : $params["dbTables"];
+        $this->dbTables = $this->conn->dbTables;
         
         /**
          * DEFINE A TABELA A SER USADA

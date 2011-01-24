@@ -484,13 +484,15 @@ class Controller
      * @param string $modelName
      * @return bool
      */
-    public function loadModel($modelName){
+    public function loadModel($modelName = ""){
+		if( empty($modelName) )
+			return false;
+		
         /**
          * Monta parâmetros para criar os models
          */
         $modelParams = array(
             'conn' => &$this->dispatcher->conn,
-            'dbTables' => $this->dispatcher->dbTables,
             'modelName' => $modelName,
             'controller' => &$this,
             'recursive' => $this->recursive,

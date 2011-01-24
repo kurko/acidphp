@@ -75,6 +75,8 @@ class Connection {
                 $this->DbConnect($this->dbConfig);
             }
         }
+
+		$this->checkTables();
     }
 
     /**
@@ -91,6 +93,33 @@ class Connection {
         }
 
         return $instance[0];
+    }
+
+    /**
+     * Verifica quais as tabelas existentes na base de dados.
+     *
+     * É usado SHOW_TABLES
+     *
+     * @param array $params Configurações adicionais
+     *      - 'conn' [opcional] : objeto conexão
+     */
+    public function checkTables($params = ""){
+		if( !empty($this->dbTables) )
+			return $this->dbTables;
+
+        /**
+         * Carrega todas as tabelas do DB
+         */
+        $mysql = $this->query('SHOW TABLES', "BOTH");
+        /**
+         * Salva as tabelas encontradas
+         * 
+         * Loop por todas as tabelas do DB, salvando as informações sobre as
+         * tabelas de forma organizada
+         */
+        foreach($mysql as $chave=>$dados){
+            $this->dbTables[] = $dados[0];
+        }
     }
 
     /**
