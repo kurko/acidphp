@@ -1,7 +1,15 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
-    RewriteRule ^$ app/public/ [L]
-    RewriteRule (.*) app/public/$1 [L]
 
+    RewriteRule ^uploads/(.*) uploads/$1 [L]
+    RewriteRule ^admin/(.*) admin/$1 [L]
+
+	RewriteCond %{REQUEST_FILENAME} !uploads/(.*)
+	RewriteCond %{REQUEST_FILENAME} !admin/(.*)
+    RewriteRule ^$ app/public/ [L]
+
+	RewriteCond %{REQUEST_FILENAME} !uploads/(.*)
+	RewriteCond %{REQUEST_FILENAME} !admin/(.*)
+    RewriteRule (.*) app/public/$1 [L]
 </IfModule>
