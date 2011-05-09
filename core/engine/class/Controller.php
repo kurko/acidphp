@@ -24,7 +24,7 @@ class Controller
          * variáveis $_POST e $_GET tratadas, bem como URL atual, controllers e
          * actions
          */
-        protected $params;
+        public $params;
         /**
          *
          * @var array Contém todos os dados organizados provenientes de forms
@@ -419,13 +419,14 @@ class Controller
                 foreach($this->helpers as $valor){
                     include_once( CORE_HELPERS_DIR.$valor.".php" );
                     $helperName = $valor.HELPER_CLASSNAME_SUFFIX;
-
+					
                     $helperParams = array(
                         "params" => &$this->params,
                         "data" => $this->data,
                         "models" => &$this->usedModels,
                         "conn" => &$this->conn,
                         "environment" => &$this->environment,
+						"controller" => &$this,
                         // todos helpers têm acesso aos demais helpers
                         "_loadedHelpers" => &$this->_loadedHelpers,
                     );

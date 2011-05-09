@@ -1063,7 +1063,6 @@ class Model
 
         );
 
-
         $options["limit"] = $startLimit.",".$options["limit"];
 
         return $this->find($options, $mode);

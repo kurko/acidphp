@@ -24,6 +24,8 @@ class Helper
      */
     protected $params;
 
+    public $controller;
+
     /**
      * Models inicializados pelo controller principal, de forma a poderem ser
      * usados por helpers
@@ -61,6 +63,7 @@ class Helper
         /**
          * Inicialização de variáveis
          */
+     	$this->controller = ( empty($params["controller"]) ) ? array() : $params["controller"];
         /**
          * $this->params
          */
