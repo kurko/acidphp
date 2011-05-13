@@ -222,6 +222,7 @@ class DatabaseAbstractor extends DataAbstractor {
                 /**
                  * Recupera dados de relacionamento
                  */
+				$mainIds = array_unique($mainIds);
                 foreach( $mainModel->hasMany as $model=>$properties ){
                     $subOptions["mainModel"] = $mainModel->{$model};
                     $subOptions["conditions"] = array(
@@ -229,8 +230,13 @@ class DatabaseAbstractor extends DataAbstractor {
                             $model.".".$properties["foreignKey"] => $mainIds,
                         )
                     );
-                    $subOptions['conditions'] = array_merge_recursive( $subOptions['conditions'], $options['conditions'] );
 
+                	$subOptions['conditions'] = array_merge_recursive( $subOptions['conditions'], $options['conditions'] );
+
+					if( !empty($properties['fields']) ){
+                		$subOptions['fields'] = $properties['fields'];
+					}
+				
                     //$subOptions["order"] = ( empty($options["order"]) ) ? "" : $options["order"];
                     $subOptions["order"] = "";
                     $sql = array_merge($sql, $this->sqlObject->select($subOptions) );

@@ -36,6 +36,8 @@ class Connection {
      */
     private $db;
 
+	public $usingPdo;
+
     /**
      *
      * @var <array> Contém toda a configuração de acesso à base de dados
@@ -43,6 +45,8 @@ class Connection {
     protected $dbConfig;
 
     private $debugLevel = 0;
+
+	public $describedTables = array();
 
 
     /**
@@ -71,6 +75,8 @@ class Connection {
                 $this->DbConnect($this->dbConfig);
             }
         }
+
+		$this->checkTables();
     }
 
     /**
@@ -90,6 +96,33 @@ class Connection {
     }
 
     /**
+     * Verifica quais as tabelas existentes na base de dados.
+     *
+     * É usado SHOW_TABLES
+     *
+     * @param array $params Configurações adicionais
+     *      - 'conn' [opcional] : objeto conexão
+     */
+    public function checkTables($params = ""){
+		if( !empty($this->dbTables) )
+			return $this->dbTables;
+
+        /**
+         * Carrega todas as tabelas do DB
+         */
+        $mysql = $this->query('SHOW TABLES', "BOTH");
+        /**
+         * Salva as tabelas encontradas
+         * 
+         * Loop por todas as tabelas do DB, salvando as informações sobre as
+         * tabelas de forma organizada
+         */
+        foreach($mysql as $chave=>$dados){
+            $this->dbTables[] = $dados[0];
+        }
+    }
+
+    /**
      * Efetua conexão via PDO.
      * 
      * Esta função é executada somente se a extensão 'PDO' estiver ativada.
@@ -105,7 +138,9 @@ class Connection {
 
         $dbConfig['driver'] = (empty($dbConfig['driver'])) ? 'mysql' : $dbonfig['driver'];
         $charset = ( empty($dbConfig["encoding"])) ? "" : ";charset=".$dbConfig["encoding"];
-
+		
+		$this->usingPdo = true;
+		
         try {
             $this->conn = new PDO(
                             $dbConfig['driver'].':host='.$dbConfig['server'].';'
@@ -136,7 +171,6 @@ class Connection {
         if( $this->conn){
             $this->DBExiste = true;
         }
-        $this->pdo = $this->conn;
 
         //$this->con = $dbConfig[]':host=localhost;dbname=test';
     }
@@ -152,6 +186,8 @@ class Connection {
      */
     protected function DbConnect($dbConfig){
         $conexao = $dbConfig;
+		$this->usingPdo = false;
+
         $conn = mysql_connect($conexao['server'], $conexao['username'], $conexao['password']) or die('Erro ao encontrar servidor');
         if(mysql_select_db($conexao['database'], $conn)){
             $this->DBExiste = TRUE;
@@ -162,6 +198,22 @@ class Connection {
             $this->DBExiste = FALSE;
         }
     }
+
+	/**
+	 * destroy()
+	 *
+	 * Destrói uma conexão atual
+	 */
+	public function destroy(){
+		
+		if( $this->usingPdo ){
+			$this->conn = null;
+		} else {
+			
+		}
+		
+		return true;
+	}
 
     /**
      * CRUD

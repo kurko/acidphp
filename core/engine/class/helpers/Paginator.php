@@ -49,6 +49,8 @@ class PaginatorHelper extends Helper
         /**
          * Inicializa variáveis do ambiente
          */
+			$this->params = $this->controller->params;
+
             $startLimit = $this->params["paginator"][$pagClass]["startLimit"];
             $totalRows = $this->params["paginator"][$pagClass]["totalRows"];
             $page = $this->params["paginator"][$pagClass]["page"];

@@ -24,6 +24,8 @@ class Helper
      */
     protected $params;
 
+    public $controller;
+
     /**
      * Models inicializados pelo controller principal, de forma a poderem ser
      * usados por helpers
@@ -56,11 +58,12 @@ class Helper
     public $_loadedHelpers;
 
 
-    function __construct($params = ""){
+    function __construct(&$params = ""){
 
         /**
          * Inicialização de variáveis
          */
+     	$this->controller = ( empty($params["controller"]) ) ? array() : $params["controller"];
         /**
          * $this->params
          */
@@ -96,6 +99,11 @@ class Helper
     function afterFilter(){
         
     }
+
+    function afterRenderFilter(){
+        
+    }
+
     /**
      * MÉTODOS DE INFORMAÇÕES SOBRE CLASSE
      */

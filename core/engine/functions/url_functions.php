@@ -54,7 +54,7 @@ function translateUrl($mixed, $isFile = false){
             if( $app == "/" )
                 $app = "";
         } else {
-            $rootDir = $dispatcher->webroot;
+            $rootDir = WEBROOT;
         }
 
         $url = str_replace("//", "/", $rootDir.$app.$controller.$action.$args);
@@ -75,9 +75,9 @@ function translateUrl($mixed, $isFile = false){
         {
 
 			/* Strips webroot off the beginning of the url */
-			$pos = strpos($mixed, $dispatcher->webroot);
+			$pos = strpos($mixed, WEBROOT);
 			if( $pos === 0 )
-				$mixed = substr($mixed, mb_strlen($dispatcher->webroot) );
+				$mixed = substr($mixed, mb_strlen(WEBROOT) );
 				
             $url = explode("/", $mixed);
             $args = array();
@@ -109,15 +109,15 @@ function translateUrl($mixed, $isFile = false){
 			$argsStr = implode("/", $args);
             if( !empty($argsStr) )
                 $argsStr = "/".$argsStr;
-
-            $url = $dispatcher->webroot.$controller.$action.$argsStr;
+			
+            $url = WEBROOT.$controller.$action.$argsStr;
         }
         /*
          * A URL é para um arquivo (css, js, imagem, etc)
          */
         else if( $isFile ){
 
-            $url = $dispatcher->webroot.$mixed;
+            $url = WEBROOT_ABSOLUTE.$mixed;
 
         } else {
             $url = $mixed;
@@ -141,6 +141,7 @@ function redirect($url){
      * Segurança: se $url for array
      */
     $url = translateUrl($url);
+
     /**
      * Redireciona
      */
@@ -189,6 +190,57 @@ function substituteUrlTerm($oldTerm, $newTerm, $url){
 
 
     return "/".$newUrl;
+}
+
+
+function parseUrl($mixed){
+	
+    $dispatcher = Dispatcher::getInstance();
+
+	/* Strips webroot off the beginning of the url */
+	$pos = strpos($mixed, "#");
+	if( $pos !== 0 )
+		$mixed = str_replace("#", "/", $mixed );
+	
+	/* Strips webroot off the beginning of the url */
+	$pos = strpos($mixed, WEBROOT);
+	if( $pos === 0 )
+		$mixed = substr($mixed, mb_strlen(WEBROOT) );
+		
+    $url = explode("/", $mixed);
+    $args = array();
+    $i = 0;
+    foreach( $url as $chave=>$valor ){
+        if( empty($valor) ){
+            unset($url[$chave]);
+        } else {
+            if( $i == 0 ){
+                $controller = $valor;
+            } else if( $i == 1 ){
+                $action = $valor;
+            } else {
+                $args[] = $valor;
+            }
+            $i++;
+        }
+    }
+
+	
+    /*
+     * Se não foi especificado um action
+     */
+    if( empty($action) )
+		$action = '';
+		
+	$argsStr = implode("/", $args);
+    if( !empty($argsStr) )
+        $argsStr = "/".$argsStr;
+
+	$result = array(
+		'controller' => $controller,
+		'action' => $action,
+	);
+	return $result;
 }
 
 ?>
