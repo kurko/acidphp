@@ -419,7 +419,6 @@ class Controller
                 foreach($this->helpers as $valor){
                     include_once( CORE_HELPERS_DIR.$valor.".php" );
                     $helperName = $valor.HELPER_CLASSNAME_SUFFIX;
-					
                     $helperParams = array(
                         "params" => &$this->params,
                         "data" => $this->data,

@@ -79,6 +79,7 @@ function translateUrl($mixed, $isFile = false){
 			if( $pos === 0 )
 				$mixed = substr($mixed, mb_strlen(WEBROOT) );
 				
+			$controller = '';
             $url = explode("/", $mixed);
             $args = array();
             $i = 0;
@@ -136,7 +137,7 @@ function translateUrl($mixed, $isFile = false){
  * @param string $url Endereço Url válido a ser aberto
  * @return boolean Retorna falso se não conseguir redirecionar
  */
-function redirect($url){
+function redirect($url, $autoExit = true){
     /**
      * Segurança: se $url for array
      */
@@ -146,9 +147,17 @@ function redirect($url){
      * Redireciona
      */
     if( !empty($url) ){
-        //header("Status: 200"); if needed for IE6
-        header("Location: ". $url);
-        exit();
+
+        header("Status: 200"); //if needed for IE6
+		header("Cache-Control: no-cache");
+		header("Expires: -1");
+		
+		$host  = $_SERVER['HTTP_HOST'];
+		$url = "http://".$host.$url;
+      	header("Location: ". $url);
+		if( $autoExit )
+        	exit();
+
         return false;
     } else {
         return false;

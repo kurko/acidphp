@@ -144,7 +144,7 @@ class DatabaseAbstractor extends DataAbstractor {
          * Models
          */
         $mainModel = $options["mainModel"];
-        //echo get_class($mainModel);
+		$mainModel->loadAssociations();
 
         /**
          * VERIFICA $OPTIONS

@@ -124,7 +124,7 @@ class Model
         /**
          * RECURSIVE
          */
-        $this->recursive = $params["recursive"];
+        $this->recursive = (empty($params["recursive"])) ? 1 : $params["recursive"];
         if( empty($params["currentRecursive"]) ){
             $this->currentRecursive = 0;
         } else {
@@ -180,53 +180,7 @@ class Model
          * 
          */
         
-        /**
-         * CRIA RELACIONAMENTOS
-         */
-        /*
-         * Prepara Recursive + 1
-         */
-        $params["currentRecursive"] = $this->currentRecursive+1;
-        /**
-         * hasOne
-         */
-        if( !empty($this->hasOne) ){
-            foreach( $this->hasOne as $model=>$propriedades ){
-
-                if( $params["currentRecursive"] <= $params["recursive"] ){
-                    include_once(APP_MODEL_DIR.$model.".php");
-                    $this->{$model} = new $model($params);
-                    $this->modelsLoaded[] = $model;
-                }
-
-            }
-        }
-        /**
-         * hasMany
-         */
-        if( !empty($this->hasMany) ){
-            foreach( $this->hasMany as $model=>$propriedades ){
-                if( $params["currentRecursive"] <= $params["recursive"] ){
-                    include_once(APP_MODEL_DIR.$model.".php");
-                    $this->{$model} = new $model($params);
-                    $this->modelsLoaded[] = $model;
-                }
-            }
-        }
-
-        /**
-         * belongsTo
-         */
-        if( !empty($this->belongsTo) ){
-            foreach( $this->belongsTo as $model=>$propriedades ){
-                if( $params["currentRecursive"] <= $params["recursive"] ){
-                    include_once(APP_MODEL_DIR.$model.".php");
-                    $this->{$model} = new $model($params);
-                    $this->modelsLoaded[] = $model;
-                }
-            }
-        }
-
+		$this->loadAssociations();
         /**
          * Carrega as tabelas de cada model
          */
@@ -257,6 +211,54 @@ class Model
 
     } // fim __construct()
 
+	function loadAssociations(){
+        /**
+         * CRIA RELACIONAMENTOS
+         */
+        /*
+         * Prepara Recursive + 1
+         */
+        $params["currentRecursive"] = $this->currentRecursive+1;
+        /**
+         * hasOne
+         */
+        if( !empty($this->hasOne) ){
+            foreach( $this->hasOne as $model=>$propriedades ){
+
+                if( $params["currentRecursive"] <= $this->recursive ){
+                    include_once(APP_MODEL_DIR.$model.".php");
+                    $this->{$model} = new $model($params);
+                    $this->modelsLoaded[] = $model;
+                }
+
+            }
+        }
+        /**
+         * hasMany
+         */
+        if( !empty($this->hasMany) ){
+            foreach( $this->hasMany as $model=>$propriedades ){
+                if( $params["currentRecursive"] <= $this->recursive ){
+                    include_once(APP_MODEL_DIR.$model.".php");
+                    $this->{$model} = new $model($params);
+                    $this->modelsLoaded[] = $model;
+                }
+            }
+        }
+
+        /**
+         * belongsTo
+         */
+        if( !empty($this->belongsTo) ){
+            foreach( $this->belongsTo as $model=>$propriedades ){
+                if( $params["currentRecursive"] <= $this->recursive ){
+                    include_once(APP_MODEL_DIR.$model.".php");
+                    $this->{$model} = new $model($params);
+                    $this->modelsLoaded[] = $model;
+                }
+            }
+        }
+	}
     /**
      * MÉTODOS CRUD
      */

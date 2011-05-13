@@ -42,7 +42,8 @@ class Dispatcher
      *
      * @var array Contém os routes atuais
      */
-    protected $routes;
+	public $routes = array();
+
     public $arguments;
     public $webroot;
 
@@ -155,11 +156,9 @@ class Dispatcher
 	        else {
 	            $absoluteWebroot = WEBROOT;
 	        }
-
 			$absoluteWebroot = str_replace("//", "/", $absoluteWebroot);
 			$absoluteWebroot = str_replace("//", "/", $absoluteWebroot);
             define( "WEBROOT_ABSOLUTE", $absoluteWebroot );
-
 	}
 
     /**
@@ -170,6 +169,7 @@ class Dispatcher
         
         if( !empty($_GET["url"]) ){
 			$url = $_GET["url"];
+			$this->getUrl = $url;
             $this->defineRoutes($url);
         }
         /**
@@ -212,7 +212,7 @@ class Dispatcher
 		$sliceFromUrl = 2;
 		
 		if( !is_array($url) ){
-			$stringUrl = $_GET["url"];
+			$stringUrl = $url;
             $url = explode("/", $stringUrl);
 		}
 		
@@ -226,33 +226,72 @@ class Dispatcher
 			exit();
 		}
 		
+		if( empty($this->routes) ){
+			return false;
+		}
+
 		$urlStr = '';
 		if( !empty($url) )
 			$urlStr = implode('/', $url);
 		
 		$matches = array();
 		
-		$extendedUrl = '/'.$urlStr;
+		$hasSlashAtTheBeginning = strpos($urlStr, '/');
+		$extendedUrl = $urlStr;
+		if( $hasSlashAtTheBeginning !== 0 ){
+			$extendedUrl = '/'.$extendedUrl;
+		}
+
+		$extendedUrl = preg_replace('{/$}', '', $extendedUrl);
+		
+		$subject = str_replace("\\","\\\\",$extendedUrl);
+		
+		if( empty($subject) )
+			$subject = "/";
+
 		foreach( $this->routes as $pattern=>$def ){
 			
 			unset($lastLookup);
 			$lastLookup = $pattern;
-			$subject = str_replace("\\","\\\\",$extendedUrl);
 			$pattern = str_replace("/","\/",$pattern);
 			$pattern = str_replace(":app",'(?P<app>\w+)',$pattern);
 			$pattern = str_replace(":controller",'(?P<controller>\w+)',$pattern);
 			$pattern = str_replace(":action",'(?P<action>\w+)',$pattern);
 			$pattern = str_replace(":arg",'(?P<arg>\w+(.*))',$pattern);
 			
-			preg_match('/'.$pattern.'/i', $subject, $match);
+			$ending = "$";
+			$beginning = "^";
 			
-			if( !empty($match) )
+			if( $pattern == "\/" ){
+				$ending = "";
+				$beginning = "";
+			}
+
+			$pattern = $beginning.$pattern.$ending;
+			preg_match('/'.$pattern.'/i', $subject, $match);
+
+			if( !empty($match) ){
 				$matches[$lastLookup] = $match;
 
+				if( array_key_exists('stop', $def) ){
+					if( $def['stop'] === true )
+						break;
+				}
+			}
+			
+			/*
+			print($pattern);
+			if( !empty($match) )
+				print(' - v');
+			print("\n");
+			*/
+			
 			unset($match);
+			
 		}
 
 		$args = array();
+		
 		/*
 		 * Matches Routing Pattern
 		 */
@@ -329,11 +368,17 @@ class Dispatcher
 					} else
 						$args[] = $this->routes[$key]['arg'];
 				}
+				// check for numeric key arguments
+				foreach( $this->routes[$key] as $routeKey => $routeValue ){
+					if( is_numeric($routeKey) ){
+						$args[] = $routeValue;
+					}
+				}
+				
 				// When matching a pattern, it will slice off the number
 				// of the matching elements
 			}
 		}
-
 		/*
 		 * No matching pattern
 		 */
@@ -387,15 +432,8 @@ class Dispatcher
 		$url = array();
 		if( !empty($args) ){
 			
-			function getStringFromArray($array){
-				if( is_string($array) )
-					return $array;
-				
-				return implode('/', $array);
-			}
-			
 			foreach( $args as $argString ){
-				$tmpArgs[] = getStringFromArray( $argString );
+				$tmpArgs[] = $this->getStringFromArray( $argString );
 			}
 			
 			$args = implode("/", $tmpArgs);
@@ -421,5 +459,14 @@ class Dispatcher
         $this->url = $_SERVER['REQUEST_URI'];
 		
     }
+	function getStringFromArray($array){
+		if( is_string($array) )
+			return $array;
+		
+		return implode('/', $array);
+	}
+	
 }
+
+
 ?>
