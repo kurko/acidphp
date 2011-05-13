@@ -23,6 +23,11 @@ class Component
     protected $data;
     /**
      *
+     * @var object Controller que chamou o component
+     */
+    protected $controller;
+    /**
+     *
      * @var array Models carregados no ambiente
      */
     protected $models;
@@ -35,10 +40,12 @@ class Component
 
 
     function __construct($params = ""){
-
         /**
          * Inicialização de variáveis
          */
+     	$this->controller = ( empty($params["controller"]) ) ? array() : $params["controller"];
+
+		$this->models = $this->controller->usedModels;
         /**
          * $this->params
          */
@@ -50,8 +57,6 @@ class Component
         /**
          * $this->models
          */
-        $this->models = ( empty($params["models"]) ) ? array() : $params["models"];
-        //$this->models = array();
     }
 
     /**
@@ -74,6 +79,8 @@ class Component
      * Acontece depois do BeforeFilter() do controller
      */
     function beforeAfterFilter(){ }
+
+    function beforeAfterRenderFilter(){ }
 
     /**
      * afterAfterFilter()

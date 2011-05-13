@@ -86,7 +86,7 @@ class Controller
          *
          * @var array Models já usados (evita retrabalho)
          */
-        protected $usedModels = array();
+        public $usedModels = array();
         /**
          *
          * @var int Models que se interrelacionam precisam de um limite de
@@ -179,7 +179,8 @@ class Controller
          *
          * Configura os parâmetros de sistema
          */
-        $this->params["controller"] = $this->dispatcher->callController;
+		$this->params["app"] = $this->dispatcher->callApp;
+		$this->params["controller"] = $this->dispatcher->callController;
         $this->params["action"] = $this->dispatcher->callAction;
         $this->params["args"] = $this->dispatcher->arguments;
         $this->params["webroot"] = $this->dispatcher->webroot;
@@ -253,6 +254,13 @@ class Controller
                 if( !empty($_POST["data"]) ){
                     $this->data = $_POST["data"];
                 }
+            }
+
+            /*
+             * $_GET
+             */
+            if( !empty($_GET) ){
+                $this->params["get"] = $_GET;
             }
 
             if( !empty($formattedFilesData) ){
@@ -348,7 +356,6 @@ class Controller
         /**
          * Variáveis de ambiente são ajustadas no método controller::_trigger();
          */
-
         /**
          * MODELS
          *
@@ -362,7 +369,7 @@ class Controller
              */
             foreach($this->uses as $valor){
                 $className = $valor;
-                
+
                 $this->loadModel($className);
             }
         }
@@ -394,26 +401,49 @@ class Controller
              * Carrega classe do Component, instancia e envia para o Controller
              */
             foreach($this->components as $valor){
-                include_once( CORE_COMPONENTS_DIR.$valor.".php" );
-                $componentName = $valor.COMPONENT_CLASSNAME_SUFFIX;
-                /**
-                 * Instancia compoment
-                 */
-                $componentParams = array(
-                    "params" => $this->params,
-                    "data" => $this->data,
-                    "models" => $this->usedModels
-                );
-                $$valor = new $componentName($componentParams);
-                /**
-                 * Envia o Component para a Action do Controller
-                 */
-                $loadedComponentName = StrTreament::firstToLower($valor);
-                $this->{$loadedComponentName} = $$valor;
-                $this->loadedComponents[] = $loadedComponentName;
+				$this->loadComponent($valor);
             }
         }
 
+        /**
+         * HELPERS
+         *
+         * Cria helpers solicitados
+         */
+            if( !empty($this->helpers) ){
+                /**
+                 * Loop por cada helper requisitado.
+                 *
+                 * Carrega classe do Helper, instancia e envia para o View
+                 */
+                foreach($this->helpers as $valor){
+                    include_once( CORE_HELPERS_DIR.$valor.".php" );
+                    $helperName = $valor.HELPER_CLASSNAME_SUFFIX;
+
+                    $helperParams = array(
+                        "params" => &$this->params,
+                        "data" => $this->data,
+                        "models" => &$this->usedModels,
+                        "conn" => &$this->conn,
+                        "environment" => &$this->environment,
+                        // todos helpers têm acesso aos demais helpers
+                        "_loadedHelpers" => &$this->_loadedHelpers,
+                    );
+                    $$valor = new $helperName($helperParams);
+
+                    /*
+                     * Salva a instância do Helper atual
+                     */
+                    $this->_loadedHelpers[$valor] = &$$valor;
+                    $this->{$valor} = &$$valor;
+					
+					
+                    /**
+                     * Envia Helper para o view
+                     */
+                    $this->set( strtolower($valor), $$valor);
+                }
+            }
 
         /**
          * VARIÁVEIS GLOBAIS
@@ -454,23 +484,66 @@ class Controller
      * @param string $modelName
      * @return bool
      */
-    public function loadModel($modelName){
-
+    public function loadModel($modelName = ""){
+		if( empty($modelName) )
+			return false;
+		
         /**
          * Monta parâmetros para criar os models
          */
         $modelParams = array(
             'conn' => &$this->dispatcher->conn,
-            'dbTables' => $this->dispatcher->dbTables,
             'modelName' => $modelName,
+            'controller' => &$this,
             'recursive' => $this->recursive,
             'params' => &$this->params,
         );
 
         include_once(APP_MODEL_DIR.$modelName.".php");
 
-        $this->{$modelName} = new $modelName($modelParams);
-        $this->usedModels[$modelName] = &$this->{$modelName};
+        $model = new $modelName($modelParams);
+		$this->{$modelName} = &$model;
+        $this->usedModels[$modelName] = &$model;
+        return $model;
+    }
+
+    /**
+     * loadComponent()
+     * 
+     * Carrega o componente especificado. Se chamado manualmente, não 
+	 * funcionarão os métodos beforeBeforeFilter, por exemplo. Portanto,
+	 * não chame manualmente o AuthComponent, por exemplo.
+     * 
+     * @param string $componentName
+     * @return bool
+     */
+    public function loadComponent($valor, $options = array()){
+
+        include_once( CORE_COMPONENTS_DIR.$valor.".php" );
+        $componentName = $valor.COMPONENT_CLASSNAME_SUFFIX;
+        /**
+         * Instancia compoment
+         */
+        $componentParams = array(
+            "params" => $this->params,
+            "data" => $this->data,
+            "models" => $this->usedModels,
+			"controller" => $this,
+        );
+
+        $$valor = new $componentName($componentParams);
+
+        /**
+         * Envia o Component para a Action do Controller
+         */
+		if( empty($options['as']) ){
+	        $loadedComponentName = StrTreament::firstToLower($valor);
+		} else {
+	        $loadedComponentName = $options['as'];
+		}
+		
+        $this->{$loadedComponentName} = $$valor;
+        $this->loadedComponents[] = $loadedComponentName;
         return true;
     }
 
@@ -498,42 +571,6 @@ class Controller
                 $this->set("siteTitle", $this->siteTitle);
                 $this->set("pageTitle", $this->pageTitle);
 
-            /**
-             * HELPERS
-             *
-             * Cria helpers solicitados
-             */
-                if( !empty($this->helpers) ){
-                    /**
-                     * Loop por cada helper requisitado.
-                     *
-                     * Carrega classe do Helper, instancia e envia para o View
-                     */
-                    foreach($this->helpers as $valor){
-                        include_once( CORE_HELPERS_DIR.$valor.".php" );
-                        $helperName = $valor.HELPER_CLASSNAME_SUFFIX;
-
-                        $helperParams = array(
-                            "params" => &$this->params,
-                            "data" => $this->data,
-                            "models" => &$this->usedModels,
-                            "conn" => &$this->conn,
-                            "environment" => $this->environment,
-                            // todos helpers têm acesso aos demais helpers
-                            "_loadedHelpers" => &$this->_loadedHelpers,
-                        );
-                        $$valor = new $helperName($helperParams);
-
-                        /*
-                         * Salva a instância do Helper atual
-                         */
-                        $this->_loadedHelpers[$valor] = &$$valor;
-                        /**
-                         * Envia Helper para o view
-                         */
-                        $this->set( strtolower($valor), $$valor);
-                    }
-                }
         /*
          * ELEMENTS
          */
@@ -633,6 +670,11 @@ class Controller
 
 
     public function afterFilter(){
+
+        return true;
+    }
+
+    public function afterRenderFilter(){
 
         return true;
     }
@@ -749,13 +791,6 @@ class Controller
             call_user_func_array( array($this, $param['action'] ), $this->params["args"] );
 
         }
-        /**
-         * Se não foi renderizado ainda, renderiza automaticamente
-         */
-        if( !$this->isRendered AND $this->autoRender )
-            $this->render( $this->action );
-        else if( !$this->isRendered )
-            $this->render( false );
 
         /*
          * COMPONENTS
@@ -764,6 +799,7 @@ class Controller
          */
         foreach( $this->loadedComponents as $component ){
             $this->$component->beforeAfterFilter();
+            $this->$component->beforeAfterRenderFilter();
         }
 
         /*
@@ -774,7 +810,7 @@ class Controller
         /**
          * $this->afterFilter() é chamado sempre depois de qualquer ação
          */
-        $this->afterFilter();
+	    $this->afterFilter();
 
         /*
          * COMPONENTS
@@ -784,6 +820,18 @@ class Controller
         foreach( $this->loadedComponents as $component ){
             $this->$component->afterAfterFilter();
         }
+
+        /**
+         * Se não foi renderizado ainda, renderiza automaticamente
+         */
+        if( !$this->isRendered AND $this->autoRender )
+            $this->render( $this->action );
+        else if( !$this->isRendered )
+            $this->render( false );
+
+
+        $this->_helperAfterRenderFilter();
+		$this->afterRenderFilter();
 
     }
 
@@ -810,9 +858,30 @@ class Controller
      * @return bool
      */
     public function _helperAfterFilter(){
-
+		
+		if( empty($this->_loadedHelpers) )
+			return false;
+		
         foreach( $this->_loadedHelpers as $helper=>$helperObject ){
             $helperObject->afterFilter();
+        }
+
+        return true;
+    }
+
+    /**
+     * _helperAfterRenderFilter()
+     * 
+     * Chama o Helper::afterRenderFilter de todos os Helpers instanciados.
+     * 
+     * @return bool
+     */
+    public function _helperAfterRenderFilter(){
+		if( empty($this->_loadedHelpers) )
+			return false;
+		
+        foreach( $this->_loadedHelpers as $helper=>$helperObject ){
+            $helperObject->afterRenderFilter();
         }
 
         return true;

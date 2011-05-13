@@ -14,13 +14,26 @@
  */
 
 $routes = array(
+
+# 'stop' => true will halt the rest of the Routes if it's validated
+#	"/refresh_page/:arg" => array( "controller" => "controller_name", "action" => "refresh_page", 'stop' => true ),
+#	"/refresh_page" => array( "controller" => "controller_name", "action" => "refresh_page", 'stop' => true ),
+
+# pass custom variables (e.g. idiom)
+#	"/pt_br" => array( "arg" => "idiom:pt_br" ),
+#	"/es" => array( "arg" => "idiom:es" ),
+#	"/en" => array( "arg" => "idiom:en" ),
+
+# a bit more complex routing for i18n
+#	"/pt_br/:controller/:action" => array( "controller" => ":controller", "action" => ":action", 'idiom:pt_br', 'stop' => true ),
+#	"/en/:controller/:action" => array( "controller" => ":controller", "action" => ":action", 'idiom:en', 'stop' => true  ),
+#	"/es/:controller/:action" => array( "controller" => ":controller", "action" => ":action", 'idiom:es', 'stop' => true  ),
+
 	
-	// este é o padrão de posicionamento dos elementos na URL
-	"/:controller/:action/:arg" => array(
-	    "controller" => ":controller", "action" => ":action", ":arg"
-	),
-	
-	// este deve ser o último,
+	"/:controller/:action/:arg" => array( "controller" => ":controller", "action" => ":action", ":arg" ),
+	"/:controller/:action" => array( "controller" => ":controller", "action" => ":action" ),
+
+# Este deve ser o último,
 	"/" => array(
 	    "controller" => "site", "action" => "index"
 	),

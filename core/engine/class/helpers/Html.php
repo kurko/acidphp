@@ -32,15 +32,59 @@ class HtmlHelper extends Helper
 
         $inlineProperties = "";
 
-        /**
+        /*
          * Opções reservadas. Todas $options serão elementos inline da tag,
          * exceto os índices abaixo.
          */
-        $reservedOptions = array();
+        $reservedOptions = array('current_if');
+
+		/*
+		 * current_if
+		 * Caso o usuário deseje configurar automaticamente uma classe 'current'
+		 * para links, caso seja o endereço atual
+		 */
+		if( !empty($options['current_if']) 		||
+		 	in_array('current_if', $options) 	||
+		 	in_array('current_controller', $options) )
+		{
+			if( in_array('current_if', $options) ){
+				$options['current_if'] = $linkDestination;
+			}
+			
+			if( in_array('current_controller', $options) ){
+				$parsedUrl = parseUrl($linkDestination);
+				$options['current_if'] = $parsedUrl['controller'];
+			}
+			
+			
+			$wanted = parseUrl($options['current_if']);
+			$current = false;
+			if( $this->params['controller'] == $wanted['controller'] ){
+				if( empty($wanted['action']) ||
+				 	$wanted['action'] == $this->params['action'] )
+				{
+					$current = true;
+				}
+				
+			}
+			
+			if( $current ){
+				if( !empty($options['class']) )
+					$options['class'].= ' current';
+				else
+					$options['class'] = 'current';
+			}
+			
+		}
+
         /**
          * Analisa cada valor de $options
          */
         foreach($options as $chave=>$valor){
+	
+			if( is_numeric($chave) )
+				continue;
+			
             if( !in_array($chave, $reservedOptions) ){
                 $inlineProperties.= ' '.$chave.'="'.$valor.'"';
             }
@@ -96,7 +140,6 @@ class HtmlHelper extends Helper
                         $inlineProperties.= " ".$chave.'="'.$valor.'"';
                 }
             }
-
             $conteudo.= '<img src="'.translateUrl(APP_IMAGES_DIR.$url, true).'" '.$inlineProperties.' />';
 
             return $conteudo;
@@ -214,6 +257,13 @@ class HtmlHelper extends Helper
         /**
          * $metas contém todas as metatags configuradas no controller
          */
+	
+		/**
+		 * @todo - metaTags não está funcionando
+		 */
+		if( empty($this->environment["metaTags"]) )
+			return false;
+			
         $metas = $this->environment["metaTags"];
 
         /**

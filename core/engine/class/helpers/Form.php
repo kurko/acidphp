@@ -101,7 +101,7 @@ class FormHelper extends Helper
      * @param array $options Opções de amostragem e configurações
      * @return string Código HTML para finalizar bloco de código <form></form>
      */
-    public function end($submitValue = "Enviar", $options = ""){
+    public function end($submitValue = "", $options = ""){
 
         $conteudo = '';
         if( !empty($submitValue) )
@@ -117,7 +117,7 @@ class FormHelper extends Helper
      *
      * Acontece sempre após toda a execução do código.
      */
-    public function afterFilter(){
+    public function afterRenderFilter(){
 
         /*
          * Exclui as mensagens de campos não-validas das Sessions.
@@ -217,6 +217,12 @@ class FormHelper extends Helper
         $urlSuffix = (empty($options["urlSuffix"])) ? '' : $options["urlSuffix"];
         if( !empty($options["urlSuffix"]) ) unset($options["urlSuffix"]);
 
+        $hash = (empty($options["hash"])) ? '' : $options["hash"];
+        if( !empty($options["hash"]) ) {
+			unset($options["hash"]);
+			$hash = '#'.$hash;
+		}
+
 
         /**
          * formId
@@ -254,7 +260,7 @@ class FormHelper extends Helper
         /*
          * Define 'action' do <form>
          */
-        $this->_formActionUrl = WEBROOT.$appUrl.$controller.'/'.$action."/".$urlSuffix;
+        $this->_formActionUrl = WEBROOT.$appUrl.$controller.'/'.$action."/".$urlSuffix . $hash;
 
         if( !empty($options) AND is_array($options) ){
             foreach($options as $property=>$value){

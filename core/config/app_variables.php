@@ -52,6 +52,8 @@ define("APP_CONFIG_ROUTES", APP_CONFIG_DIR."routes.php");
 define("APP_CONFIG_CORE", APP_CONFIG_DIR."core.php");
 define("APP_CONFIG_DATABASE", APP_CONFIG_DIR."database.php");
 
+define("LOCALE_DIR", APP_CONFIG_DIR."locale/");
+
 /**
  * View paths
  */
