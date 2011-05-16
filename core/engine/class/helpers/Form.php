@@ -67,6 +67,7 @@ class FormHelper extends Helper
         "password",
         "textarea",
         "select",
+		"date",
         "radio",
         "checkbox",
         "file",
@@ -486,8 +487,6 @@ class FormHelper extends Helper
 
         // fim análise $options
         
-
-
         /**
          * NOMES DO INPUTS
          *
@@ -573,6 +572,7 @@ class FormHelper extends Helper
                 $conteudo.= $this->_between($between);
             
         }
+
         /**
          * INPUTS
          *
@@ -615,6 +615,50 @@ class FormHelper extends Helper
              */
             $conteudo.= '<div class="input_field">';
             $conteudo.= '<input type="'.$inputType.'" name="'.$inputName.'" '.$standardAtrib.' '.$standardAtribValue.' />';
+        }
+        /**
+         * DATE
+         */
+        else if( $inputType == "date" ){
+
+            $maxYear = date('Y')+20;
+            $minYear = '1900';
+
+            if( !empty($options['maxYear']) )
+                $maxYear = $options['maxYear'];
+
+            if( !empty($options['minYear']) )
+                $minYear = $options['minYear'];
+
+            /**
+             * Gera conteúdo para o formulário
+             */
+            $conteudo.= '<div class="input_field input_date">';
+            /*
+             * Day
+             */
+            $conteudo.= '<select name="'.$inputName.'[day]">';
+            for( $i = 1; $i <= 31; $i++ ){
+                $conteudo.= '<option value="'.$i.'">'.$i.'</option>';
+            }
+            $conteudo.= '</select>';
+            /*
+             * Month
+             */
+            $conteudo.= '<select name="'.$inputName.'[month]">';
+            for( $i = 1; $i <= 12; $i++ ){
+                $conteudo.= '<option value="'.$i.'">'.$i.'</option>';
+            }
+            $conteudo.= '</select>';
+            /*
+             * Year
+             */
+            $conteudo.= '<select name="'.$inputName.'[year]">';
+            for( $i = $minYear; $i <= $maxYear; $i++ ){
+                $conteudo.= '<option value="'.$i.'">'.$i.'</option>';
+            }
+            $conteudo.= '</select>';
+            //$conteudo.= '<input type="" name="'.$inputName.'" '.$standardAtrib.' '.$standardAtribValue.' />';
         }
         /**
          * CHECKBOX
@@ -940,7 +984,6 @@ class FormHelper extends Helper
      * @return <string>
      */
     public function _fieldType($fieldName, $fieldModel, $customType="" ){
-
         /*
          * An accepted custom type was set
          */

@@ -64,7 +64,6 @@ class Dispatcher
 	}
 	
 	function initialize(){
-		
 		include "../../".$this->app."/config/routes.php";
         $this->routes = $routes;
 		
@@ -75,10 +74,13 @@ class Dispatcher
          * e action deve ser aberto.
          */
         $this->translateUrl();
+		
+#		print_r($this->callApp);
 
 		if( empty($this->callApp) )
 			$this->callApp = $this->app;
 		// routing sends to a different app?
+
 		
 		if( $this->app != $this->callApp &&
 			is_dir("../../".$this->callApp."/config/") )
@@ -278,13 +280,6 @@ class Dispatcher
 						break;
 				}
 			}
-			
-			/*
-			print($pattern);
-			if( !empty($match) )
-				print(' - v');
-			print("\n");
-			*/
 			
 			unset($match);
 			

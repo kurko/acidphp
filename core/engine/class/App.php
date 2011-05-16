@@ -131,12 +131,21 @@ class App {
 	        }
 
 			
-			$supposedlyApp = reset( explode("/", $url ) );
+			$supposedlyApp = array_reverse(explode("/", $_SERVER["SCRIPT_NAME"] ));
+			$supposedlyApp = $supposedlyApp[2];
+
 			if( $this->isAppDir( $supposedlyApp ) ){
 		        $url = str_replace( $supposedlyApp.'/', "", $url );
 				$this->appDir = $supposedlyApp;
 			} else {
-				$this->appDir = "app";
+				$supposedlyApp = reset( explode("/", $url ) );
+
+				if( $this->isAppDir( $supposedlyApp ) ){
+			        $url = str_replace( $supposedlyApp.'/', "", $url );
+					$this->appDir = $supposedlyApp;
+				} else {
+					$this->appDir = "app";
+				}
 			}
 
 			
