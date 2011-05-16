@@ -442,6 +442,7 @@ class FormHelper extends Helper
         $fieldValue = "";
         if( !empty($options["value"]) ){
             $fieldValue = 'value="'.$options["value"].'" ';
+			$fieldTextValue = $options["value"];
             unset($options["value"]);
         }
 
@@ -497,12 +498,11 @@ class FormHelper extends Helper
          */
         $modelName = $this->_fieldModel($fieldName);
         $fieldName = $this->_fieldName($fieldName);
-
+		
         /**
          * VALOR AUTOMÁTICO
          */
         if( empty($fieldValue) ) {
-
             /**
              * @todo - mostrar valores para outros campos fora input=text,
              * como select, radio, etc.
