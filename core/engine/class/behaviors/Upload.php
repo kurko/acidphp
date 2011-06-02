@@ -28,7 +28,7 @@ class UploadBehavior extends Behavior
      * 
      * @var string
      */
-    private $path = UPLOADS_PUBLIC_DIR;
+    public $path = UPLOADS_PUBLIC_DIR;
 
     /**
      * Tamanho máximo permitido do arquivo. Valor em bytes.
