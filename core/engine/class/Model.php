@@ -251,7 +251,7 @@ class Model
          */
         if( !empty($this->belongsTo) ){
             foreach( $this->belongsTo as $model=>$propriedades ){
-                if( $params["currentRecursive"] <= $params["recursive"] ){
+                if( $params["currentRecursive"] <= $this->recursive ){
                     include_once(APP_MODEL_DIR.$model.".php");
                     $this->{$model} = new $model($params);
                     $this->modelsLoaded[] = $model;
