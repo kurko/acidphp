@@ -251,14 +251,44 @@ class Model
          */
         if( !empty($this->belongsTo) ){
             foreach( $this->belongsTo as $model=>$propriedades ){
-                if( $params["currentRecursive"] <= $this->recursive ){
+                if( $params["currentRecursive"] <= $params["recursive"] ){
                     include_once(APP_MODEL_DIR.$model.".php");
                     $this->{$model} = new $model($params);
                     $this->modelsLoaded[] = $model;
                 }
             }
         }
-	}
+
+        /**
+         * Carrega as tabelas de cada model
+         */
+        $this->tableAlias[ get_class($this) ] = $this->useTable;
+        foreach( $this->modelsLoaded as $chave=>$valor ){
+            $this->tableAlias[$valor] = $this->{$valor}->useTable;
+        }
+
+        /**
+         * DATA ABSTRACTOR
+         */
+        /**
+         * Instancia DatabaseAbstractor
+         *
+         * Responsável pela abstração de bancos de dados.
+         */
+         if( $this->conn){
+            $this->databaseAbstractor = new DatabaseAbstractor(array(
+                    'conn' => $this->conn,
+                )
+            );
+         }
+
+       /**
+        * BEHAVIORS
+        */
+        $this->_initBehaviors();
+
+    } // fim __construct()
+
     /**
      * MÉTODOS CRUD
      */
