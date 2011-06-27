@@ -62,7 +62,7 @@ class App {
      * @staticvar <object> $instance
      * @return <object>
      */
-    public function getInstance(){
+    static function getInstance(){
         static $instance;
 
         if( empty($instance[0]) ){

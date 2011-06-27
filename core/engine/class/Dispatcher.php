@@ -130,7 +130,10 @@ class Dispatcher
 	        /*
 	         * O último diretório antes do controller é o mesmo da app
 	         */
-			$webAppRoot = reset( array_filter( array_reverse( explode('/', WEBROOT) ) ) );
+			$webAppRoot = explode('/', WEBROOT);
+			$webAppRoot = array_reverse( $webAppRoot );
+			$webAppRoot = array_filter( $webAppRoot );
+			$webAppRoot = reset( $webAppRoot );
 
 	        if( !empty( $webAppRoot )
 	            AND $webAppRoot == $this->app )
