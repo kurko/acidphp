@@ -130,10 +130,9 @@ class Dispatcher
 	        /*
 	         * O último diretório antes do controller é o mesmo da app
 	         */
-			$webAppRoot = explode('/', WEBROOT);
-			$webAppRoot = array_reverse( $webAppRoot );
-			$webAppRoot = array_filter( $webAppRoot );
-			$webAppRoot = reset( $webAppRoot );
+			$separatedWebroot = array_reverse( explode('/', WEBROOT) );
+			$separatedWebroot = array_filter( $separatedWebroot );
+			$webAppRoot = reset( $separatedWebroot );
 
 	        if( !empty( $webAppRoot )
 	            AND $webAppRoot == $this->app )
@@ -223,7 +222,9 @@ class Dispatcher
 		
 		if( is_file( $this->appPublicDir.$stringUrl ) ){
 			$file = $this->appPublicDir.$stringUrl;
-			$ext = reset( array_reverse(explode(".", $file)) );
+			$separaredFileString = explode(".", $file);
+			$separaredFileString = array_reverse($separaredFileString);
+			$ext = reset( $separaredFileString );
 			
 			if( $ext == 'css' ) header('Content-type: text/css');
 			else if( $ext == 'js' ) header('Content-type: application/js');
